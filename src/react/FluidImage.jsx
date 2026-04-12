@@ -12,6 +12,7 @@ export const FluidImage = forwardRef(function FluidImage(
   {
     src,
     effect = 0.4,
+    imageSize = 'cover',
     className,
     style,
     config,
@@ -27,7 +28,7 @@ export const FluidImage = forwardRef(function FluidImage(
     ref,
     () => ({
       reset() {
-        if (src) controllerRef.current?.setImageSource(src, effect);
+        if (src) controllerRef.current?.setImageSource(src, effect, imageSize);
       },
       updateLocation({ x, y, strength = 1 }) {
         controllerRef.current?.handleMove(x, y, strength);
@@ -36,14 +37,14 @@ export const FluidImage = forwardRef(function FluidImage(
         controllerRef.current?.updateConfig(cfg);
       },
     }),
-    [src, effect]
+    [src, effect, imageSize]
   );
 
-  // Reload whenever src or effect changes
+  // Reload whenever src, effect, or imageSize changes
   useEffect(() => {
     if (!src) return;
-    controllerRef.current?.setImageSource(src, effect);
-  }, [src, effect]);
+    controllerRef.current?.setImageSource(src, effect, imageSize);
+  }, [src, effect, imageSize]);
 
   // Built-in pointer tracking
   useEffect(() => {

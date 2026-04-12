@@ -5,6 +5,7 @@ import Terminal from "vite-plugin-terminal";
 
 
 export default defineConfig(({ command }) => ({
+  base: './',
   plugins: [
     react(),
     // Terminal plugin only works in dev mode (virtual module not available in builds)

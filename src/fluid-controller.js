@@ -64,12 +64,13 @@ export class FluidController {
   /**
    * @param {string} src
    * @param {number} [effect=0.4]
+   * @param {string | number} [size='cover']
    */
-  setImageSource(src, effect = 0.4) {
+  setImageSource(src, effect = 0.4, size = 'cover') {
     if (this.#worker) {
-      this.#worker.postMessage({ type: 'setImageSource', src, effect });
+      this.#worker.postMessage({ type: 'setImageSource', src, effect, size });
     } else {
-      this.#sim.setImageSource(src, effect);
+      this.#sim.setImageSource(src, effect, size);
     }
   }
 

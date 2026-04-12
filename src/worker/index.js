@@ -47,14 +47,14 @@ self.onmessage = async (e) => {
       case 'setImageSource': {
         if (!sim) return;
         // Fetch and decode inside the worker — keeps the main thread free
-        await sim.setImageSource(data.src, data.effect);
+        await sim.setImageSource(data.src, data.effect, data.size);
         break;
       }
 
       case 'setImageBitmap': {
         if (!sim) return;
         // Caller transferred the bitmap; use it directly (zero-copy)
-        sim.setImageBitmap(data.bitmap, data.effect);
+        sim.setImageBitmap(data.bitmap, data.effect, data.size);
         break;
       }
 

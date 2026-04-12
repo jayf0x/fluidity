@@ -84,15 +84,18 @@ export const splatShader = /* glsl */ `
   precision highp float;
   varying vec2 vUv;
   uniform sampler2D uTarget;
+  uniform sampler2D uBackground;
   uniform float aspectRatio;
   uniform vec3 color;
   uniform vec2 point;
   uniform float radius;
+  uniform float uSampleBackground;
   void main () {
     vec2 p = vUv - point.xy;
     p.x *= aspectRatio;
-    vec3 splat = exp(-dot(p, p) / radius) * color;
-    gl_FragColor = vec4(texture2D(uTarget, vUv).xyz + splat, 1.0);
+    float w = exp(-dot(p, p) / radius);
+    vec3 splatColor = mix(color, texture2D(uBackground, vUv).rgb, uSampleBackground);
+    gl_FragColor = vec4(texture2D(uTarget, vUv).xyz + w * splatColor, 1.0);
   }
 `;
 
@@ -141,15 +144,19 @@ export const displayShader = /* glsl */ `
   uniform float uRefraction;
   uniform float uSpecularExp;
   uniform float uShine;
+  uniform float uImageFluid;
+
+  const vec3 LUM = vec3(0.299, 0.587, 0.114);
 
   void main () {
-    float density = texture2D(uTexture, vUv).r;
+    vec3 densityRGB = texture2D(uTexture, vUv).rgb;
+    float density = dot(densityRGB, LUM);
     float obs = texture2D(uObstacle, vUv).r;
 
-    float dL = texture2D(uTexture, vUv - vec2(texelSize.x * 2.0, 0.0)).r;
-    float dR = texture2D(uTexture, vUv + vec2(texelSize.x * 2.0, 0.0)).r;
-    float dT = texture2D(uTexture, vUv + vec2(0.0, texelSize.y * 2.0)).r;
-    float dB = texture2D(uTexture, vUv - vec2(0.0, texelSize.y * 2.0)).r;
+    float dL = dot(texture2D(uTexture, vUv - vec2(texelSize.x * 2.0, 0.0)).rgb, LUM);
+    float dR = dot(texture2D(uTexture, vUv + vec2(texelSize.x * 2.0, 0.0)).rgb, LUM);
+    float dT = dot(texture2D(uTexture, vUv + vec2(0.0, texelSize.y * 2.0)).rgb, LUM);
+    float dB = dot(texture2D(uTexture, vUv - vec2(0.0, texelSize.y * 2.0)).rgb, LUM);
 
     vec3 normal = normalize(vec3(dL - dR, dB - dT, 0.2));
 
@@ -161,7 +168,8 @@ export const displayShader = /* glsl */ `
     vec3 halfV = normalize(lightDir + viewDir);
     float spec = pow(max(dot(normal, halfV), 0.0), uSpecularExp) * uShine * density;
 
-    vec3 color = mix(bg, uWaterColor, min(density * 1.5, 0.8));
+    vec3 fluidColor = mix(uWaterColor, densityRGB, uImageFluid);
+    vec3 color = mix(bg, fluidColor, min(density * 1.5, 0.8));
     color += spec * uGlowColor;
     color = mix(color, bg * 0.5, obs * 0.2);
 

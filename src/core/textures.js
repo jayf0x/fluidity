@@ -37,23 +37,49 @@ export function createTextTextures(gl, width, height, opts) {
 }
 
 /**
+ * Computes draw position/size for an image within a canvas.
+ * @param {number} bitmapW
+ * @param {number} bitmapH
+ * @param {number} canvasW
+ * @param {number} canvasH
+ * @param {string | number} [size='cover'] - 'cover'|'contain'|'50%'|'200px'|number (scale factor)
+ * @returns {{ x: number, y: number, drawW: number, drawH: number }}
+ */
+function computeImageTransform(bitmapW, bitmapH, canvasW, canvasH, size = 'cover') {
+  let scale;
+  if (size === 'cover') {
+    scale = Math.max(canvasW / bitmapW, canvasH / bitmapH);
+  } else if (size === 'contain') {
+    scale = Math.min(canvasW / bitmapW, canvasH / bitmapH);
+  } else if (typeof size === 'string' && size.endsWith('%')) {
+    scale = Math.min(canvasW / bitmapW, canvasH / bitmapH) * (parseFloat(size) / 100);
+  } else if (typeof size === 'string' && size.endsWith('px')) {
+    scale = parseFloat(size) / Math.max(bitmapW, bitmapH);
+  } else if (typeof size === 'number') {
+    scale = size;
+  } else {
+    scale = Math.max(canvasW / bitmapW, canvasH / bitmapH);
+  }
+  const drawW = bitmapW * scale;
+  const drawH = bitmapH * scale;
+  return { x: (canvasW - drawW) / 2, y: (canvasH - drawH) / 2, drawW, drawH };
+}
+
+/**
  * Creates background + obstacle textures from an ImageBitmap.
  * @param {WebGLRenderingContext | WebGL2RenderingContext} gl
  * @param {ImageBitmap} bitmap
  * @param {number} width
  * @param {number} height
  * @param {number} [effect=0.4] - obstacle brightness (0–1)
+ * @param {string | number} [size='cover'] - image sizing mode
  * @returns {{ backgroundTex: WebGLTexture, obstacleTex: WebGLTexture }}
  */
-export function createImageTextures(gl, bitmap, width, height, effect = 0.4) {
+export function createImageTextures(gl, bitmap, width, height, effect = 0.4, size = 'cover') {
   const tCanvas = new OffscreenCanvas(width, height);
   const ctx = tCanvas.getContext('2d');
 
-  const scale = Math.min(width / bitmap.width, height / bitmap.height) * 0.5;
-  const drawW = bitmap.width * scale;
-  const drawH = bitmap.height * scale;
-  const x = (width - drawW) / 2;
-  const y = (height - drawH) / 2;
+  const { x, y, drawW, drawH } = computeImageTransform(bitmap.width, bitmap.height, width, height, size);
 
   // Background — full quality
   ctx.clearRect(0, 0, width, height);

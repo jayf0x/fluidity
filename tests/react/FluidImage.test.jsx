@@ -43,30 +43,37 @@ describe('FluidImage', () => {
     expect(container.querySelector('div')).toHaveClass('fluid-img');
   });
 
-  it('calls setImageSource with initial src and effect', async () => {
+  it('calls setImageSource with initial src, effect and default size', async () => {
     await act(async () => {
       render(<FluidImage src="https://example.com/img.jpg" effect={0.6} />);
     });
-    expect(mockController.setImageSource).toHaveBeenCalledWith('https://example.com/img.jpg', 0.6);
+    expect(mockController.setImageSource).toHaveBeenCalledWith('https://example.com/img.jpg', 0.6, 'cover');
   });
 
-  it('uses default effect of 0.4', async () => {
+  it('uses default effect of 0.4 and default size cover', async () => {
     await act(async () => {
       render(<FluidImage src="https://example.com/img.jpg" />);
     });
-    expect(mockController.setImageSource).toHaveBeenCalledWith('https://example.com/img.jpg', 0.4);
+    expect(mockController.setImageSource).toHaveBeenCalledWith('https://example.com/img.jpg', 0.4, 'cover');
   });
 
   it('calls setImageSource again when src changes', async () => {
     const { rerender } = render(<FluidImage src="https://example.com/a.jpg" />);
     await act(async () => { rerender(<FluidImage src="https://example.com/b.jpg" />); });
-    expect(mockController.setImageSource).toHaveBeenLastCalledWith('https://example.com/b.jpg', 0.4);
+    expect(mockController.setImageSource).toHaveBeenLastCalledWith('https://example.com/b.jpg', 0.4, 'cover');
   });
 
   it('calls setImageSource again when effect changes', async () => {
     const { rerender } = render(<FluidImage src="https://example.com/a.jpg" effect={0.3} />);
     await act(async () => { rerender(<FluidImage src="https://example.com/a.jpg" effect={0.7} />); });
-    expect(mockController.setImageSource).toHaveBeenLastCalledWith('https://example.com/a.jpg', 0.7);
+    expect(mockController.setImageSource).toHaveBeenLastCalledWith('https://example.com/a.jpg', 0.7, 'cover');
+  });
+
+  it('passes imageSize prop to setImageSource', async () => {
+    await act(async () => {
+      render(<FluidImage src="https://example.com/img.jpg" imageSize="contain" />);
+    });
+    expect(mockController.setImageSource).toHaveBeenCalledWith('https://example.com/img.jpg', 0.4, 'contain');
   });
 
   it('does not call setImageSource when src is undefined', async () => {
@@ -80,7 +87,7 @@ describe('FluidImage', () => {
       render(<FluidImage ref={ref} src="https://example.com/img.jpg" effect={0.5} />);
     });
     ref.current.reset();
-    expect(mockController.setImageSource).toHaveBeenLastCalledWith('https://example.com/img.jpg', 0.5);
+    expect(mockController.setImageSource).toHaveBeenLastCalledWith('https://example.com/img.jpg', 0.5, 'cover');
   });
 
   it('exposes updateLocation via ref', async () => {

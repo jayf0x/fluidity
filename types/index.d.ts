@@ -107,6 +107,12 @@ export interface FluidImageProps extends FluidBaseProps {
    * Default: 0.4
    */
   effect?: number;
+  /**
+   * How the image is sized within the canvas.
+   * Accepts: 'cover' | 'contain' | '50%' | '200px' | number (scale factor).
+   * Default: 'cover'
+   */
+  imageSize?: string | number;
 }
 
 export const FluidImage: ForwardRefExoticComponent<FluidImageProps & RefAttributes<FluidHandle>>;
@@ -157,8 +163,8 @@ export class FluidSimulation {
   constructor(canvas: HTMLCanvasElement | OffscreenCanvas, config?: Partial<FluidConfig>);
 
   setTextSource(opts: TextSourceOpts): void;
-  setImageSource(src: string, effect?: number): Promise<void>;
-  setImageBitmap(bitmap: ImageBitmap, effect?: number): void;
+  setImageSource(src: string, effect?: number, size?: string | number): Promise<void>;
+  setImageBitmap(bitmap: ImageBitmap, effect?: number, size?: string | number): void;
 
   handleMove(x: number, y: number, strength?: number): void;
 
@@ -180,7 +186,7 @@ export class FluidController {
   );
 
   setTextSource(opts: TextSourceOpts): void;
-  setImageSource(src: string, effect?: number): void;
+  setImageSource(src: string, effect?: number, size?: string | number): void;
 
   handleMove(x: number, y: number, strength?: number): void;
   resize(width: number, height: number): void;
