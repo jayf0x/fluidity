@@ -1,7 +1,7 @@
 
 ## CORE/BUG: whitespace around images should be interactive
 
-**Status:** ready
+**Status:** ✅ done — `backgroundColor` prop added to `FluidImage` (default `'#0a0a0a'`)
 **Effort:** S
 
 **Setup:** `FluidImage` with `imageSize="10%"` — tiny image in center, large black border. Fluid only interacts visually within image area.
@@ -19,7 +19,7 @@
 
 ## DEMO/QUALITY: Refactor demo
 
-**Status:** ready
+**Status:** ✅ done — `constants.ts`, `useFluidConfig`, `useFluidControls` extracted; all examples refactored
 **Effort:** M
 
 Demo has duplicated code across 5 examples. Fix:
@@ -34,7 +34,7 @@ Libraries: Leva already in `demo/package.json`. Feel free to use any utility lib
 
 ## DEMO/FEATURE: refine options panel
 
-**Status:** ready (Leva already installed: `"leva": "^0.10.1"` in demo/package.json)
+**Status:** ✅ done — Leva integrated; `useFluidControls` hook + per-example `useControls('settings',...)`; Panel removed from all examples
 **Effort:** M
 
 Replace current custom `Panel` component with Leva's `useControls`.
@@ -83,7 +83,7 @@ Leva renders its own floating panel automatically — remove manual `<Panel>` co
 
 ## CORE/FEATURE: Add presets to library
 
-**Status:** ready
+**Status:** ✅ done — `PRESETS` + `PresetKey` exported from library; `preset` prop on `FluidText`/`FluidImage`; `mergeConfig(user, preset)` updated
 **Effort:** S
 
 Add named presets into the library so users can pass `preset="storm"` prop.
@@ -115,7 +115,7 @@ Props still override preset (user config applied last).
 
 ## CORE/BUG: Effect gives flicker when close to text
 
-**Status:** ready
+**Status:** ✅ done — `max(..., 0.0)` clamped on all 5 density samples in `displayShader`
 **Effort:** S
 
 **Setup:** Black background, white text, `shine > 0`. Moving cursor close to text edge causes brief black flash on the text.
@@ -141,7 +141,7 @@ float dL = max(texture2D(uTexture, vUv - ...).r, 0.0);
 
 ## DEMO/FEATURE: Refine demo examples
 
-**Status:** ready
+**Status:** ✅ done — all `as never`/`as any` removed; Leva migration provides proper inferred types throughout
 **Effort:** S
 
 Fix TypeScript types in all examples. Current antipattern:
@@ -166,7 +166,7 @@ File: `demo/src/examples/*.tsx`
 
 ## DEMO/FEATURE: SEO — demo site
 
-**Status:** ready
+**Status:** ✅ done — all meta tags added to `demo/index.html`; title updated. OG image (`og-image.png`) still needed — capture a screenshot and commit to `demo/public/`.
 **Effort:** S
 
 File: `demo/index.html`
@@ -194,7 +194,7 @@ Add to `demo/vite.config.ts`: ensure title is `fluidity-js — interactive WebGL
 
 ## GITHUB/FEATURE: Refine GitHub repo
 
-**Status:** ready
+**Status:** ✅ done — MIT LICENSE, `README.md`, `.github/workflows/deploy.yml`, repo description/homepage/topics updated via `gh`
 **Effort:** M
 
 **README.md** (root) — write modern package README:

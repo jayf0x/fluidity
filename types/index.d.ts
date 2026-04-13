@@ -31,6 +31,15 @@ export interface FluidConfig {
 }
 
 // ---------------------------------------------------------------------------
+// Presets
+// ---------------------------------------------------------------------------
+
+export type PresetKey = 'calm' | 'storm' | 'wave' | 'neon' | 'smoke';
+
+/** Named preset configurations bundled with the library. */
+export const PRESETS: Record<PresetKey, Partial<FluidConfig>>;
+
+// ---------------------------------------------------------------------------
 // Imperative handle (ref)
 // ---------------------------------------------------------------------------
 
@@ -73,6 +82,11 @@ interface FluidBaseProps {
    * Set to `false` for main-thread mode (required when using multiple instances).
    */
   worker?: boolean;
+  /**
+   * Apply a named preset as the base configuration.
+   * Any `config` values you provide override the preset.
+   */
+  preset?: PresetKey;
 }
 
 // ---------------------------------------------------------------------------
@@ -113,6 +127,12 @@ export interface FluidImageProps extends FluidBaseProps {
    * Default: 'cover'
    */
   imageSize?: string | number;
+  /**
+   * CSS background colour applied to the container div behind the canvas.
+   * Visible when the image does not fill the full canvas (e.g. imageSize='50%').
+   * Default: '#0a0a0a'
+   */
+  backgroundColor?: string;
 }
 
 export const FluidImage: ForwardRefExoticComponent<FluidImageProps & RefAttributes<FluidHandle>>;
@@ -200,5 +220,5 @@ export class FluidController {
 
 export const DEFAULT_CONFIG: FluidConfig;
 
-/** Merges user config with defaults (shallow merge). */
-export function mergeConfig(user?: Partial<FluidConfig>): FluidConfig;
+/** Merges user config with defaults, optionally layering a named preset. */
+export function mergeConfig(user?: Partial<FluidConfig>, preset?: PresetKey): FluidConfig;

@@ -10,4 +10,4 @@ export { FluidController } from './fluid-controller.js';
 export { FluidSimulation } from './core/simulation.js';
 
 // Config utilities
-export { DEFAULT_CONFIG, mergeConfig } from './core/config.js';
+export { DEFAULT_CONFIG, PRESETS, mergeConfig } from './core/config.js';

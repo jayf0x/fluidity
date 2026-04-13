@@ -34,7 +34,7 @@
     "canvas"
   ],
   "author": "https://github.com/jayf0x",
-  "license": "ISC",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jayf0x/fluidity.git"

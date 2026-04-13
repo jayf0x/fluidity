@@ -2,6 +2,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { useFluid } from './useFluid.js';
+import { mergeConfig } from '../core/config.js';
 
 /**
  * Renders text with an interactive WebGL fluid effect.
@@ -18,13 +19,14 @@ export const FluidText = forwardRef(function FluidText(
     className,
     style,
     config,
+    preset,
     useMouse = true,
     worker = true,
   },
   ref
 ) {
   const containerRef = useRef(null);
-  const controllerRef = useFluid(containerRef, { worker, config });
+  const controllerRef = useFluid(containerRef, { worker, config: mergeConfig(config, preset) });
 
   useImperativeHandle(
     ref,

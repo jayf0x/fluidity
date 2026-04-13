@@ -2,6 +2,7 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { useFluid } from './useFluid.js';
+import { mergeConfig } from '../core/config.js';
 
 /**
  * Renders an image with an interactive WebGL fluid effect.
@@ -13,16 +14,18 @@ export const FluidImage = forwardRef(function FluidImage(
     src,
     effect = 0.4,
     imageSize = 'cover',
+    backgroundColor = '#0a0a0a',
     className,
     style,
     config,
+    preset,
     useMouse = true,
     worker = true,
   },
   ref
 ) {
   const containerRef = useRef(null);
-  const controllerRef = useFluid(containerRef, { worker, config });
+  const controllerRef = useFluid(containerRef, { worker, config: mergeConfig(config, preset) });
 
   useImperativeHandle(
     ref,
@@ -76,7 +79,7 @@ export const FluidImage = forwardRef(function FluidImage(
     <div
       ref={containerRef}
       className={className}
-      style={{ position: 'relative', display: 'block', width: '100%', height: '100%', ...style }}
+      style={{ position: 'relative', display: 'block', width: '100%', height: '100%', background: backgroundColor, ...style }}
     />
   );
 });

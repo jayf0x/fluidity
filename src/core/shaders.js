@@ -143,13 +143,13 @@ export const displayShader = /* glsl */ `
   uniform float uShine;
 
   void main () {
-    float density = texture2D(uTexture, vUv).r;
+    float density = max(texture2D(uTexture, vUv).r, 0.0);
     float obs = texture2D(uObstacle, vUv).r;
 
-    float dL = texture2D(uTexture, vUv - vec2(texelSize.x * 2.0, 0.0)).r;
-    float dR = texture2D(uTexture, vUv + vec2(texelSize.x * 2.0, 0.0)).r;
-    float dT = texture2D(uTexture, vUv + vec2(0.0, texelSize.y * 2.0)).r;
-    float dB = texture2D(uTexture, vUv - vec2(0.0, texelSize.y * 2.0)).r;
+    float dL = max(texture2D(uTexture, vUv - vec2(texelSize.x * 2.0, 0.0)).r, 0.0);
+    float dR = max(texture2D(uTexture, vUv + vec2(texelSize.x * 2.0, 0.0)).r, 0.0);
+    float dT = max(texture2D(uTexture, vUv + vec2(0.0, texelSize.y * 2.0)).r, 0.0);
+    float dB = max(texture2D(uTexture, vUv - vec2(0.0, texelSize.y * 2.0)).r, 0.0);
 
     vec3 normal = normalize(vec3(dL - dR, dB - dT, 0.2));
 
