@@ -10,6 +10,7 @@ export default defineConfig({
       entry: resolve(new URL('.', import.meta.url).pathname, 'src/index.js'),
       name: 'FluidityJS',
       fileName: 'fluidity-js',
+      formats: ['es']
     },
     rollupOptions: {
       external: ['react', 'react/jsx-runtime', 'react-dom'],
@@ -21,8 +22,9 @@ export default defineConfig({
         },
       },
     },
-    sourcemap: true,
+    sourcemap: false,
   },
+
 
   worker: {
     format: 'es',

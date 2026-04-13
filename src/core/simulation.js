@@ -50,7 +50,6 @@ export class FluidSimulation {
 
   #rafId = null;
   #isReady = false;
-  #isImageMode = false;
 
   /**
    * @param {HTMLCanvasElement | OffscreenCanvas} canvas
@@ -76,7 +75,6 @@ export class FluidSimulation {
    * @param {{ text: string, fontSize: number, color: string, fontFamily?: string, fontWeight?: string | number }} opts
    */
   setTextSource(opts) {
-    this.#isImageMode = false;
     this.#source = { type: 'text', opts };
     this.#applyDimensions();
     this.#applySource();
@@ -91,7 +89,6 @@ export class FluidSimulation {
    */
   async setImageSource(src, effect = 0.4, size = 'cover') {
     const bitmap = await loadImageBitmap(src);
-    this.#isImageMode = true;
     this.#source = { type: 'image', bitmap, effect, size };
     this.#applyDimensions();
     this.#applySource();
@@ -105,7 +102,6 @@ export class FluidSimulation {
    * @param {string | number} [size='cover']
    */
   setImageBitmap(bitmap, effect = 0.4, size = 'cover') {
-    this.#isImageMode = true;
     this.#source = { type: 'image', bitmap, effect, size };
     this.#applyDimensions();
     this.#applySource();
@@ -335,11 +331,7 @@ export class FluidSimulation {
       gl.uniform3f(splat.uniforms.color, this.#mouse.dx * cfg.splatForce, -this.#mouse.dy * cfg.splatForce, 0);
       blit(this.#velocity.write.fbo); this.#velocity.swap();
 
-      gl.uniform1i(splat.uniforms.uTarget, 0);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#density.read.tex);
-      gl.uniform1i(splat.uniforms.uBackground, 1);
-      gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.#backgroundTex);
-      gl.uniform1f(splat.uniforms.uSampleBackground, this.#isImageMode ? 1.0 : 0.0);
       gl.uniform3f(splat.uniforms.color, 1, 1, 1);
       blit(this.#density.write.fbo); this.#density.swap();
 
@@ -383,7 +375,6 @@ export class FluidSimulation {
     gl.uniform1f(display.uniforms.uRefraction, cfg.refraction);
     gl.uniform1f(display.uniforms.uSpecularExp, cfg.specularExp);
     gl.uniform1f(display.uniforms.uShine, cfg.shine);
-    gl.uniform1f(display.uniforms.uImageFluid, this.#isImageMode ? 1.0 : 0.0);
 
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#density.read.tex);
     gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
