@@ -82,6 +82,23 @@ export interface FluidHandle {
    */
   updateLocation(opts: { x: number; y: number; strength?: number }): void;
 
+  /**
+   * Immediately injects one fluid splat at pixel position (x, y) with an
+   * explicit velocity vector (vx, vy) in canvas-pixel units.
+   * Safe to call multiple times per frame — each call writes directly to the
+   * velocity and density FBOs without going through the mouse-state machine.
+   *
+   * Ideal for programmatic paths (particle systems, Lorenz attractors, etc.)
+   * where you need N independent injection points per frame.
+   *
+   * @param x     Canvas-relative pixel X
+   * @param y     Canvas-relative pixel Y
+   * @param vx    Horizontal velocity (positive = right)
+   * @param vy    Vertical velocity (positive = down)
+   * @param strength  Force multiplier. Default: 1
+   */
+  splat(x: number, y: number, vx: number, vy: number, strength?: number): void;
+
   /** Merges a partial config update into the running simulation. */
   updateConfig(config: Partial<FluidConfig>): void;
 }
@@ -226,6 +243,7 @@ export class FluidSimulation {
   setBackground(bitmap: ImageBitmap | null, size?: string | number): void;
 
   handleMove(x: number, y: number, strength?: number): void;
+  splat(x: number, y: number, vx: number, vy: number, strength?: number): void;
 
   resize(width?: number, height?: number): void;
   updateConfig(config: Partial<FluidConfig>): void;
@@ -249,6 +267,7 @@ export class FluidController {
   setBackground(bitmap: ImageBitmap | null, size?: string | number): void;
 
   handleMove(x: number, y: number, strength?: number): void;
+  splat(x: number, y: number, vx: number, vy: number, strength?: number): void;
   resize(width: number, height: number): void;
   updateConfig(config: Partial<FluidConfig>): void;
   destroy(): void;

@@ -30,6 +30,7 @@ describe('package exports', () => {
     expect(typeof pkg.FluidController.prototype.setImageSource).toBe('function');
     expect(typeof pkg.FluidController.prototype.setBackground).toBe('function');
     expect(typeof pkg.FluidController.prototype.handleMove).toBe('function');
+    expect(typeof pkg.FluidController.prototype.splat).toBe('function');
     expect(typeof pkg.FluidController.prototype.updateConfig).toBe('function');
     expect(typeof pkg.FluidController.prototype.resize).toBe('function');
     expect(typeof pkg.FluidController.prototype.destroy).toBe('function');
@@ -42,6 +43,7 @@ describe('package exports', () => {
     expect(typeof pkg.FluidSimulation.prototype.setImageBitmap).toBe('function');
     expect(typeof pkg.FluidSimulation.prototype.setBackground).toBe('function');
     expect(typeof pkg.FluidSimulation.prototype.handleMove).toBe('function');
+    expect(typeof pkg.FluidSimulation.prototype.splat).toBe('function');
     expect(typeof pkg.FluidSimulation.prototype.resize).toBe('function');
     expect(typeof pkg.FluidSimulation.prototype.updateConfig).toBe('function');
     expect(typeof pkg.FluidSimulation.prototype.start).toBe('function');

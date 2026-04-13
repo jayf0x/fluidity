@@ -56,6 +56,18 @@ export class FluidController {
   // Interaction
   // ---------------------------------------------------------------------------
 
+  /**
+   * Immediately injects one splat at (x, y) with explicit velocity (vx, vy).
+   * Safe to call multiple times per frame. See FluidSimulation.splat for details.
+   */
+  splat(x: number, y: number, vx: number, vy: number, strength = 1): void {
+    if (this.#worker) {
+      this.#worker.postMessage({ type: 'splat', x, y, vx, vy, strength });
+    } else {
+      this.#sim!.splat(x, y, vx, vy, strength);
+    }
+  }
+
   handleMove(x: number, y: number, strength = 1): void {
     if (this.#worker) {
       this.#worker.postMessage({ type: 'move', x, y, strength });

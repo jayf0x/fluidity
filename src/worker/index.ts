@@ -68,6 +68,16 @@ self.onmessage = async (e: MessageEvent) => {
         break;
       }
 
+      case 'splat': {
+        if (!sim) return;
+        sim.splat(
+          data.x as number, data.y as number,
+          data.vx as number, data.vy as number,
+          (data.strength as number | undefined) ?? 1
+        );
+        break;
+      }
+
       case 'move': {
         if (!sim) return;
         sim.handleMove(data.x as number, data.y as number, (data.strength as number | undefined) ?? 1);

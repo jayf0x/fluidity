@@ -130,6 +130,39 @@ export class FluidSimulation {
     this.#mouse.targetY = y;
   }
 
+  /**
+   * Immediately applies one fluid splat at (x, y) with explicit velocity (vx, vy).
+   * Safe to call multiple times per frame — each call writes directly to the FBOs.
+   * Designed for programmatic use cases (e.g. particle systems, attractor paths)
+   * where you want N independent injection points per frame without flooding the
+   * mouse-state machine or the worker message queue.
+   */
+  splat(x: number, y: number, vx: number, vy: number, strength = 1): void {
+    if (!this.#isReady || this.#width === 0) return;
+    const gl = this.#gl;
+    const cfg = this.#config;
+    const { splat: prog } = this.#programs;
+    const blit = this.#blit;
+
+    gl.viewport(0, 0, this.#simWidth, this.#simHeight);
+
+    prog.bind();
+    gl.uniform1f(prog.uniforms.aspectRatio, this.#width / this.#height);
+    gl.uniform2f(prog.uniforms.point, x / this.#width, 1.0 - y / this.#height);
+    gl.uniform1f(prog.uniforms.radius, cfg.splatRadius);
+
+    // Velocity splat
+    gl.uniform1i(prog.uniforms.uTarget, 0);
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
+    gl.uniform3f(prog.uniforms.color, vx * cfg.splatForce * strength, -vy * cfg.splatForce * strength, 0);
+    blit(this.#velocity!.write.fbo); this.#velocity!.swap();
+
+    // Density splat
+    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#density!.read.tex);
+    gl.uniform3f(prog.uniforms.color, strength, strength, strength);
+    blit(this.#density!.write.fbo); this.#density!.swap();
+  }
+
   resize(width?: number, height?: number): void {
     if (width !== undefined && width > 0) {
       this.#width = this.#canvas.width = width;

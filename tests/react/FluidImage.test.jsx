@@ -10,6 +10,7 @@ const mockController = {
   setTextSource: vi.fn(),
   setImageSource: vi.fn(),
   setBackground: vi.fn(),
+  splat: vi.fn(),
   handleMove: vi.fn(),
   updateConfig: vi.fn(),
   resize: vi.fn(),

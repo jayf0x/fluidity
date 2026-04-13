@@ -24,6 +24,7 @@ vi.mock('../src/core/simulation.ts', () => ({
     setImageBitmap: vi.fn(),
     setBackground: vi.fn(),
     handleMove: vi.fn(),
+    splat: vi.fn(),
     resize: vi.fn(),
     updateConfig: vi.fn(),
     start: vi.fn(),
@@ -112,6 +113,14 @@ describe('FluidController — worker mode', () => {
     );
   });
 
+  it('forwards splat to worker', () => {
+    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    ctrl.splat(100, 200, 3, -5, 0.5);
+    expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'splat', x: 100, y: 200, vx: 3, vy: -5, strength: 0.5 })
+    );
+  });
+
   it('sends destroy message then terminates the worker after a tick', () => {
     vi.useFakeTimers();
     const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
@@ -152,6 +161,9 @@ describe('FluidController — main-thread mode (isWorkerEnabled=false)', () => {
 
     ctrl.handleMove(10, 20, 2);
     expect(sim.handleMove).toHaveBeenCalledWith(10, 20, 2);
+
+    ctrl.splat(50, 60, 1.5, -2.0, 0.8);
+    expect(sim.splat).toHaveBeenCalledWith(50, 60, 1.5, -2.0, 0.8);
 
     ctrl.updateConfig({ curl: 0.5 });
     expect(sim.updateConfig).toHaveBeenCalledWith({ curl: 0.5 });
