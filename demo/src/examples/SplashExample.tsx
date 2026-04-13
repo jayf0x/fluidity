@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useControls, button } from 'leva';
+import { useControls, button, useCreateStore, LevaPanel } from 'leva';
 import { FluidText, type FluidHandle } from 'fluidity-js';
 import { useFluidControls } from '../hooks/useFluidControls';
 import { WORDS } from '../constants';
@@ -7,7 +7,8 @@ import { WORDS } from '../constants';
 export function SplashExample() {
   const ref = useRef<FluidHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  useFluidControls(ref);
+  const store = useCreateStore();
+  useFluidControls(ref, store);
 
   const [running, setRunning] = useState(true);
   const [wordIdx, setWordIdx] = useState(0);
@@ -15,9 +16,9 @@ export function SplashExample() {
   const { rate, strength } = useControls('settings', {
     rate:     { value: 300,  min: 50,  max: 1000, step: 50 },
     strength: { value: 10,   min: 1,   max: 30,   step: 1 },
-  });
+  }, { store });
 
-  // Keep latest splat fn in a ref to avoid stale closures in Leva buttons
+  // Stale-closure-safe splat fn
   const splatFnRef = useRef<() => void>(() => {});
   useEffect(() => {
     splatFnRef.current = () => {
@@ -37,7 +38,7 @@ export function SplashExample() {
     'one shot':     button(() => splatFnRef.current()),
     'word →':       button(() => setWordIdx((i) => (i + 1) % WORDS.length)),
     reset:          button(() => ref.current?.reset()),
-  });
+  }, { store });
 
   useEffect(() => {
     if (!running) return;
@@ -47,6 +48,7 @@ export function SplashExample() {
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <LevaPanel store={store} />
       <FluidText
         ref={ref}
         text={WORDS[wordIdx]}

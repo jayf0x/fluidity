@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { useControls, button } from 'leva';
+import { useControls, button, useCreateStore, LevaPanel } from 'leva';
 import { FluidImage, type FluidHandle } from 'fluidity-js';
 import { useFluidControls } from '../hooks/useFluidControls';
 import { IMAGES } from '../constants';
@@ -8,7 +8,8 @@ const IMAGE_OPTIONS = Object.fromEntries(IMAGES.map((img) => [img.label, img.src
 
 export function ImageExample() {
   const ref = useRef<FluidHandle>(null);
-  useFluidControls(ref);
+  const store = useCreateStore();
+  useFluidControls(ref, store);
 
   const { src, imageSize, effect } = useControls('settings', {
     src:       { label: 'image', options: IMAGE_OPTIONS, value: IMAGES[0].src },
@@ -16,10 +17,11 @@ export function ImageExample() {
     effect:    { value: 0.4, min: 0, max: 1, step: 0.01 },
     reload:    button(() => ref.current?.reset()),
     splash:    button(() => ref.current?.updateLocation({ x: 400, y: 300, strength: 12 })),
-  });
+  }, { store });
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <LevaPanel store={store} />
       <FluidImage
         ref={ref}
         src={src}

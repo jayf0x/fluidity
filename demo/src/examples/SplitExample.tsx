@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { useControls, button } from 'leva';
+import { useControls, button, useCreateStore, LevaPanel } from 'leva';
 import { FluidText, FluidImage, type FluidHandle } from 'fluidity-js';
 import { useFluidConfig } from '../hooks/useFluidConfig';
 import { SPLIT_IMAGE_SRC } from '../constants';
@@ -7,22 +7,24 @@ import { SPLIT_IMAGE_SRC } from '../constants';
 export function SplitExample() {
   const textRef = useRef<FluidHandle>(null);
   const imageRef = useRef<FluidHandle>(null);
+  const store = useCreateStore();
 
   const { text, textShine, imgEffect } = useControls('settings', {
     text:      { value: 'split' },
     textShine: { label: 'text shine', value: 0.02, min: 0, max: 0.15, step: 0.001 },
     imgEffect: { label: 'img effect', value: 0.4,  min: 0, max: 1,    step: 0.01 },
-  });
+  }, { store });
 
   useControls('actions', {
     'reset text': button(() => textRef.current?.reset()),
     'reset img':  button(() => imageRef.current?.reset()),
-  });
+  }, { store });
 
   useFluidConfig(textRef, { shine: textShine });
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', position: 'relative' }}>
+      <LevaPanel store={store} />
 
       {/* left: FluidText, worker=false */}
       <div style={{ position: 'relative', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
