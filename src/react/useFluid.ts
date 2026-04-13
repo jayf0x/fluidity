@@ -1,7 +1,7 @@
-'use strict';
-
 import { useEffect, useRef } from 'react';
+import type { RefObject } from 'react';
 import { FluidController } from '../fluid-controller.js';
+import type { FluidConfig } from '../../types/index.js';
 
 /**
  * Manages the FluidController lifecycle.
@@ -11,14 +11,13 @@ import { FluidController } from '../fluid-controller.js';
  * double-invoke pattern never reuses a canvas whose control was already
  * transferred to an OffscreenCanvas worker — that transfer is irreversible
  * and can't be undone during cleanup.
- *
- * @param {React.RefObject<HTMLElement>} containerRef  - ref to a wrapper element
- * @param {{ worker?: boolean, config?: object }} [opts]
- * @returns {React.RefObject<FluidController | null>}
  */
-export function useFluid(containerRef, { worker = true, config = {} } = {}) {
-  const controllerRef = useRef(null);
-  const initOptsRef = useRef({ worker, config });
+export function useFluid(
+  containerRef: RefObject<HTMLElement | null>,
+  { isWorkerEnabled = true, config = {} }: { isWorkerEnabled?: boolean; config?: Partial<FluidConfig> } = {}
+): RefObject<FluidController | null> {
+  const controllerRef = useRef<FluidController | null>(null);
+  const initOptsRef = useRef({ isWorkerEnabled, config });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -37,8 +36,8 @@ export function useFluid(containerRef, { worker = true, config = {} } = {}) {
     const initH = Math.round(rect.height) || container.clientHeight || 0;
     if (initW > 0) { canvas.width = initW; canvas.height = initH; }
 
-    const { worker: useWorker, config: initConfig } = initOptsRef.current;
-    const controller = new FluidController(canvas, { worker: useWorker, config: initConfig });
+    const { isWorkerEnabled, config: initConfig } = initOptsRef.current;
+    const controller = new FluidController(canvas, { isWorkerEnabled, config: initConfig });
     controllerRef.current = controller;
 
     // Forward container resizes to the simulation

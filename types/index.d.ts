@@ -1,6 +1,21 @@
 import type { CSSProperties, ForwardRefExoticComponent, RefAttributes } from 'react';
 
 // ---------------------------------------------------------------------------
+// Algorithm
+// ---------------------------------------------------------------------------
+
+/**
+ * Named rendering algorithm for the display shader.
+ *
+ * - `standard` — fluid colour overlay + gentle refraction (default)
+ * - `glass`    — strong UV distortion only, no colour, bent-glass look
+ * - `ink`      — dense opaque pigment that accumulates and stains
+ * - `aurora`   — velocity-field UV warp, liquid-metal / lava-lamp feel
+ * - `ripple`   — exaggerated normals + Fresnel rim, still-water surface
+ */
+export type FluidAlgorithm = 'standard' | 'glass' | 'ink' | 'aurora' | 'ripple';
+
+// ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
 
@@ -28,6 +43,16 @@ export interface FluidConfig {
   waterColor: [number, number, number];
   /** Glossy reflection / glow colour [R, G, B]. Default: [0.7, 0.85, 1.0] */
   glowColor: [number, number, number];
+  /**
+   * Display rendering algorithm. Each algorithm has a distinct visual character.
+   * Default: 'standard'
+   */
+  algorithm: FluidAlgorithm;
+  /**
+   * UV warp intensity for the `aurora` algorithm.
+   * Controls how far velocity displaces background pixels. Default: 0.015
+   */
+  warpStrength: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -65,8 +90,11 @@ export interface FluidHandle {
 // Shared props
 // ---------------------------------------------------------------------------
 
+/**
+ * Boolean props follow the `is`/`has`/`can` naming convention.
+ */
 interface FluidBaseProps {
-  /** Additional CSS class applied to the `<canvas>` element. */
+  /** Additional CSS class applied to the container element. */
   className?: string;
   /** Inline styles merged with the default `display:block; width:100%; height:100%`. */
   style?: CSSProperties;
@@ -76,17 +104,38 @@ interface FluidBaseProps {
    * When `true` (default), mouse/touch events on the canvas are wired up automatically.
    * Set to `false` and use `ref.updateLocation()` for custom event handling.
    */
-  useMouse?: boolean;
+  isMouseEnabled?: boolean;
   /**
    * When `true` (default), the simulation runs in a Web Worker via OffscreenCanvas.
    * Set to `false` for main-thread mode (required when using multiple instances).
    */
-  worker?: boolean;
+  isWorkerEnabled?: boolean;
   /**
    * Apply a named preset as the base configuration.
    * Any `config` values you provide override the preset.
    */
   preset?: PresetKey;
+  /**
+   * Rendering algorithm that controls the visual character of the fluid effect.
+   * Default: 'standard'
+   */
+  algorithm?: FluidAlgorithm;
+  /**
+   * CSS background colour applied to the container div behind the WebGL canvas.
+   * Visible through transparent canvas areas (e.g. empty space in FluidText,
+   * or around a partial-coverage image). Default: '#0a0a0a'
+   */
+  backgroundColor?: string;
+  /**
+   * URL or local path to an image composited as the canvas background,
+   * behind the text or main image. Accepts any fetchable URL or relative path.
+   */
+  backgroundSrc?: string;
+  /**
+   * Sizing mode for `backgroundSrc`. Accepts: 'cover' | 'contain' | '50%' | '200px' | number.
+   * Default: 'cover'
+   */
+  backgroundSize?: string | number;
 }
 
 // ---------------------------------------------------------------------------
@@ -127,12 +176,6 @@ export interface FluidImageProps extends FluidBaseProps {
    * Default: 'cover'
    */
   imageSize?: string | number;
-  /**
-   * CSS background colour applied to the container div behind the canvas.
-   * Visible when the image does not fill the full canvas (e.g. imageSize='50%').
-   * Default: '#0a0a0a'
-   */
-  backgroundColor?: string;
 }
 
 export const FluidImage: ForwardRefExoticComponent<FluidImageProps & RefAttributes<FluidHandle>>;
@@ -144,15 +187,10 @@ export const FluidImage: ForwardRefExoticComponent<FluidImageProps & RefAttribut
 /**
  * Low-level hook that creates a FluidController inside a container element.
  *
- * The hook creates a `<canvas>` element programmatically on every mount and
- * appends it to the container. This ensures React StrictMode's double-invoke
- * pattern never reuses a neutered canvas (OffscreenCanvas transfer is
- * irreversible). The canvas is removed on unmount.
- *
  * @example
  * ```tsx
  * const containerRef = useRef<HTMLDivElement>(null);
- * const controllerRef = useFluid(containerRef, { worker: false });
+ * const controllerRef = useFluid(containerRef, { isWorkerEnabled: false });
  *
  * useEffect(() => {
  *   controllerRef.current?.setTextSource({ text: 'Hello', fontSize: 80, color: '#fff' });
@@ -163,7 +201,7 @@ export const FluidImage: ForwardRefExoticComponent<FluidImageProps & RefAttribut
  */
 export function useFluid(
   containerRef: React.RefObject<HTMLElement>,
-  opts?: { worker?: boolean; config?: Partial<FluidConfig> }
+  opts?: { isWorkerEnabled?: boolean; config?: Partial<FluidConfig> }
 ): React.RefObject<FluidController | null>;
 
 // ---------------------------------------------------------------------------
@@ -185,6 +223,7 @@ export class FluidSimulation {
   setTextSource(opts: TextSourceOpts): void;
   setImageSource(src: string, effect?: number, size?: string | number): Promise<void>;
   setImageBitmap(bitmap: ImageBitmap, effect?: number, size?: string | number): void;
+  setBackground(bitmap: ImageBitmap | null, size?: string | number): void;
 
   handleMove(x: number, y: number, strength?: number): void;
 
@@ -202,11 +241,12 @@ export class FluidSimulation {
 export class FluidController {
   constructor(
     canvas: HTMLCanvasElement,
-    opts?: { worker?: boolean; config?: Partial<FluidConfig> }
+    opts?: { isWorkerEnabled?: boolean; config?: Partial<FluidConfig> }
   );
 
   setTextSource(opts: TextSourceOpts): void;
   setImageSource(src: string, effect?: number, size?: string | number): void;
+  setBackground(bitmap: ImageBitmap | null, size?: string | number): void;
 
   handleMove(x: number, y: number, strength?: number): void;
   resize(width: number, height: number): void;
@@ -222,3 +262,13 @@ export const DEFAULT_CONFIG: FluidConfig;
 
 /** Merges user config with defaults, optionally layering a named preset. */
 export function mergeConfig(user?: Partial<FluidConfig>, preset?: PresetKey): FluidConfig;
+
+// ---------------------------------------------------------------------------
+// Utilities
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetches a URL and returns an ImageBitmap.
+ * Works on both main thread and in workers.
+ */
+export function loadImageBitmap(src: string): Promise<ImageBitmap>;

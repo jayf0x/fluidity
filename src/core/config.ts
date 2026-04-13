@@ -1,7 +1,6 @@
-'use strict';
+import type { FluidConfig, FluidAlgorithm, PresetKey } from '../../types/index.js';
 
-/** @type {import('../../types/index.d.ts').FluidConfig} */
-export const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG: FluidConfig = {
   densityDissipation: 0.992,
   velocityDissipation: 0.93,
   pressureIterations: 25,
@@ -13,10 +12,11 @@ export const DEFAULT_CONFIG = {
   shine: 0.01,
   waterColor: [0.0, 0.0, 0.0],
   glowColor: [0.7, 0.85, 1.0],
+  algorithm: 'standard' as FluidAlgorithm,
+  warpStrength: 0.015,
 };
 
-/** @type {Record<import('../../types/index.d.ts').PresetKey, Partial<import('../../types/index.d.ts').FluidConfig>>} */
-export const PRESETS = {
+export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
   calm: {
     densityDissipation: 0.999, velocityDissipation: 0.98, curl: 0.0001,
     splatRadius: 0.003, splatForce: 0.5, refraction: 0.15, shine: 0.005,
@@ -47,11 +47,8 @@ export const PRESETS = {
 /**
  * Merges user-provided config with defaults, optionally layering a named preset.
  * Preset values take precedence over defaults; user values take precedence over preset.
- * @param {Partial<import('../../types/index.d.ts').FluidConfig>} [user]
- * @param {import('../../types/index.d.ts').PresetKey} [preset]
- * @returns {import('../../types/index.d.ts').FluidConfig}
  */
-export function mergeConfig(user = {}, preset) {
+export function mergeConfig(user: Partial<FluidConfig> = {}, preset?: PresetKey): FluidConfig {
   const base = preset ? { ...DEFAULT_CONFIG, ...PRESETS[preset] } : DEFAULT_CONFIG;
   return { ...base, ...user };
 }

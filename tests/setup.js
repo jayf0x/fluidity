@@ -41,6 +41,9 @@ export function createWebGLMock() {
     TEXTURE0: 0x84c0,
     TEXTURE1: 0x84c1,
     TEXTURE2: 0x84c2,
+    TEXTURE3: 0x84c3,
+    TEXTURE4: 0x84c4,
+    COLOR_BUFFER_BIT: 0x4000,
 
     // Program / shader
     createProgram: vi.fn(PROG),
@@ -82,6 +85,8 @@ export function createWebGLMock() {
     // Draw
     viewport: vi.fn(),
     drawArrays: vi.fn(),
+    clearColor: vi.fn(),
+    clear: vi.fn(),
 
     // Uniforms
     uniform1f: vi.fn(),

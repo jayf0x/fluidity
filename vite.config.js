@@ -7,7 +7,7 @@ export default defineConfig({
 
   build: {
     lib: {
-      entry: resolve(new URL('.', import.meta.url).pathname, 'src/index.js'),
+      entry: resolve(new URL('.', import.meta.url).pathname, 'src/index.ts'),
       name: 'FluidityJS',
       fileName: 'fluidity-js',
       formats: ['es']
@@ -34,6 +34,6 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['tests/setup.js'],
-    include: ['tests/**/*.test.{js,jsx}'],
+    include: ['tests/**/*.test.{js,jsx,ts,tsx}'],
   },
 });

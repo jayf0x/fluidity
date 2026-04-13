@@ -85,21 +85,39 @@ export function Custom() {
 | `fontWeight` | `string \| number` | `900` | Font weight. |
 | `config` | `Partial<FluidConfig>` | — | Simulation config overrides. |
 | `preset` | `PresetKey` | — | Named preset as base config. |
-| `useMouse` | `boolean` | `true` | Auto-wire mouse/touch events. |
-| `worker` | `boolean` | `true` | Run in Web Worker via OffscreenCanvas. |
+| `algorithm` | `FluidAlgorithm` | `'standard'` | Rendering algorithm (see below). |
+| `backgroundColor` | `string` | `'#0a0a0a'` | CSS colour behind the canvas (shows through transparent areas). |
+| `backgroundSrc` | `string` | — | URL/path composited as background behind text. |
+| `backgroundSize` | `string \| number` | `'cover'` | Sizing mode for `backgroundSrc`. |
+| `isMouseEnabled` | `boolean` | `true` | Auto-wire mouse/touch events. |
+| `isWorkerEnabled` | `boolean` | `true` | Run in Web Worker via OffscreenCanvas. |
 | `className` | `string` | — | Class applied to the container div. |
 | `style` | `CSSProperties` | — | Inline styles merged on container div. |
 
 ### FluidImageProps
 
-All `FluidTextProps` props except text/font ones, plus:
+All shared props (above) plus:
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `src` | `string` | — | Image URL. Changing reloads the simulation. |
 | `effect` | `number` | `0.4` | Obstacle boundary strength (0–1). |
 | `imageSize` | `string \| number` | `'cover'` | `'cover'` \| `'contain'` \| `'50%'` \| `'200px'` \| scale factor. |
-| `backgroundColor` | `string` | `'#0a0a0a'` | Background colour shown when image doesn't fill canvas. |
+
+### FluidAlgorithm
+
+| Value | Visual character |
+|-------|-----------------|
+| `'standard'` | Colour overlay blended over refracted background (default) |
+| `'glass'` | Strong UV distortion only — bent-glass, no colour overlay |
+| `'ink'` | Dense opaque pigment accumulates and stains |
+| `'aurora'` | Velocity-field UV warp — liquid metal / lava-lamp |
+| `'ripple'` | Exaggerated normals + Fresnel rim — calm water surface |
+
+```tsx
+<FluidImage src="/photo.jpg" algorithm="aurora" />
+<FluidText text="fluid" algorithm="ripple" config={{ warpStrength: 0.03 }} />
+```
 
 ### FluidConfig
 
@@ -111,11 +129,13 @@ All `FluidTextProps` props except text/font ones, plus:
 | `curl` | `number` | `0.0001` | Vorticity confinement — swirl factor. |
 | `splatRadius` | `number` | `0.004` | Brush radius. |
 | `splatForce` | `number` | `0.91` | Force applied by brush. |
-| `refraction` | `number` | `0.25` | Background warp strength through fluid. |
+| `refraction` | `number` | `0.25` | Background warp / refraction strength. |
 | `specularExp` | `number` | `1.01` | Specular highlight exponent. |
 | `shine` | `number` | `0.01` | Highlight intensity. |
 | `waterColor` | `[R, G, B]` | `[0, 0, 0]` | Base fluid colour (0–1 each). |
 | `glowColor` | `[R, G, B]` | `[0.7, 0.85, 1.0]` | Glow / specular colour (0–1 each). |
+| `algorithm` | `FluidAlgorithm` | `'standard'` | Display rendering algorithm. |
+| `warpStrength` | `number` | `0.015` | UV warp intensity for the `aurora` algorithm. |
 
 ---
 

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DEFAULT_CONFIG, mergeConfig } from '../../src/core/config.js';
+import { DEFAULT_CONFIG, mergeConfig } from '../../src/core/config.ts';
 
 describe('DEFAULT_CONFIG', () => {
   it('has all required keys', () => {
@@ -58,6 +58,8 @@ describe('mergeConfig', () => {
       shine: 0.05,
       waterColor: [1, 0, 0],
       glowColor: [0, 1, 0],
+      algorithm: 'standard',
+      warpStrength: 0.015,
     };
     expect(mergeConfig(full)).toEqual(full);
   });

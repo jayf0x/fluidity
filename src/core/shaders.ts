@@ -1,5 +1,3 @@
-'use strict';
-
 export const baseVertexShader = /* glsl */ `
   precision highp float;
   attribute vec2 aPosition;
@@ -129,42 +127,113 @@ export const vorticityShader = /* glsl */ `
   }
 `;
 
+/**
+ * Display shader supporting 5 distinct rendering algorithms.
+ *
+ * Texture units:
+ *   0  uTexture    density FBO
+ *   1  uObstacle   obstacle mask
+ *   2  uBackground background / source texture
+ *   3  uCoverage   binary content mask (1=opaque area, 0=transparent)
+ *   4  uVelocity   velocity FBO (used by aurora algorithm)
+ *
+ * uAlgorithm values:
+ *   0  standard — colour overlay + gentle refraction (default)
+ *   1  glass    — pure UV distortion, no colour, bent-glass feel
+ *   2  ink      — dense opaque pigment that accumulates and stains
+ *   3  aurora   — velocity-field UV warp, liquid-metal / lava-lamp
+ *   4  ripple   — exaggerated normals + Fresnel rim, still-water surface
+ */
 export const displayShader = /* glsl */ `
   precision highp float;
   varying vec2 vUv;
+
   uniform sampler2D uTexture;
   uniform sampler2D uObstacle;
   uniform sampler2D uBackground;
-  uniform vec2 texelSize;
-  uniform vec3 uWaterColor;
-  uniform vec3 uGlowColor;
+  uniform sampler2D uCoverage;
+  uniform sampler2D uVelocity;
+
+  uniform vec2  texelSize;
+  uniform vec3  uWaterColor;
+  uniform vec3  uGlowColor;
   uniform float uRefraction;
   uniform float uSpecularExp;
   uniform float uShine;
+  uniform float uWarpStrength;
+  uniform int   uAlgorithm;
 
   void main () {
-    float density = max(texture2D(uTexture, vUv).r, 0.0);
-    float obs = texture2D(uObstacle, vUv).r;
+    float density  = max(texture2D(uTexture,   vUv).r, 0.0);
+    float obs      = texture2D(uObstacle,  vUv).r;
+    float coverage = texture2D(uCoverage,  vUv).r;
 
     float dL = max(texture2D(uTexture, vUv - vec2(texelSize.x * 2.0, 0.0)).r, 0.0);
     float dR = max(texture2D(uTexture, vUv + vec2(texelSize.x * 2.0, 0.0)).r, 0.0);
     float dT = max(texture2D(uTexture, vUv + vec2(0.0, texelSize.y * 2.0)).r, 0.0);
     float dB = max(texture2D(uTexture, vUv - vec2(0.0, texelSize.y * 2.0)).r, 0.0);
 
-    vec3 normal = normalize(vec3(dL - dR, dB - dT, 0.2));
+    vec3  normal   = normalize(vec3(dL - dR, dB - dT, 0.2));
+    vec3  lightDir = normalize(vec3(0.5, 1.0, 0.5));
+    vec3  halfV    = normalize(lightDir + vec3(0.0, 0.0, 1.0));
+    float spec     = pow(max(dot(normal, halfV), 0.0), uSpecularExp) * uShine * density;
 
-    vec2 refrUv = vUv + normal.xy * uRefraction * density;
-    vec3 bg = texture2D(uBackground, mix(vUv, refrUv, 1.0 - obs)).rgb;
+    vec3 bg    = texture2D(uBackground, vUv).rgb;
+    vec3 color = bg;
 
-    vec3 lightDir = normalize(vec3(0.5, 1.0, 0.5));
-    vec3 viewDir = vec3(0.0, 0.0, 1.0);
-    vec3 halfV = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfV), 0.0), uSpecularExp) * uShine * density;
+    if (uAlgorithm == 1) {
+      // ── glass ──────────────────────────────────────────────────────────────
+      // Strong UV distortion only. Image bends but no colour overlay.
+      vec2 refrUv = clamp(vUv + normal.xy * uRefraction * density * 3.0, 0.0, 1.0);
+      vec3 refrBg = texture2D(uBackground, mix(vUv, refrUv, 1.0 - obs)).rgb;
+      color = refrBg + spec * uGlowColor * 2.5;
+      color = mix(color, bg * 0.6, obs * 0.3);
 
-    vec3 color = mix(bg, uWaterColor, min(density * 1.5, 0.8));
-    color += spec * uGlowColor;
-    color = mix(color, bg * 0.5, obs * 0.2);
+    } else if (uAlgorithm == 2) {
+      // ── ink ────────────────────────────────────────────────────────────────
+      // Dense opaque pigment that stains. Subtle refraction underneath.
+      float inkD  = min(density * 4.0, 1.0);
+      vec2 refrUv = clamp(vUv + normal.xy * uRefraction * density * 0.4, 0.0, 1.0);
+      vec3 refrBg = texture2D(uBackground, mix(vUv, refrUv, 1.0 - obs)).rgb;
+      color = mix(refrBg, uWaterColor + spec * uGlowColor, inkD);
+      color = mix(color, bg * 0.5, obs * 0.15);
 
-    gl_FragColor = vec4(color, 1.0);
+    } else if (uAlgorithm == 3) {
+      // ── aurora ─────────────────────────────────────────────────────────────
+      // Velocity field warps background UVs — liquid metal / lava-lamp feel.
+      vec2  vel    = texture2D(uVelocity, vUv).xy;
+      float velMag = clamp(length(vel) * 20.0, 0.0, 1.0);
+      vec2  warpUv = clamp(vUv + vel * uWarpStrength, 0.0, 1.0);
+      vec3  warpBg = texture2D(uBackground, warpUv).rgb;
+      color  = mix(bg, warpBg, velMag * (1.0 - obs));
+      color += spec * uGlowColor * velMag * 1.5;
+      color += uWaterColor * density * 0.3;
+      color  = mix(color, bg * 0.5, obs * 0.2);
+
+    } else if (uAlgorithm == 4) {
+      // ── ripple ─────────────────────────────────────────────────────────────
+      // Exaggerated normal perturbation + Fresnel rim — calm water surface.
+      vec2  rippleUv = clamp(vUv + normal.xy * uRefraction * density * 6.0, 0.0, 1.0);
+      vec3  refrBg   = texture2D(uBackground, mix(vUv, rippleUv, 1.0 - obs)).rgb;
+      float fresnel  = pow(clamp(1.0 - dot(normal, vec3(0.0, 0.0, 1.0)), 0.0, 1.0), 3.0) * density;
+      color  = refrBg;
+      color += fresnel * uGlowColor * 2.0;
+      color += spec * uGlowColor * density * 2.0;
+      color  = mix(color, bg * 0.5, obs * 0.2);
+
+    } else {
+      // ── standard (0) ───────────────────────────────────────────────────────
+      // Original: colour overlay blended over refracted background.
+      vec2 refrUv = vUv + normal.xy * uRefraction * density;
+      vec3 refrBg = texture2D(uBackground, mix(vUv, refrUv, 1.0 - obs)).rgb;
+      color  = mix(refrBg, uWaterColor, min(density * 1.5, 0.8));
+      color += spec * uGlowColor;
+      color  = mix(color, bg * 0.5, obs * 0.2);
+    }
+
+    // Premultiplied alpha — transparent where there is neither content nor fluid,
+    // letting the CSS backgroundColor on the container div show through.
+    float alpha = clamp(max(density * 1.5, coverage), 0.0, 1.0);
+    gl_FragColor = vec4(color * alpha, alpha);
   }
 `;

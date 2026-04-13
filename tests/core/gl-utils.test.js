@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { Program, createFBO, createDoubleFBO, createBlit } from '../../src/core/gl-utils.js';
+import { Program, createFBO, createDoubleFBO, createBlit } from '../../src/core/gl-utils.ts';
 import { createWebGLMock } from '../setup.js';
 
 describe('Program', () => {

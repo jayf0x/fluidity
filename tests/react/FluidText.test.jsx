@@ -9,17 +9,18 @@ import { createRef, StrictMode } from 'react';
 const mockController = {
   setTextSource: vi.fn(),
   setImageSource: vi.fn(),
+  setBackground: vi.fn(),
   handleMove: vi.fn(),
   updateConfig: vi.fn(),
   resize: vi.fn(),
   destroy: vi.fn(),
 };
 
-vi.mock('../../src/fluid-controller.js', () => ({
+vi.mock('../../src/fluid-controller.ts', () => ({
   FluidController: vi.fn(() => mockController),
 }));
 
-import { FluidText } from '../../src/react/FluidText.jsx';
+import { FluidText } from '../../src/react/FluidText.tsx';
 
 describe('FluidText', () => {
   beforeEach(() => {
@@ -102,8 +103,8 @@ describe('FluidText', () => {
     expect(container.querySelector('canvas')).toBeNull();
   });
 
-  it('does not fire handleMove when useMouse=false', () => {
-    const { container } = render(<FluidText text="X" useMouse={false} />);
+  it('does not fire handleMove when isMouseEnabled=false', () => {
+    const { container } = render(<FluidText text="X" isMouseEnabled={false} />);
     const div = container.querySelector('div');
     div.dispatchEvent(new MouseEvent('mousemove', { clientX: 10, clientY: 10, bubbles: true }));
     expect(mockController.handleMove).not.toHaveBeenCalled();
@@ -121,12 +122,12 @@ describe('FluidText', () => {
     ).resolves.not.toThrow();
   });
 
-  it('cleans up event listeners when useMouse toggles', async () => {
-    const { container, rerender } = render(<FluidText text="X" useMouse={true} />);
+  it('cleans up event listeners when isMouseEnabled toggles', async () => {
+    const { container, rerender } = render(<FluidText text="X" isMouseEnabled={true} />);
     const div = container.querySelector('div');
     const removeSpy = vi.spyOn(div, 'removeEventListener');
 
-    await act(async () => { rerender(<FluidText text="X" useMouse={false} />); });
+    await act(async () => { rerender(<FluidText text="X" isMouseEnabled={false} />); });
 
     expect(removeSpy).toHaveBeenCalledWith('mousemove', expect.any(Function));
     expect(removeSpy).toHaveBeenCalledWith('touchmove', expect.any(Function));

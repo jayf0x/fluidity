@@ -3,7 +3,7 @@
  * This catches import errors that unit tests with mocks might miss.
  */
 import { describe, it, expect } from 'vitest';
-import * as pkg from '../src/index.js';
+import * as pkg from '../src/index.ts';
 
 describe('package exports', () => {
   it('exports FluidText as a React forwardRef component', () => {
@@ -28,6 +28,7 @@ describe('package exports', () => {
     expect(typeof pkg.FluidController).toBe('function');
     expect(typeof pkg.FluidController.prototype.setTextSource).toBe('function');
     expect(typeof pkg.FluidController.prototype.setImageSource).toBe('function');
+    expect(typeof pkg.FluidController.prototype.setBackground).toBe('function');
     expect(typeof pkg.FluidController.prototype.handleMove).toBe('function');
     expect(typeof pkg.FluidController.prototype.updateConfig).toBe('function');
     expect(typeof pkg.FluidController.prototype.resize).toBe('function');
@@ -39,6 +40,7 @@ describe('package exports', () => {
     expect(typeof pkg.FluidSimulation.prototype.setTextSource).toBe('function');
     expect(typeof pkg.FluidSimulation.prototype.setImageSource).toBe('function');
     expect(typeof pkg.FluidSimulation.prototype.setImageBitmap).toBe('function');
+    expect(typeof pkg.FluidSimulation.prototype.setBackground).toBe('function');
     expect(typeof pkg.FluidSimulation.prototype.handleMove).toBe('function');
     expect(typeof pkg.FluidSimulation.prototype.resize).toBe('function');
     expect(typeof pkg.FluidSimulation.prototype.updateConfig).toBe('function');
@@ -60,6 +62,8 @@ describe('package exports', () => {
       shine: expect.any(Number),
       waterColor: expect.any(Array),
       glowColor: expect.any(Array),
+      algorithm: expect.any(String),
+      warpStrength: expect.any(Number),
     });
   });
 
@@ -71,7 +75,7 @@ describe('package exports', () => {
     const expected = new Set([
       'FluidText', 'FluidImage', 'useFluid',
       'FluidController', 'FluidSimulation',
-      'DEFAULT_CONFIG', 'PRESETS', 'mergeConfig',
+      'DEFAULT_CONFIG', 'PRESETS', 'mergeConfig', 'loadImageBitmap',
     ]);
     for (const key of Object.keys(pkg)) {
       expect(expected.has(key), `Unexpected export: "${key}"`).toBe(true);

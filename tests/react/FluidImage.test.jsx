@@ -9,17 +9,18 @@ import { createRef } from 'react';
 const mockController = {
   setTextSource: vi.fn(),
   setImageSource: vi.fn(),
+  setBackground: vi.fn(),
   handleMove: vi.fn(),
   updateConfig: vi.fn(),
   resize: vi.fn(),
   destroy: vi.fn(),
 };
 
-vi.mock('../../src/fluid-controller.js', () => ({
+vi.mock('../../src/fluid-controller.ts', () => ({
   FluidController: vi.fn(() => mockController),
 }));
 
-import { FluidImage } from '../../src/react/FluidImage.jsx';
+import { FluidImage } from '../../src/react/FluidImage.tsx';
 
 describe('FluidImage', () => {
   beforeEach(() => {
