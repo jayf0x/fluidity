@@ -6,7 +6,7 @@ import { useControls, useCreateStore } from 'leva';
 import { ExampleWrapper } from '../components/ExampleWrapper';
 import { hexToRgb, useFluidControls } from '../hooks/useFluidControls';
 
-const defaultConfig: FluidConfig = {
+const defaultConfig: FluidConfigLeva = {
   densityDissipation: 0.98,
   velocityDissipation: 0.84,
   pressureIterations: 60,
@@ -18,8 +18,8 @@ const defaultConfig: FluidConfig = {
   shine: 0.01,
   warpStrength: 0.0,
   algorithm: 'ripple',
-  waterColor: hexToRgb('#00f5ff'),
-  glowColor: hexToRgb('#642df7'),
+  waterColor: '#00f5ff',
+  glowColor: '#642df7',
 };
 
 interface State {
@@ -58,7 +58,7 @@ const allEffects: Record<
   Rossler: {
     step: (p) => {
       const dt = 0.04,
-        a = 0.2,
+        a = 0.3,
         b = 0.2,
         c = 5.7;
       const dx = -p.y - p.z;
@@ -99,10 +99,9 @@ export function SplashExample() {
 
   useFluidControls(ref, store, defaultConfig);
 
-  const { effect, text } = useControls(
+  const { effect } = useControls(
     {
       effect: { value: effectNames[0], options: effectNames },
-      text: 'fluidity',
     },
     { store }
   );
@@ -134,7 +133,7 @@ export function SplashExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidText ref={ref} text={text} />
+      <FluidText ref={ref} text={effect} fontSize={200} />
     </ExampleWrapper>
   );
 }
