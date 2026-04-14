@@ -12,4 +12,6 @@ Around text there are always rough edges of around ~1px blackness that are not t
 
 Expect no edge. Ideally could even smoothen edges.
 
-{"velocityDissipation":0.84}
+## BUG/CORE: image gives static background to splat
+
+When spat on image,

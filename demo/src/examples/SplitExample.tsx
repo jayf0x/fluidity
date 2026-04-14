@@ -4,10 +4,10 @@ import { type FluidAlgorithm, type FluidHandle, FluidImage, FluidText } from 'fl
 import { button, useControls, useCreateStore } from 'leva';
 
 import { ExampleWrapper } from '../components/ExampleWrapper';
-import { SPLIT_IMAGE_SRC } from '../constants';
 import { useFluidConfig } from '../hooks/useFluidConfig';
 
 const ALGORITHMS: FluidAlgorithm[] = ['standard', 'glass', 'ink', 'aurora', 'ripple'];
+export const SPLIT_IMAGE_SRC = 'https://images.unsplash.com/photo-1652119482620-505b32c669b1?w=1200';
 
 export function SplitExample() {
   const textRef = useRef<FluidHandle>(null);
