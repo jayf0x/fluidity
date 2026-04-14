@@ -48,8 +48,8 @@ const allEffects: Record<
       return { x: p.x + dx * dt, y: p.y + dy * dt, z: p.z + dz * dt, vx: dx, vy: -dz };
     },
     project: (p, w, h) => ({
-      sx: w / 2 + p.x * (h / 70),
-      sy: h / 2 + 200 - p.z * (h / 70),
+      sx: w / 2 + p.x * (h / 50),
+      sy: h / 2 + 200 - p.z * (h / 50),
       svx: p.vx * 0.5,
       svy: p.vy * 0.5,
     }),
