@@ -1,9 +1,9 @@
+import type { FluidAlgorithm, FluidConfig } from '../../types/index.js';
 import { mergeConfig } from './config.js';
-import { initWebGL, createPrograms, createFBO, createDoubleFBO, createBlit } from './gl-utils.js';
-import type { FBO, DoubleFBO, Programs } from './gl-utils.js';
-import { createTextTextures, createImageTextures, loadImageBitmap } from './textures.js';
+import { createBlit, createDoubleFBO, createFBO, createPrograms, initWebGL } from './gl-utils.js';
+import type { DoubleFBO, FBO, Programs } from './gl-utils.js';
+import { createImageTextures, createTextTextures, loadImageBitmap } from './textures.js';
 import type { TextSourceOpts } from './textures.js';
-import type { FluidConfig, FluidAlgorithm } from '../../types/index.js';
 
 // rAF shim — works on main thread and in workers (Chrome 69+)
 const raf: (fn: FrameRequestCallback) => number =
@@ -12,9 +12,7 @@ const raf: (fn: FrameRequestCallback) => number =
     : (fn: FrameRequestCallback) => setTimeout(fn, 1000 / 60) as unknown as number;
 
 const craf: (id: number) => void =
-  typeof cancelAnimationFrame !== 'undefined'
-    ? cancelAnimationFrame.bind(globalThis)
-    : clearTimeout;
+  typeof cancelAnimationFrame !== 'undefined' ? cancelAnimationFrame.bind(globalThis) : clearTimeout;
 
 const DT = 0.016;
 
@@ -59,9 +57,9 @@ export class FluidSimulation {
 
   #backgroundTex: WebGLTexture | null = null;
   #obstacleTex: WebGLTexture | null = null;
-  #coverageTex: WebGLTexture | null = null;  // binary content mask for transparent canvas support
+  #coverageTex: WebGLTexture | null = null; // binary content mask for transparent canvas support
 
-  #backgroundBitmap: ImageBitmap | null = null;  // optional background image (from backgroundSrc prop)
+  #backgroundBitmap: ImageBitmap | null = null; // optional background image (from backgroundSrc prop)
   #backgroundSize: string | number = 'cover';
 
   #config: FluidConfig;
@@ -98,7 +96,7 @@ export class FluidSimulation {
     this.#ensureRunning();
   }
 
-  async setImageSource(src: string, effect = 0.4, size: string | number = 'cover'): Promise<void> {
+  async setImageSource(src: string, effect = 0.0, size: string | number = 'cover'): Promise<void> {
     const bitmap = await loadImageBitmap(src);
     this.#source = { type: 'image', bitmap, effect, size };
     this.#applyDimensions();
@@ -106,7 +104,7 @@ export class FluidSimulation {
     this.#ensureRunning();
   }
 
-  setImageBitmap(bitmap: ImageBitmap, effect = 0.4, size: string | number = 'cover'): void {
+  setImageBitmap(bitmap: ImageBitmap, effect = 0.0, size: string | number = 'cover'): void {
     this.#source = { type: 'image', bitmap, effect, size };
     this.#applyDimensions();
     this.#applySource();
@@ -153,14 +151,18 @@ export class FluidSimulation {
 
     // Velocity splat
     gl.uniform1i(prog.uniforms.uTarget, 0);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
     gl.uniform3f(prog.uniforms.color, vx * cfg.splatForce * strength, -vy * cfg.splatForce * strength, 0);
-    blit(this.#velocity!.write.fbo); this.#velocity!.swap();
+    blit(this.#velocity!.write.fbo);
+    this.#velocity!.swap();
 
     // Density splat
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#density!.read.tex);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#density!.read.tex);
     gl.uniform3f(prog.uniforms.color, strength, strength, strength);
-    blit(this.#density!.write.fbo); this.#density!.swap();
+    blit(this.#density!.write.fbo);
+    this.#density!.swap();
   }
 
   resize(width?: number, height?: number): void {
@@ -262,17 +264,26 @@ export class FluidSimulation {
 
     if (this.#source.type === 'text') {
       const { backgroundTex, obstacleTex, coverageTex } = createTextTextures(
-        this.#gl, this.#width, this.#height, this.#source.opts,
-        this.#backgroundBitmap, this.#backgroundSize
+        this.#gl,
+        this.#width,
+        this.#height,
+        this.#source.opts,
+        this.#backgroundBitmap,
+        this.#backgroundSize
       );
       this.#backgroundTex = backgroundTex;
       this.#obstacleTex = obstacleTex;
       this.#coverageTex = coverageTex; // same reference as obstacleTex
     } else {
       const { backgroundTex, obstacleTex, coverageTex } = createImageTextures(
-        this.#gl, this.#source.bitmap, this.#width, this.#height,
-        this.#source.effect, this.#source.size,
-        this.#backgroundBitmap, this.#backgroundSize
+        this.#gl,
+        this.#source.bitmap,
+        this.#width,
+        this.#height,
+        this.#source.effect,
+        this.#source.size,
+        this.#backgroundBitmap,
+        this.#backgroundSize
       );
       this.#backgroundTex = backgroundTex;
       this.#obstacleTex = obstacleTex;
@@ -332,24 +343,30 @@ export class FluidSimulation {
     gl.uniform2f(advection.uniforms.texelSize, 1 / W, 1 / H);
     gl.uniform1f(advection.uniforms.dt, DT);
     gl.uniform1i(advection.uniforms.uObstacle, 0);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
     gl.uniform1f(advection.uniforms.dissipation, cfg.velocityDissipation);
     gl.uniform1i(advection.uniforms.uVelocity, 1);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
     gl.uniform1i(advection.uniforms.uSource, 1);
-    blit(this.#velocity!.write.fbo); this.#velocity!.swap();
+    blit(this.#velocity!.write.fbo);
+    this.#velocity!.swap();
 
     // 2. Advect density
     gl.uniform1f(advection.uniforms.dissipation, cfg.densityDissipation);
     gl.uniform1i(advection.uniforms.uSource, 2);
-    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, this.#density!.read.tex);
-    blit(this.#density!.write.fbo); this.#density!.swap();
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, this.#density!.read.tex);
+    blit(this.#density!.write.fbo);
+    this.#density!.swap();
 
     // 3. Vorticity (curl → confinement)
     curl.bind();
     gl.uniform2f(curl.uniforms.texelSize, 1 / W, 1 / H);
     gl.uniform1i(curl.uniforms.uVelocity, 0);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
     blit(this.#curl!.fbo);
 
     vorticity.bind();
@@ -357,10 +374,13 @@ export class FluidSimulation {
     gl.uniform1f(vorticity.uniforms.curl, cfg.curl);
     gl.uniform1f(vorticity.uniforms.dt, DT);
     gl.uniform1i(vorticity.uniforms.uVelocity, 0);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
     gl.uniform1i(vorticity.uniforms.uCurl, 1);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.#curl!.tex);
-    blit(this.#velocity!.write.fbo); this.#velocity!.swap();
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.#curl!.tex);
+    blit(this.#velocity!.write.fbo);
+    this.#velocity!.swap();
 
     // 4. Splat on mouse move
     if (this.#mouse.moved) {
@@ -370,13 +390,17 @@ export class FluidSimulation {
       gl.uniform1f(splat.uniforms.radius, cfg.splatRadius);
 
       gl.uniform1i(splat.uniforms.uTarget, 0);
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
       gl.uniform3f(splat.uniforms.color, this.#mouse.dx * cfg.splatForce, -this.#mouse.dy * cfg.splatForce, 0);
-      blit(this.#velocity!.write.fbo); this.#velocity!.swap();
+      blit(this.#velocity!.write.fbo);
+      this.#velocity!.swap();
 
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#density!.read.tex);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.#density!.read.tex);
       gl.uniform3f(splat.uniforms.color, 1, 1, 1);
-      blit(this.#density!.write.fbo); this.#density!.swap();
+      blit(this.#density!.write.fbo);
+      this.#density!.swap();
 
       this.#mouse.moved = false;
     }
@@ -385,32 +409,42 @@ export class FluidSimulation {
     divergence.bind();
     gl.uniform2f(divergence.uniforms.texelSize, 1 / W, 1 / H);
     gl.uniform1i(divergence.uniforms.uVelocity, 0);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
     gl.uniform1i(divergence.uniforms.uObstacle, 1);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
     blit(this.#divergence!.fbo);
 
     pressure.bind();
     gl.uniform2f(pressure.uniforms.texelSize, 1 / W, 1 / H);
     gl.uniform1i(pressure.uniforms.uDivergence, 0);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#divergence!.tex);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#divergence!.tex);
     gl.uniform1i(pressure.uniforms.uObstacle, 1);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
     for (let i = 0; i < cfg.pressureIterations; i++) {
       gl.uniform1i(pressure.uniforms.uPressure, 2);
-      gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, this.#pressure!.read.tex);
-      blit(this.#pressure!.write.fbo); this.#pressure!.swap();
+      gl.activeTexture(gl.TEXTURE2);
+      gl.bindTexture(gl.TEXTURE_2D, this.#pressure!.read.tex);
+      blit(this.#pressure!.write.fbo);
+      this.#pressure!.swap();
     }
 
     gradientSubtract.bind();
     gl.uniform2f(gradientSubtract.uniforms.texelSize, 1 / W, 1 / H);
     gl.uniform1i(gradientSubtract.uniforms.uPressure, 0);
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#pressure!.read.tex);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#pressure!.read.tex);
     gl.uniform1i(gradientSubtract.uniforms.uVelocity, 1);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
     gl.uniform1i(gradientSubtract.uniforms.uObstacle, 2);
-    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
-    blit(this.#velocity!.write.fbo); this.#velocity!.swap();
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
+    blit(this.#velocity!.write.fbo);
+    this.#velocity!.swap();
 
     // 6. Display
     gl.viewport(0, 0, this.#width, this.#height);
@@ -427,17 +461,22 @@ export class FluidSimulation {
     gl.uniform1f(display.uniforms.uWarpStrength, cfg.warpStrength ?? 0.015);
     gl.uniform1i(display.uniforms.uAlgorithm, ALGORITHM_INT[cfg.algorithm] ?? 0);
 
-    gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#density!.read.tex);
-    gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
-    gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, this.#backgroundTex);
-    gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, this.#coverageTex);
-    gl.activeTexture(gl.TEXTURE4); gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#density!.read.tex);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.#obstacleTex);
+    gl.activeTexture(gl.TEXTURE2);
+    gl.bindTexture(gl.TEXTURE_2D, this.#backgroundTex);
+    gl.activeTexture(gl.TEXTURE3);
+    gl.bindTexture(gl.TEXTURE_2D, this.#coverageTex);
+    gl.activeTexture(gl.TEXTURE4);
+    gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
 
-    gl.uniform1i(display.uniforms.uTexture,    0);
-    gl.uniform1i(display.uniforms.uObstacle,   1);
+    gl.uniform1i(display.uniforms.uTexture, 0);
+    gl.uniform1i(display.uniforms.uObstacle, 1);
     gl.uniform1i(display.uniforms.uBackground, 2);
-    gl.uniform1i(display.uniforms.uCoverage,   3);
-    gl.uniform1i(display.uniforms.uVelocity,   4);
+    gl.uniform1i(display.uniforms.uCoverage, 3);
+    gl.uniform1i(display.uniforms.uVelocity, 4);
 
     blit(null);
   }

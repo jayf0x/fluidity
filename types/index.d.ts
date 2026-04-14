@@ -184,7 +184,7 @@ export interface FluidImageProps extends FluidBaseProps {
   /**
    * Obstacle brightness (0–1) controlling how strongly the image edges
    * repel the fluid. Lower = weaker boundary, higher = stronger.
-   * Default: 0.4
+   * Default: 0.0
    */
   effect?: number;
   /**
@@ -257,10 +257,7 @@ export class FluidSimulation {
 
 /** Unified controller abstracting worker vs main-thread execution. */
 export class FluidController {
-  constructor(
-    canvas: HTMLCanvasElement,
-    opts?: { isWorkerEnabled?: boolean; config?: Partial<FluidConfig> }
-  );
+  constructor(canvas: HTMLCanvasElement, opts?: { isWorkerEnabled?: boolean; config?: Partial<FluidConfig> });
 
   setTextSource(opts: TextSourceOpts): void;
   setImageSource(src: string, effect?: number, size?: string | number): void;

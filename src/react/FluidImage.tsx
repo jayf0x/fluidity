@@ -1,14 +1,15 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
-import { useFluid } from './useFluid.js';
+
+import type { FluidHandle, FluidImageProps } from '../../types/index.js';
 import { mergeConfig } from '../core/config.js';
 import { loadImageBitmap } from '../core/textures.js';
-import type { FluidImageProps, FluidHandle } from '../../types/index.js';
+import { useFluid } from './useFluid.js';
 
 export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function FluidImage(
   {
     src,
-    effect = 0.4,
+    effect = 0.0,
     imageSize = 'cover',
     className,
     style,
@@ -70,11 +71,16 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     let cancelled = false;
     loadImageBitmap(backgroundSrc)
       .then((bitmap) => {
-        if (cancelled) { bitmap.close(); return; }
+        if (cancelled) {
+          bitmap.close();
+          return;
+        }
         controllerRef.current?.setBackground(bitmap, backgroundSize);
       })
       .catch((err) => console.error('[fluidity-js] backgroundSrc load failed:', err));
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [backgroundSrc, backgroundSize]);
 
   // Built-in pointer tracking
@@ -107,11 +113,16 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     <div
       ref={containerRef}
       className={className}
-      style={{
-        position: 'relative', display: 'block', width: '100%', height: '100%',
-        background: backgroundColor,
-        ...style,
-      } as CSSProperties}
+      style={
+        {
+          position: 'relative',
+          display: 'block',
+          width: '100%',
+          height: '100%',
+          background: backgroundColor,
+          ...style,
+        } as CSSProperties
+      }
     />
   );
 });

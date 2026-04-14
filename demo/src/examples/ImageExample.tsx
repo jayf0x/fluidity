@@ -8,15 +8,16 @@ import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaultProps: Partial<FluidConfigLeva> = {
   densityDissipation: 0.99,
-  velocityDissipation: 0.93,
-  pressureIterations: 3.0,
+  velocityDissipation: 0.99,
+  pressureIterations: 21.0,
   curl: 0.0,
-  splatRadius: 0.0,
-  splatForce: 1.18,
+  splatRadius: 0.005,
+  splatForce: 0.5,
   refraction: 1.0,
   specularExp: 0.1,
   shine: 0.0,
-  warpStrength: 0.01,
+  warpStrength: 0.005,
+  algorithm: 'aurora',
 };
 
 const IMAGE_OPTIONS = {
@@ -31,12 +32,11 @@ export function ImageExample() {
   const store = useCreateStore();
   useFluidControls(ref, store, defaultProps);
 
-  const { src, imageSize, effect } = useControls(
+  const { src, imageSize } = useControls(
     'settings',
     {
       src: { label: 'image', options: IMAGE_OPTIONS, value: IMAGE_OPTIONS['forest'] },
       imageSize: { label: 'size', options: ['cover', 'contain', '80%', '50%'], value: 'cover' },
-      effect: { value: 0.4, min: 0, max: 1, step: 0.01 },
       reload: button(() => ref.current?.reset()),
       splash: button(() => ref.current?.updateLocation({ x: 400, y: 300, strength: 12 })),
     },
@@ -45,7 +45,7 @@ export function ImageExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidImage ref={ref} src={src} effect={effect} imageSize={imageSize} />
+      <FluidImage ref={ref} src={src} effect={0} imageSize={imageSize} />
     </ExampleWrapper>
   );
 }

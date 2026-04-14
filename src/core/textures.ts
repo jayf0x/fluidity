@@ -118,7 +118,7 @@ export function createImageTextures(
   bitmap: ImageBitmap,
   width: number,
   height: number,
-  effect = 0.4,
+  effect = 0.0,
   size: string | number = 'cover',
   backgroundBitmap: ImageBitmap | null = null,
   backgroundSize: string | number = 'cover'

@@ -1,10 +1,9 @@
-import { FluidSimulation } from './core/simulation.js';
-import FluidWorker from './worker/index.js?worker&inline';
 import type { FluidConfig } from '../types/index.js';
+import { FluidSimulation } from './core/simulation.js';
 import type { TextSourceOpts } from './core/textures.js';
+import FluidWorker from './worker/index.js?worker&inline';
 
-const WORKER_SUPPORTED =
-  typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined';
+const WORKER_SUPPORTED = typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined';
 
 export class FluidController {
   #worker: Worker | null = null;
@@ -12,7 +11,10 @@ export class FluidController {
   #useWorker: boolean;
   #canvas: HTMLCanvasElement;
 
-  constructor(canvas: HTMLCanvasElement, { isWorkerEnabled = true, config = {} }: { isWorkerEnabled?: boolean; config?: Partial<FluidConfig> } = {}) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    { isWorkerEnabled = true, config = {} }: { isWorkerEnabled?: boolean; config?: Partial<FluidConfig> } = {}
+  ) {
     this.#canvas = canvas;
     this.#useWorker = isWorkerEnabled && WORKER_SUPPORTED;
 
@@ -35,7 +37,7 @@ export class FluidController {
     }
   }
 
-  setImageSource(src: string, effect = 0.4, size: string | number = 'cover'): void {
+  setImageSource(src: string, effect = 0, size: string | number = 'cover'): void {
     if (this.#worker) {
       this.#worker.postMessage({ type: 'setImageSource', src, effect, size });
     } else {
@@ -121,7 +123,7 @@ export class FluidController {
     } catch {
       console.warn(
         '[fluidity-js] OffscreenCanvas transfer failed — falling back to main-thread mode. ' +
-        'This is expected in React StrictMode development.'
+          'This is expected in React StrictMode development.'
       );
       this.#useWorker = false;
       this.#sim = new FluidSimulation(canvas, config);
@@ -138,9 +140,6 @@ export class FluidController {
       }
     };
 
-    this.#worker.postMessage(
-      { type: 'init', canvas: offscreen, width, height, config },
-      [offscreen]
-    );
+    this.#worker.postMessage({ type: 'init', canvas: offscreen, width, height, config }, [offscreen]);
   }
 }

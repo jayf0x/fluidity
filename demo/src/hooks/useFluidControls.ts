@@ -56,7 +56,7 @@ export function useFluidControls(
     () => ({
       densityDissipation: { value: values.densityDissipation, min: 0.9, max: 1.0, step: 0.001 },
       velocityDissipation: { value: values.velocityDissipation, min: 0.7, max: 1.0, step: 0.001 },
-      pressureIterations: { value: values.pressureIterations, min: 1, max: 60, step: 1 },
+      pressureIterations: { value: values.pressureIterations, min: 0.1, max: 50, step: 0.1 },
       curl: { value: values.curl, min: 0, max: 1, step: 0.01 },
       splatRadius: { value: values.splatRadius, min: 0.001, max: 0.03, step: 0.001 },
       splatForce: { value: values.splatForce, min: 0.1, max: 5.0, step: 0.01 },
@@ -70,7 +70,7 @@ export function useFluidControls(
         value: values.algorithm,
         options: ['standard', 'glass', 'ink', 'aurora', 'ripple'] satisfies FluidAlgorithm[],
       },
-      preset: { value: values.algorithm, options: ['calm', 'neon', 'smoke', 'storm', 'wave'] satisfies PresetKey[] },
+      // preset: { value: values.algorithm, options: ['calm', 'neon', 'smoke', 'storm', 'wave'] satisfies PresetKey[] },
     }),
     []
   );
