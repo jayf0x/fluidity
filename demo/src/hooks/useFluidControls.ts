@@ -2,11 +2,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import type { RefObject } from 'react';
 
 import type { FluidAlgorithm, FluidConfig, FluidHandle, PresetKey } from 'fluidity-js';
-import { useControls, useCreateStore } from 'leva';
-
-type LevaStore = ReturnType<typeof useCreateStore>;
-
-type RGB = [number, number, number];
+import { useControls } from 'leva';
 
 export function hexToRgb(hex: string): RGB {
   const n = parseInt(hex.replace('#', ''), 16);

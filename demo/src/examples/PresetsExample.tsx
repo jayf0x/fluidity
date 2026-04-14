@@ -6,12 +6,12 @@ import { button, useControls, useCreateStore } from 'leva';
 import { ExampleWrapper } from '../components/ExampleWrapper';
 import { rgbArrayToHex, useFluidControls } from '../hooks/useFluidControls';
 
-const PRESET_META: Record<PresetKey, { text: string; color: string }> = {
-  calm: { text: 'calm', color: '#a8d8ea' },
-  storm: { text: 'storm', color: '#ffffff' },
-  wave: { text: 'wave', color: '#e0f0ff' },
-  neon: { text: 'neon', color: '#ff2d9b' },
-  smoke: { text: 'smoke', color: '#cccccc' },
+const mappedPresetColor: Record<PresetKey, string> = {
+  calm: '#a8d8ea',
+  storm: '#ffffff',
+  wave: '#e0f0ff',
+  neon: '#ff2d9b',
+  smoke: '#cccccc',
 };
 
 export function PresetsExample() {
@@ -33,34 +33,18 @@ export function PresetsExample() {
 
   // Preset → fill Leva fluid config sliders
   useEffect(() => {
-    const p = PRESETS[preset as PresetKey];
-    const d = DEFAULT_CONFIG;
+    const selected = PRESETS[preset];
     set({
-      densityDissipation: p.densityDissipation ?? d.densityDissipation,
-      velocityDissipation: p.velocityDissipation ?? d.velocityDissipation,
-      pressureIterations: p.pressureIterations ?? d.pressureIterations,
-      curl: p.curl ?? d.curl,
-      splatRadius: p.splatRadius ?? d.splatRadius,
-      splatForce: p.splatForce ?? d.splatForce,
-      refraction: p.refraction ?? d.refraction,
-      specularExp: p.specularExp ?? d.specularExp,
-      shine: p.shine ?? d.shine,
-      waterColor: rgbArrayToHex((p.waterColor ?? d.waterColor) as [number, number, number]),
-      glowColor: rgbArrayToHex((p.glowColor ?? d.glowColor) as [number, number, number]),
+      ...DEFAULT_CONFIG,
+      ...PRESETS,
+      waterColor: rgbArrayToHex((selected.waterColor ?? DEFAULT_CONFIG.waterColor) as RGB),
+      glowColor: rgbArrayToHex((selected.glowColor ?? DEFAULT_CONFIG.glowColor) as RGB),
     });
   }, [preset, set]);
 
-  const meta = PRESET_META[preset as PresetKey];
-
   return (
     <ExampleWrapper store={store}>
-      <FluidText
-        ref={ref}
-        text={meta.text}
-        fontSize={150}
-        color={meta.color}
-        style={{ width: '100%', height: '100%' }}
-      />
+      <FluidText ref={ref} text={preset} fontSize={150} color={mappedPresetColor[preset]} />
     </ExampleWrapper>
   );
 }
