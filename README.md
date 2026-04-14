@@ -126,7 +126,7 @@ All shared props (above) plus:
 | `densityDissipation` | `number` | `0.992` | How long ink lingers (0–1). |
 | `velocityDissipation` | `number` | `0.93` | How quickly velocity decays (0–1). |
 | `pressureIterations` | `number` | `25` | Jacobi iterations — higher is more accurate but slower. |
-| `curl` | `number` | `0.3` | Vorticity confinement — swirl factor. |
+| `curl` | `number` | `0.0001` | Vorticity confinement — swirl factor. Visible effect starts around `0.1`; `0.2`–`0.5` for strong swirl. |
 | `splatRadius` | `number` | `0.004` | Brush radius. |
 | `splatForce` | `number` | `0.91` | Force applied by brush. |
 | `refraction` | `number` | `0.25` | Background warp / refraction strength. |

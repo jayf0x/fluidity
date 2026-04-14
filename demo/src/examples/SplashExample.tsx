@@ -10,7 +10,7 @@ const defaultConfig: FluidConfigLeva = {
   densityDissipation: 0.98,
   velocityDissipation: 0.84,
   pressureIterations: 60,
-  curl: 0.5,
+  curl: 0.0001,
   splatRadius: 0.01,
   splatForce: 4.86,
   refraction: 0.57,

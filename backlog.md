@@ -1,13 +1,3 @@
-## CORE/BUG: `curl` param has no visual effect
-
-Setting `curl` 0→2 produces no visible difference in any example.
-
-**Suspect:** `vorticityShader` uniform binding or `cfg.curl` value range mismatch. DEFAULT_CONFIG has `curl: 0.0001` — may be too small to matter. Check `vorticity.uniforms.curl` is correctly bound in `simulation.ts #step()` and that the value passed is in the right unit (shader may expect 0–10 not 0–0.01).
-
-**Files:** `src/core/simulation.ts` (vorticity pass, line ~340), `src/core/shaders.ts` (vorticityShader), `src/core/config.ts` (DEFAULT_CONFIG curl default).
-
----
-
 ## CORE/BUG: `pressureIterations` has no visual effect
 
 Changing 20→200 shows no quality difference.
@@ -18,36 +8,6 @@ Changing 20→200 shows no quality difference.
 
 ---
 
-## CORE/BUG: `backgroundSrc` obstacle detection broken for bright images
-
-Bright `backgroundSrc` images → bright areas non-interactive (obstacle mask reads high brightness = solid obstacle).
-
-**Root cause:** `createTextTextures` / `createImageTextures` in `textures.ts` draw the background bitmap into the same canvas used to generate the obstacle texture. Obstacle = brightness of drawn pixels. Background image bleeds into obstacle mask.
-
-**Fix options:**
-
-1. **Separate canvases** — draw background on one canvas (background tex), draw only text/image on a second canvas (obstacle tex). Don't composite background into obstacle canvas at all. This is cleanest — zero coupling.
-2. **Post-process obstacle** — after compositing, draw obstacle content again on top at full brightness to "overwrite" any background influence on the obstacle channel.
-
-Option 1 is correct. `createTextTextures` should return `backgroundTex` from a canvas with only the background bitmap, `obstacleTex` from a canvas with only the text (no background).
-
-Make sure that invariant is preserved after the refactor — the coverage texture should still come from the obstacle canvas (text/image shape), not the background canvas.
-
-**Files:** `src/core/textures.ts` — `createTextTextures`, `createImageTextures`.
-
----
-
-## CORE/BUG: Cursor splat flickers over non-interactive areas
-
-Moving cursor over non-obstacle (empty canvas region) → splat appears then immediately vanishes.
-
-**Cause:** Obstacle mask = 0 in empty areas → advection step zeroes velocity and density near those pixels → splat injected by `handleMove` gets wiped in same frame by advection pass using obstacle mask.
-
-**Fix:** Advection zeroing should only zero _inside_ obstacles (obs=1), not outside (obs=0). Check advection shader — it should zero velocity where `obs > threshold`, not where `obs < threshold`. Possible sign flip. Also check `uObstacle` texture: value should be 1 _inside_ obstacle (text/image pixels), 0 _outside_ (empty space). If inverted → empty space acts as obstacle.
-
-**Files:** `src/core/shaders.ts` (advectionShader obstacle sampling), `src/core/textures.ts` (verify obstacle texture polarity).
-
----
 
 ## CORE/BUG: Background hardcoded black in textures
 

@@ -93,7 +93,15 @@ export function createTextTextures(
   draw(color);
   const backgroundTex = uploadTexture(gl, tCanvas);
 
-  draw('white', 4);
+  // Obstacle: white text on black only — background bitmap must NOT bleed in,
+  // or bright background pixels become false obstacles that zero velocity.
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = 'white';
+  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, width / 2, height / 2);
   const obstacleTex = uploadTexture(gl, tCanvas);
 
   return { backgroundTex, obstacleTex, coverageTex: obstacleTex };
