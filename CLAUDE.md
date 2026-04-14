@@ -6,22 +6,22 @@ WebGL fluid simulation React library. Navier-Stokes solver (advection, divergenc
 ## Repo layout
 ```
 fluidity/
-├── src/                     # Library source (published as fluidity-js)
-│   ├── index.js             # Exports
+├── src/                     # Library source (.ts/.tsx — fully typed)
+│   ├── index.ts             # Exports
 │   ├── core/
-│   │   ├── config.js        # DEFAULT_CONFIG + mergeConfig
-│   │   ├── gl-utils.js      # initWebGL, Program class, createFBO, createDoubleFBO, createBlit
-│   │   ├── shaders.js       # All GLSL shader strings
-│   │   ├── simulation.js    # FluidSimulation class (main simulation loop)
-│   │   └── textures.js      # createTextTextures, createImageTextures, loadImageBitmap, computeImageTransform
-│   ├── worker/index.js      # Web Worker: receives messages, delegates to FluidSimulation
-│   ├── fluid-controller.js  # FluidController: worker vs main-thread abstraction
+│   │   ├── config.ts        # DEFAULT_CONFIG + mergeConfig
+│   │   ├── gl-utils.ts      # initWebGL, Program class, createFBO, createDoubleFBO, createBlit
+│   │   ├── shaders.ts       # All GLSL shader strings
+│   │   ├── simulation.ts    # FluidSimulation class (main simulation loop)
+│   │   └── textures.ts      # createTextTextures, createImageTextures, loadImageBitmap, computeImageTransform
+│   ├── worker/index.ts      # Web Worker: receives messages, delegates to FluidSimulation
+│   ├── fluid-controller.ts  # FluidController: worker vs main-thread abstraction
 │   └── react/
-│       ├── FluidText.jsx    # React component (forwardRef)
-│       ├── FluidImage.jsx   # React component (forwardRef), imageSize prop
-│       └── useFluid.js      # Hook: creates canvas programmatically, mounts FluidController
-├── types/index.d.ts         # TypeScript declarations
-├── tests/                   # Vitest + jsdom tests (65 total)
+│       ├── FluidText.tsx    # React component (forwardRef)
+│       ├── FluidImage.tsx   # React component (forwardRef), imageSize prop
+│       └── useFluid.ts      # Hook: creates canvas programmatically, mounts FluidController
+├── types/index.d.ts         # Manual TypeScript declarations (public API)
+├── tests/                   # Vitest + jsdom tests (68 total)
 │   ├── setup.js             # WebGL mock, canvas mock, Worker/OffscreenCanvas shims
 │   ├── core/
 │   ├── fluid-controller.test.js
@@ -31,118 +31,98 @@ fluidity/
 │   ├── src/
 │   │   ├── App.tsx          # Nav + example switcher (5 tabs)
 │   │   ├── examples/        # TextExample, ImageExample, SplashExample, SplitExample, PresetsExample
-│   │   └── components/Panel.tsx  # Floating panel UI primitives
-│   ├── vite.config.ts       # base: './', alias fluidity-js → ../src/index.js
-│   └── package.json         # leva installed, gh-pages for deploy
-├── vite.config.js           # Library build (Vite 4, Node 16 compat)
+│   │   ├── hooks/useFluidControls.ts  # Shared Leva controls hook
+│   │   └── components/ExampleWrapper.tsx  # Leva panel + layout wrapper
+│   ├── vite.config.ts       # base: './', alias fluidity-js → ../src/index.ts
+│   └── package.json         # leva, gh-pages
+├── vite.config.js           # Library build (Vite 4, Node 16 compat), entry: src/index.ts
 ├── package.json             # Library package
-└── backlog.md               # Prioritized feature/bug backlog
+└── backlog.md               # Prioritized bug/feature backlog
 ```
 
 ## Node version
-- **Library** (`/`): Node 16 compatible deps (vite@4, vitest@0.34). Run tests/build with Node 16+.
-- **Demo** (`/demo`): Node 20 required. Vite 5.
-- On macOS with nvm: prefix demo commands with `PATH=/Users/me/.nvm/versions/node/v20.19.6/bin:$PATH`
+- **Library** (`/`): Node 16+ deps (vite@4, vitest@0.34).
+- **Demo** (`/demo`): Node 20 required (Vite 5).
+- macOS nvm: prefix demo commands with `PATH=/Users/me/.nvm/versions/node/v20.19.6/bin:$PATH`
 
 ## Key commands
 ```bash
-# Library
-npm test                          # watch mode
-npx vitest run                    # single run
-PATH=.../node/v20.19.6/bin:$PATH npx vitest run  # safe version
+# Library tests
+PATH=~/.nvm/versions/node/v20.19.6/bin:$PATH npx vitest run
 
-# Demo (cd demo first)
-pnpm dev                          # dev server
-pnpm build                        # production build to demo/dist/
-pnpm deploy                       # build + push to gh-pages branch
+# Demo (from /demo)
+pnpm dev
+pnpm build
+pnpm deploy   # gh-pages branch → https://jayf0x.github.io/fluidity
 ```
+
+## Public API (FluidHandle ref)
+```ts
+interface FluidHandle {
+  reset(): void
+  updateLocation(opts: { x: number; y: number; strength?: number }): void
+  splat(x: number, y: number, vx: number, vy: number, strength?: number): void
+  updateConfig(config: Partial<FluidConfig>): void
+}
+```
+`splat()` writes directly to velocity+density FBOs. Safe N×/frame. Use for programmatic paths (attractors, particles). `updateLocation` goes through mouse-state machine (one splat per sim step, last-write-wins).
+
+## Config (DEFAULT_CONFIG)
+```ts
+{
+  densityDissipation: 0.992, velocityDissipation: 0.93, pressureIterations: 25,
+  curl: 0.3, splatRadius: 0.004, splatForce: 0.91,
+  refraction: 0.25, specularExp: 1.01, shine: 0.01,
+  waterColor: [0,0,0], glowColor: [0.7,0.85,1.0],
+  algorithm: 'standard',   // 'standard'|'glass'|'ink'|'aurora'|'ripple'
+  warpStrength: 0.015,
+}
+```
+
+## Simulation pipeline (per frame, simulation.ts #step)
+1. Advect velocity (obstacle mask zeroes inside text/image)
+2. Advect density
+3. Curl → vorticity confinement
+4. Splat — mouse move OR direct `splat()` calls → velocity + density FBOs
+5. Divergence → pressure solve (N iterations) → gradient subtract
+6. Display pass: 5 texture units bound:
+   - `uTexture(0)` = density FBO
+   - `uObstacle(1)` = obstacle tex
+   - `uBackground(2)` = background tex
+   - `uCoverage(3)` = binary content mask (enables transparent canvas)
+   - `uVelocity(4)` = velocity FBO (used by aurora algorithm)
+   - Uniforms: `uAlgorithm` (int 0–4), `uWarpStrength`, `uWaterColor`, `uGlowColor`, `uRefraction`, `uSpecularExp`, `uShine`
 
 ## Critical architecture decisions
 
 ### React StrictMode + OffscreenCanvas
-`transferControlToOffscreen` is irreversible. StrictMode double-mounts would try to transfer twice → crash.
-**Fix**: `useFluid.js` creates a fresh `<canvas>` element programmatically each mount inside a container `<div>`, removes on cleanup. Components render `<div>` not `<canvas>`. `FluidController` also has try/catch fallback.
-
-```js
-// useFluid.js — core pattern
-useEffect(() => {
-  const canvas = document.createElement('canvas');
-  container.appendChild(canvas);
-  const controller = new FluidController(canvas, opts);
-  const ro = new ResizeObserver(([e]) => {
-    const { inlineSize: w, blockSize: h } = e.contentBoxSize[0];
-    controller.resize(Math.round(w), Math.round(h));
-  });
-  ro.observe(container);
-  return () => { ro.disconnect(); controller.destroy(); canvas.remove(); };
-}, []);
-```
+`transferControlToOffscreen` irreversible. StrictMode double-mounts → double transfer → crash.
+**Fix:** `useFluid.ts` creates fresh `<canvas>` element per mount inside container `<div>`, removes on cleanup. `FluidController` also has try/catch fallback to main-thread mode.
 
 ### Worker destroy timing
-```js
-// fluid-controller.js — capture ref before nulling
+```ts
 destroy() {
   const worker = this.#worker;
-  this.#worker = null;           // null first
+  this.#worker = null;                          // null first — prevents double-use
   worker.postMessage({ type: 'destroy' });
-  setTimeout(() => worker.terminate(), 50);  // captured ref, not this.#worker
+  setTimeout(() => worker.terminate(), 50);     // captured ref safe
 }
 ```
 
 ### createBlit optimization
-Vertex buffer + attrib pointer set up ONCE in `createBlit(gl)`. Returns `blit(fbo)` fn that only binds FBO + draws. Do NOT call `vertexAttribPointer` per draw.
+Vertex buffer + attrib pointer set up ONCE in `createBlit(gl)`. Returns `blit(fbo)` fn — only binds FBO + draws. Never call `vertexAttribPointer` per draw.
 
-### Image size (computeImageTransform)
-In `textures.js`. Accepts `'cover'|'contain'|'50%'|'200px'|number`. Default `'cover'`. Propagated:
-`FluidImage imageSize prop` → `controllerRef.setImageSource(src, effect, size)` → `FluidController.setImageSource` → worker msg `{type:'setImageSource', src, effect, size}` → `FluidSimulation.setImageSource(src, effect, size)` → `createImageTextures(..., size)`.
+### Transparent canvas
+WebGL context: `alpha: true`. `gl.clearColor(0,0,0,0)`. Display shader outputs premultiplied alpha: `vec4(color * alpha, alpha)`. Coverage texture (`uCoverage`) = binary mask of content area → empty space transparent → CSS `backgroundColor` prop visible through canvas.
+- Text mode: `coverageTex === obstacleTex` (same ref, guard double-delete in `#disposeTextures`)
+- Image mode: separate white-rect coverage texture
 
-## Simulation pipeline (per frame)
-1. Advect velocity (obstacle mask zeroes inside text/image)
-2. Advect density
-3. Curl → vorticity confinement
-4. Splat (mouse move → velocity + density FBOs)
-5. Divergence → pressure solve (N iterations) → gradient subtract
-6. Display: sample density FBO → compute normals → refract background texture → add specular
-
-## Shader uniforms (display)
-`uTexture`=density FBO, `uObstacle`=obstacle tex, `uBackground`=background tex, `uWaterColor`, `uGlowColor`, `uRefraction`, `uSpecularExp`, `uShine`, `texelSize`.
-
-## Config (DEFAULT_CONFIG)
-```js
-{ densityDissipation: 0.992, velocityDissipation: 0.93, pressureIterations: 25,
-  curl: 0.0001, splatRadius: 0.004, splatForce: 0.91,
-  refraction: 0.25, specularExp: 1.01, shine: 0.01,
-  waterColor: [0,0,0], glowColor: [0.7,0.85,1.0] }
-```
+### backgroundSrc bitmap lifecycle
+Main thread: loads bitmap via `loadImageBitmap()`, transfers to worker (zero-copy `postMessage([bitmap])`). Worker stores in `#backgroundBitmap`. On change: old bitmap `.close()`d in `setBackground()`. On destroy: `.close()` called.
 
 ## Tests
-65 tests. All must pass before committing. Run: `PATH=.../v20.19.6/bin:$PATH npx vitest run`
-
-Tests use full WebGL mock in `tests/setup.js`. `FluidText`/`FluidImage` are `forwardRef` ExoticComponents — check `$typeof` not `typeof === 'function'`.
-
-## Known issues (see backlog.md for implementation details)
-
-### Image effect (CORE/BUG)
-Current: white fluid appears on top of image, reveals black background when pushed. Wrong.
-Desired: UV warp rendering — use velocity field to distort UV when sampling `uBackground`. No separate fluid color. See backlog.md for full implementation plan.
-
-### Text flicker (CORE/BUG)
-Density FBO holds slightly negative values near obstacle boundary → display shader produces dark flash.
-Fix: `float density = max(texture2D(uTexture, vUv).r, 0.0);` in displayShader.
-
-### Image whitespace not interactive (CORE/BUG)
-With small imageSize (e.g. `10%`), surrounding black area fluid is invisible because `waterColor=[0,0,0]`.
-Fix: add `backgroundColor` CSS prop to `FluidImage` container div (default `#0a0a0a`).
-
-## Demo site
-5 examples: text, image, auto-splash, split-view (worker=false), presets.
-Nav: pill tabs top-center. Controls: floating `Panel` component bottom-left.
-GitHub Pages: `base: './'` in vite config, `pnpm deploy` (gh-pages).
-URL: https://jayf0x.github.io/fluidity
-
-## Leva (demo controls)
-Already installed in `demo/package.json`. Backlog item wants all examples to use `useControls` from Leva. Hook to create: `demo/src/hooks/useFluidControls.ts` — shared DEFAULT_CONFIG sliders + page-specific folder.
-
-## Type system
-`types/index.d.ts` — `FluidConfig`, `FluidHandle`, `FluidTextProps`, `FluidImageProps` (has `imageSize?: string | number`), `FluidBaseProps`, `useFluid`, `FluidController`, `FluidSimulation`.
-`demo/tsconfig.json` paths: `"fluidity-js"` → `["../types/index.d.ts"]`.
+68 tests. All must pass before committing.
+- `tests/setup.js` — WebGL mock (`createWebGLMock`), canvas mock (`createCanvasMock`). Mock includes `clearColor`, `clear`, `COLOR_BUFFER_BIT`, `TEXTURE0`–`TEXTURE4`.
+- React component mocks: `vi.mock('../../src/fluid-controller.ts', ...)` — note `.ts` extension required.
+- Worker mock: `vi.mock('../src/worker/index.ts?worker&inline', ...)`
+- `FluidText`/`FluidImage` are forwardRef ExoticComponents — check `$$typeof`, not `typeof`.

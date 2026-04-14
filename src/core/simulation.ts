@@ -353,6 +353,7 @@ export class FluidSimulation {
     blit(this.#curl!.fbo);
 
     vorticity.bind();
+    gl.uniform2f(vorticity.uniforms.texelSize, 1 / W, 1 / H);
     gl.uniform1f(vorticity.uniforms.curl, cfg.curl);
     gl.uniform1f(vorticity.uniforms.dt, DT);
     gl.uniform1i(vorticity.uniforms.uVelocity, 0);

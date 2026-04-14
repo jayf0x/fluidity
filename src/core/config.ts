@@ -4,7 +4,7 @@ export const DEFAULT_CONFIG: FluidConfig = {
   densityDissipation: 0.992,
   velocityDissipation: 0.93,
   pressureIterations: 25,
-  curl: 0.0001,
+  curl: 0.3,
   splatRadius: 0.004,
   splatForce: 0.91,
   refraction: 0.25,

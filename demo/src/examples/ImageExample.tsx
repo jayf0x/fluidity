@@ -4,7 +4,7 @@ import { type FluidHandle, FluidImage } from 'fluidity-js';
 import { button, useControls, useCreateStore } from 'leva';
 
 import { ExampleWrapper } from '../components/ExampleWrapper';
-import { IMAGES, SPLIT_IMAGE_SRC } from '../constants';
+import { IMAGES } from '../constants';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const IMAGE_OPTIONS = Object.fromEntries(IMAGES.map((img) => [img.label, img.src]));
@@ -28,14 +28,7 @@ export function ImageExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidImage
-        ref={ref}
-        src={src}
-        effect={effect}
-        imageSize={imageSize}
-        backgroundSrc={SPLIT_IMAGE_SRC}
-        backgroundColor="blue"
-      />
+      <FluidImage ref={ref} src={src} effect={effect} imageSize={imageSize} />
     </ExampleWrapper>
   );
 }
