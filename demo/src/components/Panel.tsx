@@ -10,8 +10,8 @@ export function Panel({ children, position = 'bottom-left' }: PanelProps) {
     position === 'bottom-right'
       ? { bottom: 16, right: 16 }
       : position === 'top-right'
-      ? { top: 56, right: 16 }
-      : { bottom: 16, left: 16 };
+        ? { top: 56, right: 16 }
+        : { bottom: 16, left: 16 };
 
   return (
     <div

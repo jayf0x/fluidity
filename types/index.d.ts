@@ -69,7 +69,7 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>>;
 // ---------------------------------------------------------------------------
 
 /** Methods exposed by FluidText and FluidImage via a forwarded ref. */
-export interface FluidHandle {
+export interface FluidHandle extends Element {
   /**
    * Fully re-initialises the simulation and reloads the source.
    * Use when you want a clean restart (e.g. after changing the src prop externally).

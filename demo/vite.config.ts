@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
-import Terminal from "vite-plugin-terminal";
-
+import Terminal from 'vite-plugin-terminal';
 
 export default defineConfig(({ command }) => ({
   base: './',

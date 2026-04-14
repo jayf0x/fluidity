@@ -8,23 +8,21 @@ export function TextExample() {
   const store = useCreateStore();
   useFluidControls(ref, store);
 
-  const { text, fontSize, color } = useControls('settings', {
-    text:     { value: 'fluidity' },
-    fontSize: { value: 130, min: 40, max: 220, step: 2 },
-    color:    '#ffffff',
-    reset:    button(() => ref.current?.reset()),
-  }, { store });
+  const props = useControls(
+    'settings',
+    {
+      text: { value: 'fluidity' },
+      fontSize: { value: 130, min: 40, max: 220, step: 2 },
+      color: '#ffffff',
+      reset: button(() => ref.current?.reset()),
+    },
+    { store }
+  );
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <LevaPanel store={store} />
-      <FluidText
-        ref={ref}
-        text={text}
-        fontSize={fontSize}
-        color={color}
-        style={{ width: '100%', height: '100%' }}
-      />
+      <FluidText ref={ref} {...props} style={{ width: '100%', height: '100%' }} />
     </div>
   );
 }

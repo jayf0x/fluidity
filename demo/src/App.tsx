@@ -8,10 +8,10 @@ import { PresetsExample } from './examples/PresetsExample';
 type Tab = 'text' | 'image' | 'splash' | 'split' | 'presets';
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'text',    label: 'text' },
-  { id: 'image',   label: 'image' },
-  { id: 'splash',  label: 'auto-splash' },
-  { id: 'split',   label: 'split view' },
+  { id: 'text', label: 'text' },
+  { id: 'image', label: 'image' },
+  { id: 'splash', label: 'auto-splash' },
+  { id: 'split', label: 'split view' },
   { id: 'presets', label: 'presets' },
 ];
 
@@ -20,22 +20,23 @@ export function App() {
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', background: '#0a0a0a' }}>
-
       {/* ── Nav ─────────────────────────────── */}
-      <nav style={{
-        position: 'absolute',
-        top: 14,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'flex',
-        gap: 4,
-        background: 'rgba(10,10,14,0.85)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: 99,
-        padding: '4px 6px',
-        zIndex: 20,
-      }}>
+      <nav
+        style={{
+          position: 'absolute',
+          top: 14,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          gap: 4,
+          background: 'rgba(10,10,14,0.85)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 99,
+          padding: '4px 6px',
+          zIndex: 20,
+        }}
+      >
         {TABS.map(({ id, label }) => (
           <button
             key={id}
@@ -60,10 +61,10 @@ export function App() {
 
       {/* ── Examples ────────────────────────── */}
       <div style={{ width: '100%', height: '100%' }}>
-        {tab === 'text'    && <TextExample />}
-        {tab === 'image'   && <ImageExample />}
-        {tab === 'splash'  && <SplashExample />}
-        {tab === 'split'   && <SplitExample />}
+        {tab === 'text' && <TextExample />}
+        {tab === 'image' && <ImageExample />}
+        {tab === 'splash' && <SplashExample />}
+        {tab === 'split' && <SplitExample />}
         {tab === 'presets' && <PresetsExample />}
       </div>
 
