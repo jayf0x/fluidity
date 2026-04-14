@@ -69,14 +69,19 @@ export function createTextTextures(
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, width, height);
       const { x, y, drawW, drawH } = computeImageTransform(
-        backgroundBitmap.width, backgroundBitmap.height, width, height, backgroundSize
+        backgroundBitmap.width,
+        backgroundBitmap.height,
+        width,
+        height,
+        backgroundSize
       );
+      // ctx.filter = blur ? `brightness(0.1) blur(50px)` : '';
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
+      // ctx.filter = '';
     } else {
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, width, height);
     }
-    ctx.shadowBlur = blur;
     ctx.shadowColor = fillColor;
     ctx.fillStyle = fillColor;
     ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
@@ -120,10 +125,15 @@ export function createImageTextures(
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, width, height);
   if (backgroundBitmap) {
-    const { x: bx, y: by, drawW: bw, drawH: bh } = computeImageTransform(
-      backgroundBitmap.width, backgroundBitmap.height, width, height, backgroundSize
-    );
+    const {
+      x: bx,
+      y: by,
+      drawW: bw,
+      drawH: bh,
+    } = computeImageTransform(backgroundBitmap.width, backgroundBitmap.height, width, height, backgroundSize);
+    ctx.filter = `brightness(${effect}) blur(8px)`;
     ctx.drawImage(backgroundBitmap, bx, by, bw, bh);
+    ctx.filter = 'none';
   }
   ctx.drawImage(bitmap, x, y, drawW, drawH);
   const backgroundTex = uploadTexture(gl, tCanvas);
@@ -143,7 +153,8 @@ export function createImageTextures(
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = 'white';
   ctx.fillRect(
-    Math.max(0, x), Math.max(0, y),
+    Math.max(0, x),
+    Math.max(0, y),
     Math.min(drawW, width - Math.max(0, x)),
     Math.min(drawH, height - Math.max(0, y))
   );

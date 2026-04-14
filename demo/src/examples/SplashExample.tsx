@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
-import { FluidConfig, type FluidHandle, FluidText } from 'fluidity-js';
+import { type FluidHandle, FluidText } from 'fluidity-js';
 import { useControls, useCreateStore } from 'leva';
 
 import { ExampleWrapper } from '../components/ExampleWrapper';
-import { hexToRgb, useFluidControls } from '../hooks/useFluidControls';
+import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaultConfig: FluidConfigLeva = {
   densityDissipation: 0.98,
@@ -106,8 +106,8 @@ export function SplashExample() {
     { store }
   );
 
-  // Reset state on effect change to prevent coordinate explosions
   useEffect(() => {
+    // Reset state on effect change to prevent coordinate explosions
     stateRef.current = { x: 0.1, y: 0, z: 0, vx: 0, vy: 0 };
   }, [effect]);
 
@@ -118,7 +118,7 @@ export function SplashExample() {
     stateRef.current = engine.step(stateRef.current);
     const { sx, sy, svx, svy } = engine.project(stateRef.current, w, h);
 
-    ref.current?.splat(sx, sy, svx, svy, 2);
+    ref.current?.splat(sx, sy, svx, svy, 1);
   }, [effect]);
 
   useEffect(() => {

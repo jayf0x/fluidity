@@ -4,6 +4,7 @@ import { type FluidHandle, FluidText } from 'fluidity-js';
 import { LevaPanel, button, useControls, useCreateStore } from 'leva';
 
 import { ExampleWrapper } from '../components/ExampleWrapper';
+import { SPLIT_IMAGE_SRC } from '../constants';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 export function TextExample() {
@@ -24,7 +25,7 @@ export function TextExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidText ref={ref} {...props} style={{ width: '100%', height: '100%' }} />
+      <FluidText ref={ref} {...props} backgroundSrc={SPLIT_IMAGE_SRC} />
     </ExampleWrapper>
   );
 }
