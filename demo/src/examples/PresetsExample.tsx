@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { useControls, button, useCreateStore, LevaPanel } from 'leva';
-import { FluidText, DEFAULT_CONFIG, PRESETS, type FluidHandle, type PresetKey } from 'fluidity-js';
-import { useFluidControls, rgbArrayToHex } from '../hooks/useFluidControls';
+
+import { DEFAULT_CONFIG, type FluidHandle, FluidText, PRESETS, type PresetKey } from 'fluidity-js';
+import { LevaPanel, button, useControls, useCreateStore } from 'leva';
+
+import { rgbArrayToHex, useFluidControls } from '../hooks/useFluidControls';
 
 const PRESET_META: Record<PresetKey, { text: string; color: string }> = {
   calm: { text: 'calm', color: '#a8d8ea' },

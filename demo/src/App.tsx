@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { TextExample } from './examples/TextExample';
+
 import { ImageExample } from './examples/ImageExample';
+import { PresetsExample } from './examples/PresetsExample';
 import { SplashExample } from './examples/SplashExample';
 import { SplitExample } from './examples/SplitExample';
-import { PresetsExample } from './examples/PresetsExample';
+import { TextExample } from './examples/TextExample';
 
 type Tab = 'text' | 'image' | 'splash' | 'split' | 'presets';
 

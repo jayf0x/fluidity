@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { useControls, useCreateStore } from 'leva';
 import type { RefObject } from 'react';
-import type { FluidConfig, FluidAlgorithm, FluidHandle } from 'fluidity-js';
+
+import type { FluidAlgorithm, FluidConfig, FluidHandle } from 'fluidity-js';
+import { useControls, useCreateStore } from 'leva';
 
 export type LevaStore = ReturnType<typeof useCreateStore>;
 

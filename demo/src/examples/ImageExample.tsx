@@ -1,8 +1,10 @@
 import { useRef } from 'react';
-import { useControls, button, useCreateStore, LevaPanel } from 'leva';
-import { FluidImage, type FluidHandle } from 'fluidity-js';
-import { useFluidControls } from '../hooks/useFluidControls';
+
+import { type FluidHandle, FluidImage } from 'fluidity-js';
+import { LevaPanel, button, useControls, useCreateStore } from 'leva';
+
 import { IMAGES } from '../constants';
+import { useFluidControls } from '../hooks/useFluidControls';
 
 const IMAGE_OPTIONS = Object.fromEntries(IMAGES.map((img) => [img.label, img.src]));
 

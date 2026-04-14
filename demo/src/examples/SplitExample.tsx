@@ -1,8 +1,10 @@
 import { useRef } from 'react';
-import { useControls, button, useCreateStore, LevaPanel } from 'leva';
-import { FluidText, FluidImage, type FluidHandle, type FluidAlgorithm } from 'fluidity-js';
-import { useFluidConfig } from '../hooks/useFluidConfig';
+
+import { type FluidAlgorithm, type FluidHandle, FluidImage, FluidText } from 'fluidity-js';
+import { LevaPanel, button, useControls, useCreateStore } from 'leva';
+
 import { SPLIT_IMAGE_SRC } from '../constants';
+import { useFluidConfig } from '../hooks/useFluidConfig';
 
 const ALGORITHMS: FluidAlgorithm[] = ['standard', 'glass', 'ink', 'aurora', 'ripple'];
 

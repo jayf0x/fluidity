@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useControls, button, useCreateStore, LevaPanel } from 'leva';
-import { FluidText, type FluidHandle } from 'fluidity-js';
+
+import { type FluidHandle, FluidText } from 'fluidity-js';
+import { LevaPanel, button, useControls, useCreateStore } from 'leva';
+
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const config = {

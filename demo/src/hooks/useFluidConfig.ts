@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import type { RefObject } from 'react';
+
 import type { FluidConfig, FluidHandle } from 'fluidity-js';
 
 export function useFluidConfig(ref: RefObject<FluidHandle | null>, config: Partial<FluidConfig>) {
