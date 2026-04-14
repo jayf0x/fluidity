@@ -1,152 +1,140 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
-import { type FluidHandle, FluidText } from 'fluidity-js';
-import { LevaPanel, button, useControls, useCreateStore } from 'leva';
+import { FluidConfig, type FluidHandle, FluidText } from 'fluidity-js';
+import { useControls, useCreateStore } from 'leva';
 
-import { useFluidControls } from '../hooks/useFluidControls';
+import { ExampleWrapper } from '../components/ExampleWrapper';
+import { hexToRgb, useFluidControls } from '../hooks/useFluidControls';
 
-const config = {
-  speed: 0.012,
-  sigma: 10,
-  rho: 60,
-  beta: 2.667,
+const defaultConfig: FluidConfig = {
+  densityDissipation: 0.98,
+  velocityDissipation: 0.84,
+  pressureIterations: 60,
+  curl: 0.5,
+  splatRadius: 0.01,
+  splatForce: 4.86,
+  refraction: 0.57,
+  specularExp: 0.5,
+  shine: 0.01,
+  warpStrength: 0.0,
+  algorithm: 'ripple',
+  waterColor: hexToRgb('#00f5ff'),
+  glowColor: hexToRgb('#642df7'),
 };
 
-const useResize = (ref: React.RefObject<HTMLDivElement>) => {
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const observer = new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        setWidth(entry.contentRect.width);
-        setHeight(entry.contentRect.height);
-      }
-    });
-
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return [width, height];
-};
-
-// ---------------------------------------------------------------------------
-// Lorenz attractor generator
-// Yields { x, y, z, dx, dy, dz } — position + instantaneous derivative.
-// The caller drives the clock by sending dt via generator.next(dt).
-// We expose dx/dy so callers can pass them as fluid velocity without recomputing.
-// ---------------------------------------------------------------------------
-interface LorenzState {
+interface State {
   x: number;
   y: number;
   z: number;
-  dx: number;
-  dy: number;
-  dz: number;
+  vx: number;
+  vy: number;
 }
 
-function* createLorenzGenerator(initialPos: {
-  x: number;
-  y: number;
-  z: number;
-}): Generator<LorenzState, never, number> {
-  let { x, y, z } = initialPos;
-
-  while (true) {
-    const dx = config.sigma * (y - x);
-    const dy = x * (config.rho - z) - y;
-    const dz = x * y - config.beta * z;
-
-    const dt: number = yield { x, y, z, dx, dy, dz };
-
-    x += dx * dt;
-    y += dy * dt;
-    z += dz * dt;
+const allEffects: Record<
+  string,
+  {
+    step: (p: State) => State;
+    project: (p: State, w: number, h: number) => { sx: number; sy: number; svx: number; svy: number };
   }
-}
+> = {
+  Lorenz: {
+    step: (p) => {
+      const dt = 0.012,
+        s = 10,
+        r = 28,
+        b = 2.667;
+      const dx = s * (p.y - p.x);
+      const dy = p.x * (r - p.z) - p.y;
+      const dz = p.x * p.y - b * p.z;
+      return { x: p.x + dx * dt, y: p.y + dy * dt, z: p.z + dz * dt, vx: dx, vy: -dz };
+    },
+    project: (p, w, h) => ({
+      sx: w / 2 + p.x * (h / 70),
+      sy: h / 2 + 200 - p.z * (h / 70),
+      svx: p.vx * 0.5,
+      svy: p.vy * 0.5,
+    }),
+  },
+  Rossler: {
+    step: (p) => {
+      const dt = 0.04,
+        a = 0.2,
+        b = 0.2,
+        c = 5.7;
+      const dx = -p.y - p.z;
+      const dy = p.x + a * p.y;
+      const dz = b + p.z * (p.x - c);
+      return { x: p.x + dx * dt, y: p.y + dy * dt, z: p.z + dz * dt, vx: dx, vy: dy };
+    },
+    project: (p, w, h) => ({
+      sx: w / 2 + p.x * (h / 60),
+      sy: h / 2 - p.y * (h / 60),
+      svx: p.vx * 2,
+      svy: p.vy * 2,
+    }),
+  },
+  Spiral: {
+    step: (p) => {
+      const theta = p.z + 0.05;
+      const r = 180 + Math.sin(theta * 2) * 40;
+      const tx = Math.cos(theta) * r;
+      const ty = Math.sin(theta) * r;
+      return { x: tx, y: ty, z: theta, vx: tx - p.x, vy: ty - p.y };
+    },
+    project: (p, w, h) => ({
+      sx: w / 2 + p.x,
+      sy: h / 2 + p.y,
+      svx: p.vx * 0.8,
+      svy: p.vy * 0.8,
+    }),
+  },
+};
 
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
+const effectNames = Object.keys(allEffects);
 
 export function SplashExample() {
   const ref = useRef<FluidHandle>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const lorenzRef = useRef(createLorenzGenerator({ x: 0.1, y: 0, z: 0 }));
-
+  const stateRef = useRef<State>({ x: 0.1, y: 0, z: 0, vx: 0, vy: 0 });
   const store = useCreateStore();
-  const [containerWidth, containerHeight] = useResize(containerRef);
 
-  useFluidControls(ref, store);
+  useFluidControls(ref, store, defaultConfig);
 
-  const params = useControls(
-    'Actions',
+  const { effect, text } = useControls(
     {
-      text: { value: 'fluidity' },
+      effect: { value: effectNames[0], options: effectNames },
+      text: 'fluidity',
     },
     { store }
   );
 
-  // Prime on mount
+  // Reset state on effect change to prevent coordinate explosions
   useEffect(() => {
-    lorenzRef.current.next(0);
-  }, []);
+    stateRef.current = { x: 0.1, y: 0, z: 0, vx: 0, vy: 0 };
+  }, [effect]);
 
   const animate = useCallback(() => {
-    const scale = containerHeight / 60;
-    const cx = containerWidth / 2;
-    // Shift so the butterfly sits vertically centred (Z ranges ~0–50 for rho=28)
-    const cy = containerHeight / 2 + config.rho * scale * 0.5;
+    const { innerWidth: w, innerHeight: h } = window;
+    const engine = allEffects[effect];
 
-    const { value } = lorenzRef.current.next(config.speed);
-    if (!value) return;
+    stateRef.current = engine.step(stateRef.current);
+    const { sx, sy, svx, svy } = engine.project(stateRef.current, w, h);
 
-    // Butterfly projection: X → screenX, Z → screenY (inverted)
-    const sx = cx + value.x * scale;
-    const sy = cy - value.z * scale;
-
-    // Pass Lorenz derivatives as velocity — gives physically correct
-    // "flow direction" trails matching the attractor's own momentum.
-    // dx/dz are in attractor units; scale them to pixel-space.
-    const vx = value.dx * scale * config.speed;
-    const vy = -value.dz * scale * config.speed; // Z inverted above
-
-    ref.current?.splat(sx, sy, vx, vy, 2);
-  }, [containerWidth, containerHeight, config]);
+    ref.current?.splat(sx, sy, svx, svy, 2);
+  }, [effect]);
 
   useEffect(() => {
     let frameId: number;
-
     const loop = () => {
       animate();
       frameId = requestAnimationFrame(loop);
     };
-
     frameId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(frameId);
-  }, [config, containerWidth, containerHeight]);
+  }, [animate]);
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: '100vh', position: 'relative', background: '#020202' }}>
-      <LevaPanel store={store} />
-      <FluidText
-        ref={ref}
-        {...params}
-        color="#ffffff"
-        isMouseEnabled={true}
-        config={{
-          shine: 0.12,
-          refraction: 0.4,
-          curl: 0.2,
-          densityDissipation: 0.98,
-          velocityDissipation: 0.97,
-          glowColor: [0.1, 0.5, 1.0],
-        }}
-        style={{ width: '100%', height: '100%' }}
-      />
-    </div>
+    <ExampleWrapper store={store}>
+      <FluidText ref={ref} text={text} />
+    </ExampleWrapper>
   );
 }

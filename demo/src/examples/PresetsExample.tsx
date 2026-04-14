@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 
 import { DEFAULT_CONFIG, type FluidHandle, FluidText, PRESETS, type PresetKey } from 'fluidity-js';
-import { LevaPanel, button, useControls, useCreateStore } from 'leva';
+import { button, useControls, useCreateStore } from 'leva';
 
+import { ExampleWrapper } from '../components/ExampleWrapper';
 import { rgbArrayToHex, useFluidControls } from '../hooks/useFluidControls';
 
 const PRESET_META: Record<PresetKey, { text: string; color: string }> = {
@@ -52,8 +53,7 @@ export function PresetsExample() {
   const meta = PRESET_META[preset as PresetKey];
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <LevaPanel store={store} />
+    <ExampleWrapper store={store}>
       <FluidText
         ref={ref}
         text={meta.text}
@@ -61,6 +61,6 @@ export function PresetsExample() {
         color={meta.color}
         style={{ width: '100%', height: '100%' }}
       />
-    </div>
+    </ExampleWrapper>
   );
 }

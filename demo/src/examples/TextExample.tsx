@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import { type FluidHandle, FluidText } from 'fluidity-js';
 import { LevaPanel, button, useControls, useCreateStore } from 'leva';
 
+import { ExampleWrapper } from '../components/ExampleWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 export function TextExample() {
@@ -22,9 +23,8 @@ export function TextExample() {
   );
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <LevaPanel store={store} />
+    <ExampleWrapper store={store}>
       <FluidText ref={ref} {...props} style={{ width: '100%', height: '100%' }} />
-    </div>
+    </ExampleWrapper>
   );
 }

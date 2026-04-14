@@ -1,8 +1,9 @@
 import { useRef } from 'react';
 
 import { type FluidHandle, FluidImage } from 'fluidity-js';
-import { LevaPanel, button, useControls, useCreateStore } from 'leva';
+import { button, useControls, useCreateStore } from 'leva';
 
+import { ExampleWrapper } from '../components/ExampleWrapper';
 import { IMAGES } from '../constants';
 import { useFluidControls } from '../hooks/useFluidControls';
 
@@ -26,9 +27,8 @@ export function ImageExample() {
   );
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <LevaPanel store={store} />
+    <ExampleWrapper store={store}>
       <FluidImage ref={ref} src={src} effect={effect} imageSize={imageSize} style={{ width: '100%', height: '100%' }} />
-    </div>
+    </ExampleWrapper>
   );
 }

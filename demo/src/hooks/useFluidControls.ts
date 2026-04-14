@@ -4,14 +4,16 @@ import type { RefObject } from 'react';
 import type { FluidAlgorithm, FluidConfig, FluidHandle } from 'fluidity-js';
 import { useControls, useCreateStore } from 'leva';
 
-export type LevaStore = ReturnType<typeof useCreateStore>;
+type LevaStore = ReturnType<typeof useCreateStore>;
 
-export function hexToRgb(hex: string): [number, number, number] {
+type RGB = [number, number, number];
+
+export function hexToRgb(hex: string): RGB {
   const n = parseInt(hex.replace('#', ''), 16);
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
 
-export function rgbArrayToHex([r, g, b]: [number, number, number]): string {
+export function rgbArrayToHex([r, g, b]: RGB): string {
   const h = (v: number) =>
     Math.round(v * 255)
       .toString(16)
@@ -19,8 +21,6 @@ export function rgbArrayToHex([r, g, b]: [number, number, number]): string {
   return `#${h(r)}${h(g)}${h(b)}`;
 }
 
-// TODO: strict typing eg.  Record<keyof FluidConfig, ... >
-// TODO: typing should be strict to include the shared props from both text and image
 const FLUID_CONFIG_SCHEMA = () => ({
   densityDissipation: { value: 0.992, min: 0.9, max: 1.0, step: 0.001 },
   velocityDissipation: { value: 0.93, min: 0.7, max: 1.0, step: 0.001 },
@@ -31,18 +31,23 @@ const FLUID_CONFIG_SCHEMA = () => ({
   refraction: { value: 0.25, min: 0, max: 1.0, step: 0.01 },
   specularExp: { value: 1.01, min: 0.1, max: 10, step: 0.1 },
   shine: { value: 0.01, min: 0, max: 0.15, step: 0.001 },
+  warpStrength: { value: 0.015, min: 0.001, max: 0.1, step: 0.001 },
   waterColor: '#000000',
   glowColor: '#b3d9ff',
   algorithm: { value: 'standard', options: ['standard', 'glass', 'ink', 'aurora', 'ripple'] },
-  warpStrength: { value: 0.015, min: 0.001, max: 0.1, step: 0.001 },
+  // preset: { value: 'standard', options: ['standard', 'glass', 'ink', 'aurora', 'ripple'] },
 });
 
 /**
  * Registers the shared "fluid config" Leva panel and syncs values → simulation.
- * Pass the page's isolated `store` (from `useCreateStore()`) for tab isolation.
+ * Pass the page's isolated `store` (from `useCreateStore()`) for tab isolation.bu
  * Returns `set` to programmatically update controls (e.g. when a preset is applied).
  */
-export function useFluidControls(ref: RefObject<FluidHandle | null>, store: LevaStore) {
+export function useFluidControls(
+  ref: RefObject<FluidHandle | null>,
+  store: LevaStore,
+  config: Partial<FluidConfig> = {}
+) {
   const [
     {
       waterColor,
@@ -77,6 +82,7 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
       waterColor: hexToRgb(waterColor),
       glowColor: hexToRgb(glowColor),
       algorithm: algorithm as FluidAlgorithm,
+      ...config,
     } satisfies Partial<FluidConfig>);
   }, [
     ref,
