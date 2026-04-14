@@ -6,17 +6,16 @@ import { useControls, useCreateStore } from 'leva';
 import { ExampleWrapper } from '../components/ExampleWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
-const defaultConfig: FluidConfigLeva = {
+const defaultConfig: Partial<FluidConfigLeva> = {
   densityDissipation: 0.98,
   velocityDissipation: 0.84,
-  pressureIterations: 60,
-  curl: 0.0001,
-  splatRadius: 0.01,
+  curl: 0.0,
+  splatRadius: 0.001,
   splatForce: 4.86,
   refraction: 0.57,
   specularExp: 0.5,
-  shine: 0.01,
-  warpStrength: 0.0,
+  shine: 0.001,
+  warpStrength: 0.01,
   algorithm: 'ripple',
   waterColor: '#00f5ff',
   glowColor: '#642df7',
@@ -41,7 +40,7 @@ const allEffects: Record<
     step: (p) => {
       const dt = 0.012,
         s = 10,
-        r = 28,
+        r = 18,
         b = 2.667;
       const dx = s * (p.y - p.x);
       const dy = p.x * (r - p.z) - p.y;

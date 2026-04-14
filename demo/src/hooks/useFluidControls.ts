@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import type { RefObject } from 'react';
 
-import type { FluidAlgorithm, FluidConfig, FluidHandle } from 'fluidity-js';
+import type { FluidAlgorithm, FluidConfig, FluidHandle, PresetKey } from 'fluidity-js';
 import { useControls, useCreateStore } from 'leva';
 
 type LevaStore = ReturnType<typeof useCreateStore>;
@@ -35,7 +35,7 @@ export function useFluidControls(
     () => ({
       densityDissipation: 0.992,
       velocityDissipation: 0.93,
-      pressureIterations: 25,
+      pressureIterations: 1,
       curl: 0.0001,
       splatRadius: 0.004,
       splatForce: 0.91,
@@ -46,6 +46,7 @@ export function useFluidControls(
       waterColor: '#000000',
       glowColor: '#b3d9ff',
       algorithm: 'standard',
+      preset: undefined,
       ...customDefaults,
     }),
     []
@@ -65,7 +66,11 @@ export function useFluidControls(
       warpStrength: { value: values.warpStrength, min: 0.001, max: 0.1, step: 0.001 },
       waterColor: values.waterColor,
       glowColor: values.glowColor,
-      algorithm: { value: values.algorithm, options: ['standard', 'glass', 'ink', 'aurora', 'ripple'] },
+      algorithm: {
+        value: values.algorithm,
+        options: ['standard', 'glass', 'ink', 'aurora', 'ripple'] satisfies FluidAlgorithm[],
+      },
+      preset: { value: values.algorithm, options: ['calm', 'neon', 'smoke', 'storm', 'wave'] satisfies PresetKey[] },
     }),
     []
   );
@@ -76,6 +81,7 @@ export function useFluidControls(
   useEffect(() => {
     ref.current?.updateConfig({
       ...other,
+      algorithm: other.algorithm as FluidAlgorithm,
       waterColor: hexToRgb(waterColor),
       glowColor: hexToRgb(glowColor),
     } satisfies Partial<FluidConfig>);

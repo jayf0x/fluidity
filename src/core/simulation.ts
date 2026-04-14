@@ -383,6 +383,7 @@ export class FluidSimulation {
 
     // 5. Project (divergence → pressure solve → gradient subtract)
     divergence.bind();
+    gl.uniform2f(divergence.uniforms.texelSize, 1 / W, 1 / H);
     gl.uniform1i(divergence.uniforms.uVelocity, 0);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#velocity!.read.tex);
     gl.uniform1i(divergence.uniforms.uObstacle, 1);
@@ -390,6 +391,7 @@ export class FluidSimulation {
     blit(this.#divergence!.fbo);
 
     pressure.bind();
+    gl.uniform2f(pressure.uniforms.texelSize, 1 / W, 1 / H);
     gl.uniform1i(pressure.uniforms.uDivergence, 0);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#divergence!.tex);
     gl.uniform1i(pressure.uniforms.uObstacle, 1);
@@ -401,6 +403,7 @@ export class FluidSimulation {
     }
 
     gradientSubtract.bind();
+    gl.uniform2f(gradientSubtract.uniforms.texelSize, 1 / W, 1 / H);
     gl.uniform1i(gradientSubtract.uniforms.uPressure, 0);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.#pressure!.read.tex);
     gl.uniform1i(gradientSubtract.uniforms.uVelocity, 1);
