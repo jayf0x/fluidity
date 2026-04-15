@@ -8,3 +8,7 @@ coverage/
 .claude
 
 app/ # test app
+
+
+
+!demo/dist
