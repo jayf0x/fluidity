@@ -44,7 +44,13 @@ export function PresetsExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidText ref={ref} text={preset} fontSize={150} color={mappedPresetColor[preset]} />
+      <FluidText
+        ref={ref}
+        text={preset}
+        // preset={preset}
+        fontSize={150}
+        color={mappedPresetColor[preset]}
+      />
     </ExampleWrapper>
   );
 }
