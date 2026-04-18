@@ -1,6 +1,6 @@
 {
   "name": "@jayf0x/fluidity-js",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "High-performance WebGL fluid simulation for React — text and image effects",
   "type": "module",
   "module": "./dist/fluidity-js.js",
