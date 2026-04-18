@@ -1,6 +1,6 @@
 {
-  "name": "fluidity-js",
-  "version": "0.1.0",
+  "name": "@jayf0x/fluidity-js",
+  "version": "0.1.2",
   "description": "High-performance WebGL fluid simulation for React — text and image effects",
   "type": "module",
   "module": "./dist/fluidity-js.js",
@@ -16,6 +16,9 @@
     "types"
   ],
   "sideEffects": false,
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
@@ -25,7 +28,8 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "deploy:demo": "bash scripts/deploy-demo.sh"
+    "deploy:demo": "bash scripts/deploy-demo.sh",
+    "publish": "bash scripts/publish-gh-pkg.sh"
   },
   "keywords": [
     "webgl",
