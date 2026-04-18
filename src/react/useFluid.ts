@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
-import { FluidController } from '../fluid-controller.js';
-import type { FluidConfig } from '../../types/index.js';
+import { FluidController } from '../fluid-controller';
+import type { FluidConfig } from '../../types/index';
 
 /**
  * Manages the FluidController lifecycle.

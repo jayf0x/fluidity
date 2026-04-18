@@ -1,10 +1,10 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import type { FluidHandle, FluidImageProps } from '../../types/index.js';
-import { mergeConfig, DEFAULT_PROPS } from '../core/config.js';
-import { loadImageBitmap } from '../core/textures.js';
-import { useFluid } from './useFluid.js';
+import type { FluidHandle, FluidImageProps } from '../../types/index';
+import { mergeConfig, DEFAULT_PROPS } from '../core/config';
+import { loadImageBitmap } from '../core/textures';
+import { useFluid } from './useFluid';
 
 export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function FluidImage(
   {
@@ -55,12 +55,12 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     controllerRef.current?.setImageSource(src, effect, imageSize);
   }, [src, effect, imageSize]);
 
-  // Sync algorithm prop → updateConfig for reactive changes
+  // Sync preset/algorithm → updateConfig for reactive changes
   useEffect(() => {
-    if (algorithm !== undefined) {
-      controllerRef.current?.updateConfig({ algorithm });
-    }
-  }, [algorithm]);
+    controllerRef.current?.updateConfig(
+      mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset)
+    );
+  }, [preset, algorithm]);
 
   // Load + forward background image to the simulation
   useEffect(() => {

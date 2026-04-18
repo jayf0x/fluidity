@@ -21,7 +21,7 @@
  *   error           { message }
  */
 
-import { FluidSimulation } from '../core/simulation.js';
+import { FluidSimulation } from '../core/simulation';
 
 let sim: FluidSimulation | null = null;
 

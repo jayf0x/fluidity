@@ -8,7 +8,7 @@ import {
   curlShader,
   vorticityShader,
   displayShader,
-} from './shaders.js';
+} from './shaders';
 
 type GL = WebGLRenderingContext | WebGL2RenderingContext;
 

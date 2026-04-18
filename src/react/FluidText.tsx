@@ -1,10 +1,10 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import type { FluidHandle, FluidTextProps } from '../../types/index.js';
-import { DEFAULT_PROPS, mergeConfig } from '../core/config.js';
-import { loadImageBitmap } from '../core/textures.js';
-import { useFluid } from './useFluid.js';
+import type { FluidHandle, FluidTextProps } from '../../types/index';
+import { DEFAULT_PROPS, mergeConfig } from '../core/config';
+import { loadImageBitmap } from '../core/textures';
+import { useFluid } from './useFluid';
 
 export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidText(
   {
@@ -56,12 +56,12 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight });
   }, [text, fontSize, color, fontFamily, fontWeight]);
 
-  // Sync algorithm prop → updateConfig for reactive changes
+  // Sync preset/algorithm → updateConfig for reactive changes
   useEffect(() => {
-    if (algorithm !== undefined) {
-      controllerRef.current?.updateConfig({ algorithm });
-    }
-  }, [algorithm]);
+    controllerRef.current?.updateConfig(
+      mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset)
+    );
+  }, [preset, algorithm]);
 
   // Load + forward background image to the simulation
   useEffect(() => {

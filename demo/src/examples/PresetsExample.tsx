@@ -36,7 +36,7 @@ export function PresetsExample() {
     const selected = PRESETS[preset];
     set({
       ...DEFAULT_CONFIG,
-      ...PRESETS,
+      ...selected,
       waterColor: rgbArrayToHex((selected.waterColor ?? DEFAULT_CONFIG.waterColor) as RGB),
       glowColor: rgbArrayToHex((selected.glowColor ?? DEFAULT_CONFIG.glowColor) as RGB),
     });
@@ -47,7 +47,7 @@ export function PresetsExample() {
       <FluidText
         ref={ref}
         text={preset}
-        // preset={preset}
+        preset={preset}
         fontSize={150}
         color={mappedPresetColor[preset]}
       />

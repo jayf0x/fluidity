@@ -4,18 +4,6 @@ Try refine the edges of text to not be pixelated. Possibly project on larger can
 
 Possibly unrelated: there is a thin ~1px black border around text.
 
-## BUG/CORE, DEMO/BUG: preset should be default prop
-
-Make that preset can always be passed and is an option selectable in the `useFluidControls`.
-
-Currently in `demo/src/examples/PresetsExample.tsx` we have to manually set the preset, but this should also work with a prop.
-Currently this errors when preset prop is passed to the component.
-
-ORder of props that should take effect:
-
-- preset sets a base
-- regular props overwrite base
-
 ## BUG/CORE: Splash is still black with red background
 
 Setting the background of the image to 'red' via `backgroundColor` and then moving the cursor, still adds blackness to the canvas.
@@ -26,6 +14,6 @@ Especially visible when setting the `algorithm` to "aurora" or "ripple", the cur
 Expected:
 When the background is red, and the water and glow colors are set to red, I might expect some darkness due to light refraction, but it's currently too black.
 
-## BUG/UI: change current rending to has router
+## BUG/DEMO: change current rending to has router
 
-Change current custom routing logic to a simple hash router.
+Change current custom routing logic to a simple hash router or use Tanstack router.

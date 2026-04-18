@@ -1,4 +1,4 @@
-import type { FluidAlgorithm, FluidConfig, PresetKey } from '../../types/index.js';
+import type { FluidAlgorithm, FluidConfig, PresetKey } from '../../types/index';
 
 export const DEFAULT_CONFIG: FluidConfig = {
   densityDissipation: 0.992,

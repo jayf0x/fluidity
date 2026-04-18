@@ -1,7 +1,7 @@
-import type { FluidConfig } from '../types/index.js';
-import { DEFAULT_PROPS } from './core/config.js';
-import { FluidSimulation } from './core/simulation.js';
-import type { TextSourceOpts } from './core/textures.js';
+import type { FluidConfig } from '../types/index';
+import { DEFAULT_PROPS } from './core/config';
+import { FluidSimulation } from './core/simulation';
+import type { TextSourceOpts } from './core/textures';
 import FluidWorker from './worker/index.js?worker&inline';
 
 const WORKER_SUPPORTED = typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined';
