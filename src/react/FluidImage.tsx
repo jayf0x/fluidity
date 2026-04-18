@@ -2,25 +2,25 @@ import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
 import type { FluidHandle, FluidImageProps } from '../../types/index.js';
-import { mergeConfig } from '../core/config.js';
+import { mergeConfig, DEFAULT_PROPS } from '../core/config.js';
 import { loadImageBitmap } from '../core/textures.js';
 import { useFluid } from './useFluid.js';
 
 export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function FluidImage(
   {
     src,
-    effect = 0.4,
-    imageSize = 'cover',
+    effect = DEFAULT_PROPS.effect,
+    imageSize = DEFAULT_PROPS.imageSize,
     className,
     style,
     config,
     preset,
     algorithm,
-    backgroundColor = '#0a0a0a',
+    backgroundColor = DEFAULT_PROPS.backgroundColor,
     backgroundSrc,
-    backgroundSize = 'cover',
-    isMouseEnabled = true,
-    isWorkerEnabled = true,
+    backgroundSize = DEFAULT_PROPS.backgroundSize,
+    isMouseEnabled = DEFAULT_PROPS.isMouseEnabled,
+    isWorkerEnabled = DEFAULT_PROPS.isWorkerEnabled,
   },
   ref
 ) {

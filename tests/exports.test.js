@@ -77,7 +77,7 @@ describe('package exports', () => {
     const expected = new Set([
       'FluidText', 'FluidImage', 'useFluid',
       'FluidController', 'FluidSimulation',
-      'DEFAULT_CONFIG', 'PRESETS', 'mergeConfig', 'loadImageBitmap',
+      'DEFAULT_CONFIG', 'DEFAULT_PROPS', 'PRESETS', 'mergeConfig', 'loadImageBitmap',
     ]);
     for (const key of Object.keys(pkg)) {
       expect(expected.has(key), `Unexpected export: "${key}"`).toBe(true);

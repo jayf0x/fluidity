@@ -1,4 +1,5 @@
 import type { FluidConfig } from '../types/index.js';
+import { DEFAULT_PROPS } from './core/config.js';
 import { FluidSimulation } from './core/simulation.js';
 import type { TextSourceOpts } from './core/textures.js';
 import FluidWorker from './worker/index.js?worker&inline';
@@ -37,7 +38,7 @@ export class FluidController {
     }
   }
 
-  setImageSource(src: string, effect = 0, size: string | number = 'cover'): void {
+  setImageSource(src: string, effect = DEFAULT_PROPS.effect, size: string | number = DEFAULT_PROPS.imageSize): void {
     if (this.#worker) {
       this.#worker.postMessage({ type: 'setImageSource', src, effect, size });
     } else {

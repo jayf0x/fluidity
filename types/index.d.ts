@@ -69,7 +69,7 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>>;
 // ---------------------------------------------------------------------------
 
 /** Methods exposed by FluidText and FluidImage via a forwarded ref. */
-export interface FluidHandle extends Element {
+export interface FluidHandle {
   /**
    * Fully re-initialises the simulation and reloads the source.
    * Use when you want a clean restart (e.g. after changing the src prop externally).
@@ -275,6 +275,19 @@ export class FluidController {
 // ---------------------------------------------------------------------------
 
 export const DEFAULT_CONFIG: FluidConfig;
+
+export const DEFAULT_PROPS: {
+  readonly effect: number;
+  readonly imageSize: string | number;
+  readonly fontSize: number;
+  readonly color: string;
+  readonly fontFamily: string;
+  readonly fontWeight: string | number;
+  readonly backgroundColor: string;
+  readonly backgroundSize: string | number;
+  readonly isMouseEnabled: boolean;
+  readonly isWorkerEnabled: boolean;
+};
 
 /** Merges user config with defaults, optionally layering a named preset. */
 export function mergeConfig(user?: Partial<FluidConfig>, preset?: PresetKey): FluidConfig;

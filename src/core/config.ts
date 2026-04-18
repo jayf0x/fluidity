@@ -16,6 +16,22 @@ export const DEFAULT_CONFIG: FluidConfig = {
   warpStrength: 0.015,
 };
 
+export const DEFAULT_PROPS = {
+  // FluidImage
+  effect: 0,
+  imageSize: 'cover' as string | number,
+  // FluidText
+  fontSize: 100,
+  color: '#ffffff',
+  fontFamily: 'sans-serif',
+  fontWeight: 900 as string | number,
+  // Shared
+  backgroundColor: '#0a0a0a',
+  backgroundSize: 'cover' as string | number,
+  isMouseEnabled: true,
+  isWorkerEnabled: true,
+} as const;
+
 export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
   calm: {
     densityDissipation: 0.999,

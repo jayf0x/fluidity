@@ -1,27 +1,28 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
-import { useFluid } from './useFluid.js';
-import { mergeConfig } from '../core/config.js';
+
+import type { FluidHandle, FluidTextProps } from '../../types/index.js';
+import { DEFAULT_PROPS, mergeConfig } from '../core/config.js';
 import { loadImageBitmap } from '../core/textures.js';
-import type { FluidTextProps, FluidHandle } from '../../types/index.js';
+import { useFluid } from './useFluid.js';
 
 export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidText(
   {
-    text = '',
-    fontSize = 100,
-    color = '#ffffff',
-    fontFamily = 'sans-serif',
-    fontWeight = 900,
+    text,
+    fontSize = DEFAULT_PROPS.fontSize,
+    color = DEFAULT_PROPS.color,
+    fontFamily = DEFAULT_PROPS.fontFamily,
+    fontWeight = DEFAULT_PROPS.fontWeight,
     className,
     style,
     config,
     preset,
     algorithm,
-    backgroundColor = '#0a0a0a',
+    backgroundColor = DEFAULT_PROPS.backgroundColor,
     backgroundSrc,
-    backgroundSize = 'cover',
-    isMouseEnabled = true,
-    isWorkerEnabled = true,
+    backgroundSize = DEFAULT_PROPS.backgroundSize,
+    isMouseEnabled = DEFAULT_PROPS.isMouseEnabled,
+    isWorkerEnabled = DEFAULT_PROPS.isWorkerEnabled,
   },
   ref
 ) {
@@ -71,11 +72,16 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     let cancelled = false;
     loadImageBitmap(backgroundSrc)
       .then((bitmap) => {
-        if (cancelled) { bitmap.close(); return; }
+        if (cancelled) {
+          bitmap.close();
+          return;
+        }
         controllerRef.current?.setBackground(bitmap, backgroundSize);
       })
       .catch((err) => console.error('[fluidity-js] backgroundSrc load failed:', err));
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [backgroundSrc, backgroundSize]);
 
   // Built-in pointer tracking
@@ -108,11 +114,16 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     <div
       ref={containerRef}
       className={className}
-      style={{
-        position: 'relative', display: 'block', width: '100%', height: '100%',
-        background: backgroundColor,
-        ...style,
-      } as CSSProperties}
+      style={
+        {
+          position: 'relative',
+          display: 'block',
+          width: '100%',
+          height: '100%',
+          background: backgroundColor,
+          ...style,
+        } as CSSProperties
+      }
     />
   );
 });
