@@ -13,12 +13,10 @@
   "types": "./types/index.d.ts",
   "files": [
     "dist",
-    "types"
+    "types",
+    "README.md"
   ],
   "sideEffects": false,
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
@@ -29,7 +27,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "deploy:demo": "bash scripts/deploy-demo.sh",
-    "publish": "bash scripts/publish-gh-pkg.sh"
+    "publish:npm": "bash ./scripts/publish-npm.sh"
   },
   "keywords": [
     "webgl",

@@ -1,12 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-cd demo
-bun run build
+export PATH="$HOME/.nvm/versions/node/v20.19.6/bin:$PATH"
 
-cd $REPO_ROOT
+cd "$REPO_ROOT/demo"
+pnpm build
+npx gh-pages -d dist --dotfiles
 
-git add .
-git commit -m "Releasing demo site"
-git push origin main
+echo ""
+echo "✓ Demo deployed to gh-pages branch → https://jayf0x.github.io/fluidity"
