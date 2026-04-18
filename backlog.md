@@ -5,6 +5,13 @@ In both files there are ts errors:
 - src/react/FluidImage.tsx
 - src/react/FluidText.tsx
 
+Typing needs to be stricter.
+
+# BUG/CORE: Default Values
+
+Default values (eg. effect=0 vs effect=0.4 where it should be 0 always) should be defined once and be reused.
+Create object(s) in `src/core/config.ts`.
+
 ## BUG/CORE: Text edges are pixelated
 
 Try refine the edges of text to not be pixelated. Possibly project on larger canvas first and then downscale.
