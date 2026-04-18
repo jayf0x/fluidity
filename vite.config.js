@@ -1,17 +1,33 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import fs from 'fs';
+
+const __dir = new URL('.', import.meta.url).pathname;
+
+function copyTypes() {
+  return {
+    name: 'copy-types',
+    closeBundle() {
+      fs.copyFileSync(
+        resolve(__dir, 'types/index.d.ts'),
+        resolve(__dir, 'dist/index.d.ts')
+      );
+    },
+  };
+}
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), copyTypes()],
 
   build: {
     lib: {
-      entry: resolve(new URL('.', import.meta.url).pathname, 'src/index.ts'),
+      entry: resolve(__dir, 'src/index.ts'),
       name: 'FluidityJS',
-      fileName: 'fluidity-js',
-      formats: ['es']
+      fileName: 'index',
+      formats: ['es'],
     },
+    minify: 'esbuild',
     rollupOptions: {
       external: ['react', 'react/jsx-runtime', 'react-dom'],
       output: {
@@ -25,6 +41,9 @@ export default defineConfig({
     sourcemap: false,
   },
 
+  esbuild: {
+    legalComments: 'none',
+  },
 
   worker: {
     format: 'es',

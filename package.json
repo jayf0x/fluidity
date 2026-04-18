@@ -3,17 +3,16 @@
   "version": "0.1.3",
   "description": "High-performance WebGL fluid simulation for React — text and image effects",
   "type": "module",
-  "module": "./dist/fluidity-js.js",
+  "module": "./dist/index.js",
   "exports": {
     ".": {
-      "import": "./dist/fluidity-js.js",
-      "types": "./types/index.d.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
-  "types": "./types/index.d.ts",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "types",
     "README.md"
   ],
   "sideEffects": false,
