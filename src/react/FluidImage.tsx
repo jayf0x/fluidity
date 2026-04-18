@@ -9,7 +9,7 @@ import { useFluid } from './useFluid.js';
 export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function FluidImage(
   {
     src,
-    effect = 0.0,
+    effect = 0.4,
     imageSize = 'cover',
     className,
     style,
