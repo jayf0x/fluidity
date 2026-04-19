@@ -72,16 +72,33 @@ interface FluidHandle {
 
 `splat()` writes directly to velocity+density FBOs. Safe N×/frame. Use for programmatic paths (attractors, particles). `updateLocation` goes through mouse-state machine (one splat per sim step, last-write-wins).
 
+`FluidHandle` is a plain interface (no `extends Element`). `useImperativeHandle` returns the 4 methods above; extending a DOM type would make the factory un-satisfiable.
+
 ## Config (DEFAULT_CONFIG)
 
 ```ts
 {
-  densityDissipation: 0.992, velocityDissipation: 0.93, pressureIterations: 25,
+  densityDissipation: 0.992, velocityDissipation: 0.93, pressureIterations: 1,
   curl: 0.0001, splatRadius: 0.004, splatForce: 0.91,
   refraction: 0.25, specularExp: 1.01, shine: 0.01,
   waterColor: [0,0,0], glowColor: [0.7,0.85,1.0],
   algorithm: 'standard',   // 'standard'|'glass'|'ink'|'aurora'|'ripple'
   warpStrength: 0.015,
+}
+```
+
+## Component defaults (DEFAULT_PROPS in config.ts)
+
+Centralised in `src/core/config.ts` and re-exported from `src/index.ts`. All component prop defaults live here so they are defined once and referenced by the components, FluidController, and the public type declaration.
+
+```ts
+DEFAULT_PROPS = {
+  // FluidImage
+  effect: 0, imageSize: 'cover',
+  // FluidText
+  fontSize: 100, color: '#ffffff', fontFamily: 'sans-serif', fontWeight: 900, textQuality: 2,
+  // Shared
+  backgroundColor: '#0a0a0a', backgroundSize: 'cover', isMouseEnabled: true, isWorkerEnabled: true,
 }
 ```
 
@@ -129,13 +146,27 @@ WebGL context: `alpha: true`. `gl.clearColor(0,0,0,0)`. Display shader outputs p
 - Text mode: `coverageTex === obstacleTex` (same ref, guard double-delete in `#disposeTextures`)
 - Image mode: separate white-rect coverage texture
 
+**Background colour contamination fix (shaders.ts):** In non-coverage areas the `uBackground` texture is empty black canvas. All background samples are masked by coverage: `mix(uWaterColor, texture2D(uBackground, uv).rgb, coverage)`. This means fluid in transparent areas uses `uWaterColor` as its base instead of black, so the CSS `backgroundColor` bleeds through correctly regardless of `waterColor` or algorithm.
+
+### Text quality (textQuality prop)
+
+`FluidText` accepts `textQuality: number` (default `2`). `createTextTextures` renders the 2D canvas at `width × textQuality` / `height × textQuality` with font size scaled proportionally, then uploads that larger canvas to WebGL. GPU bilinear filtering downsamples it at display time → antialiased edges. Set to `1` for original behaviour. Stored in `TextSourceOpts` so it travels through the worker message unchanged.
+
+### Preset reactivity
+
+`FluidText` and `FluidImage` have a `useEffect([preset, algorithm])` that calls `updateConfig(mergeConfig({ ...config, algorithm? }, preset))` whenever preset or algorithm props change. This replaces the old algorithm-only effect. On components with no preset/algorithm prop the effect fires once on mount with `DEFAULT_CONFIG` as a reset, then the parent's Leva sync overrides it (React parent effects run after child effects).
+
 ### backgroundSrc bitmap lifecycle
 
 Main thread: loads bitmap via `loadImageBitmap()`, transfers to worker (zero-copy `postMessage([bitmap])`). Worker stores in `#backgroundBitmap`. On change: old bitmap `.close()`d in `setBackground()`. On destroy: `.close()` called.
 
+## Import style
+
+All `src/**` imports use no file extension (e.g. `from './config'` not `from './config.js'`). `moduleResolution: "bundler"` in tsconfig resolves without extensions. Exception: the worker Vite import keeps its extension because the query string must be adjacent to the path: `'./worker/index.js?worker&inline'`.
+
 ## Tests
 
-68 tests. All must pass before committing.
+68 tests. All must pass before committing. Run with `pnpm test:claude` (see Key commands).
 
 - `tests/setup.js` — WebGL mock (`createWebGLMock`), canvas mock (`createCanvasMock`). Mock includes `clearColor`, `clear`, `COLOR_BUFFER_BIT`, `TEXTURE0`–`TEXTURE4`.
 - React component mocks: `vi.mock('../../src/fluid-controller.ts', ...)` — note `.ts` extension required.
