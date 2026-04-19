@@ -54,6 +54,7 @@ export function Cover() {
 
 ```tsx
 import { useRef } from 'react';
+
 import { FluidText } from '@jayf0x/fluidity-js';
 
 export function Interactive() {
@@ -167,11 +168,11 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 ## Presets
 
 ```tsx
-<FluidText text="storm" preset="storm" />
-<FluidText text="calm" preset="calm" config={{ curl: 0.1 }} />
+<FluidText text="Wicked" preset="neon" />
+<FluidText text="Wicked" preset="calm" config={{ curl: 0.1 }} />
 ```
 
-Available: `calm` · `storm` · `wave` · `neon` · `smoke`
+Available: `calm` · `sand` · `wave` · `neon` · `smoke`
 
 `preset` is reactive — changing it re-applies the preset config. Any `config` values you pass override the preset. `algorithm` prop also overrides the preset's algorithm.
 

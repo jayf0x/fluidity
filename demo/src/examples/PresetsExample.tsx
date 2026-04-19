@@ -8,8 +8,8 @@ import { rgbArrayToHex, useFluidControls } from '../hooks/useFluidControls';
 
 const mappedPresetColor: Record<PresetKey, string> = {
   calm: '#a8d8ea',
-  storm: '#ffffff',
-  wave: '#e0f0ff',
+  sand: '#ffffff',
+  wave: '#fff7e0',
   neon: '#ff2d9b',
   smoke: '#cccccc',
 };

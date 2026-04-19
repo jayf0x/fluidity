@@ -18,7 +18,7 @@ interface FluidConfig {
   warpStrength: number;
 }
 
-type PresetKey = 'calm' | 'storm' | 'wave' | 'neon' | 'smoke';
+type PresetKey = 'calm' | 'sand' | 'wave' | 'neon' | 'smoke';
 
 interface FluidHandle {
   reset(): void;

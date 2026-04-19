@@ -61,17 +61,17 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
     glowColor: [0.6, 0.85, 1.0],
     waterColor: [0, 0.02, 0.05],
   },
-  storm: {
-    densityDissipation: 0.97,
-    velocityDissipation: 0.88,
-    curl: 0.45,
-    splatRadius: 0.012,
-    splatForce: 3.0,
-    refraction: 0.6,
-    shine: 0.08,
-    glowColor: [0.2, 0.3, 0.8],
-    waterColor: [0, 0, 0.1],
-    pressureIterations: 150,
+  sand: {
+    densityDissipation: 0.997,
+    velocityDissipation: 0.98,
+    curl: 1,
+    splatRadius: 0.01,
+    splatForce: 0.9,
+    refraction: 0.8,
+    specularExp: 0.1,
+    shine: 0.05,
+    glowColor: [0.027, 0.027, 0.027],
+    waterColor: [0.451, 0.329, 0.125],
   },
   wave: {
     densityDissipation: 0.994,
@@ -81,7 +81,6 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
     splatForce: 1.2,
     refraction: 0.35,
     shine: 0.03,
-    pressureIterations: 5,
     glowColor: [0.5, 0.8, 1.0],
     waterColor: [0, 0.01, 0.03],
   },
@@ -110,7 +109,11 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
   },
 };
 
-export function mergeConfig(user: Partial<FluidConfig> = {}, preset?: PresetKey, base: FluidConfig = DEFAULT_CONFIG): FluidConfig {
+export function mergeConfig(
+  user: Partial<FluidConfig> = {},
+  preset?: PresetKey,
+  base: FluidConfig = DEFAULT_CONFIG
+): FluidConfig {
   const baseWithPreset = preset ? { ...base, ...PRESETS[preset] } : base;
   return { ...baseWithPreset, ...user };
 }

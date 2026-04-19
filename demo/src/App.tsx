@@ -13,7 +13,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'image', label: 'image' },
   { id: 'splash', label: 'auto-splash' },
   { id: 'split', label: 'split view' },
-  { id: 'presets', label: 'presets' },
+  // { id: 'presets', label: 'presets' },
 ];
 
 export function App() {

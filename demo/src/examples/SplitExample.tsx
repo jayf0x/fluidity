@@ -5,37 +5,23 @@ import { button, useControls, useCreateStore } from 'leva';
 
 import { ExampleWrapper } from '../components/ExampleWrapper';
 import { useFluidConfig } from '../hooks/useFluidConfig';
+import { useFluidControls } from '../hooks/useFluidControls';
 import { IMAGE_OPTIONS } from './ImageExample';
 
 const ALGORITHMS: FluidAlgorithm[] = ['standard', 'glass', 'ink', 'aurora', 'ripple'];
+
+382030;
 
 export function SplitExample() {
   const textRef = useRef<FluidHandle>(null);
   const imageRef = useRef<FluidHandle>(null);
   const store = useCreateStore();
 
-  const { text, textShine, imgEffect, algorithm } = useControls(
-    'settings',
-    {
-      text: { value: 'split' },
-      textShine: { label: 'text shine', value: 0.02, min: 0, max: 0.15, step: 0.001 },
-      imgEffect: { label: 'img effect', value: 0.4, min: 0, max: 1, step: 0.01 },
-      algorithm: { label: 'img fx', options: ALGORITHMS, value: 'standard' satisfies FluidAlgorithm },
-    },
-    { store }
-  );
+  const controlsText = useFluidControls(textRef, store);
+  const controlsImg = useFluidControls(imageRef, store);
 
-  useControls(
-    'actions',
-    {
-      'reset text': button(() => textRef.current?.reset()),
-      'reset img': button(() => imageRef.current?.reset()),
-    },
-    { store }
-  );
-
-  useFluidConfig(textRef, { shine: textShine });
-  useFluidConfig(imageRef, { algorithm: algorithm as FluidAlgorithm });
+  useFluidConfig(textRef);
+  useFluidConfig(imageRef);
 
   return (
     <ExampleWrapper store={store}>
@@ -46,12 +32,11 @@ export function SplitExample() {
         <div style={{ position: 'relative', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
           <FluidText
             ref={textRef}
-            text={text}
+            text="Supercalifragilisticexpialidocious"
             fontSize={200}
             color="#ffffff"
             backgroundColor=""
-            isWorkerEnabled={false}
-            config={{ shine: textShine, refraction: 0.25, glowColor: [0.4, 0.7, 1.0] }}
+            // isWorkerEnabled={false}
             style={{ width: '100%', height: '100%' }}
           />
           <div
@@ -76,8 +61,7 @@ export function SplitExample() {
           <FluidImage
             ref={imageRef}
             src={IMAGE_OPTIONS.forest}
-            effect={imgEffect}
-            isWorkerEnabled={false}
+            // isWorkerEnabled={false}
             config={{ splatRadius: 0.007, velocityDissipation: 0.94 }}
             style={{ width: '100%', height: '100%' }}
           />
@@ -94,7 +78,7 @@ export function SplitExample() {
               pointerEvents: 'none',
             }}
           >
-            FluidImage · isWorkerEnabled=false · fx: {algorithm}
+            FluidImage · isWorkerEnabled=false
           </div>
         </div>
       </div>

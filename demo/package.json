@@ -5,6 +5,7 @@
   "type": "module",
   "homepage": "https://jayf0x.github.io/fluidity",
   "scripts": {
+    "dd": "rm -rf ./node_modules/.vite && vite",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",

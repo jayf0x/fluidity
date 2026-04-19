@@ -73,7 +73,7 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
       // ── Component props (returned, NOT sent to updateConfig) ────────────────
       preset: {
         value: values.preset ?? ('none' as PresetKey | 'none'),
-        options: ['none', 'calm', 'storm', 'wave', 'neon', 'smoke'] as (PresetKey | 'none')[],
+        options: ['none', 'calm', 'sand', 'wave', 'neon', 'smoke'] satisfies (PresetKey | 'none')[],
       },
       backgroundColor: values.backgroundColor,
     }),
