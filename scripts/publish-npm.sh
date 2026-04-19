@@ -72,7 +72,7 @@ npm run test:run
 
 # ── publish (auth via temp .npmrc — never in process list) ───────────────────
 echo "Publishing to npm.js..."
-npm publish --userconfig "$TMPRC" --registry https://registry.npmjs.org --access restricted
+npm publish --userconfig "$TMPRC" --registry https://registry.npmjs.org --access public
 
 echo "Publishing to GitHub Packages..."
 npm publish --userconfig "$TMPRC" --registry https://npm.pkg.github.com
