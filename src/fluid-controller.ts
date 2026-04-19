@@ -39,7 +39,9 @@ export class FluidController {
 
   setImageSource(src: string, effect = DEFAULT_PROPS.effect, size: string | number = DEFAULT_PROPS.imageSize): void {
     if (this.#worker) {
-      this.#worker.postMessage({ type: 'setImageSource', src, effect, size });
+      // Resolve relative URLs before passing to the worker — blob workers have no valid base URL
+      const absoluteSrc = new URL(src, location.href).href;
+      this.#worker.postMessage({ type: 'setImageSource', src: absoluteSrc, effect, size });
     } else {
       this.#sim!.setImageSource(src, effect, size);
     }
