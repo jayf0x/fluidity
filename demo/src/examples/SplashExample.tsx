@@ -17,7 +17,7 @@ const defaultConfig: Partial<FluidConfigLeva> = {
   shine: 0.001,
   warpStrength: 0.01,
   algorithm: 'ripple',
-  waterColor: '#00f5ff',
+  waterColor: '#002d2e',
   glowColor: '#642df7',
 };
 
@@ -96,7 +96,7 @@ export function SplashExample() {
   const stateRef = useRef<State>({ x: 0.1, y: 0, z: 0, vx: 0, vy: 0 });
   const store = useCreateStore();
 
-  useFluidControls(ref, store, defaultConfig);
+  const { preset, backgroundColor } = useFluidControls(ref, store, defaultConfig);
 
   const { effect } = useControls(
     {
@@ -132,7 +132,7 @@ export function SplashExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidText ref={ref} text={effect} fontSize={200} />
+      <FluidText ref={ref} text={effect} fontSize={200} preset={preset} backgroundColor={backgroundColor} />
     </ExampleWrapper>
   );
 }

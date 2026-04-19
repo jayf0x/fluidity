@@ -22,6 +22,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:claude": "PATH=~/.nvm/versions/node/v20.19.6/bin:$PATH npx vitest run 2>&1 | tail -8",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

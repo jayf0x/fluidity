@@ -53,7 +53,7 @@ export function initWebGL(canvas: HTMLCanvasElement | OffscreenCanvas): { gl: GL
   const isWebGL2 = !!gl;
 
   if (!isWebGL2) {
-    gl = (canvas.getContext('webgl', params) || canvas.getContext('experimental-webgl', params)) as WebGLRenderingContext;
+    gl = canvas.getContext('webgl', params) as WebGLRenderingContext;
     (gl as WebGLRenderingContext).getExtension('EXT_color_buffer_half_float');
   }
 

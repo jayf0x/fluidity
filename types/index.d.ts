@@ -170,6 +170,12 @@ export interface FluidTextProps extends FluidBaseProps {
   fontFamily?: string;
   /** Font weight. Default: 900 */
   fontWeight?: string | number;
+  /**
+   * Oversample factor for the text canvas before GPU upload.
+   * Higher = sharper, anti-aliased edges at the cost of texture memory.
+   * Default: 2 (2× resolution). Set to 1 to match the simulation resolution exactly.
+   */
+  textQuality?: number;
 }
 
 export const FluidText: ForwardRefExoticComponent<FluidTextProps & RefAttributes<FluidHandle>>;
@@ -231,6 +237,8 @@ export interface TextSourceOpts {
   color: string;
   fontFamily?: string;
   fontWeight?: string | number;
+  /** Oversample factor for the text canvas before upload. Higher = sharper edges. Default: 2 */
+  textQuality?: number;
 }
 
 /** Low-level WebGL fluid simulation. Accepts HTMLCanvasElement or OffscreenCanvas. */
@@ -283,6 +291,7 @@ export const DEFAULT_PROPS: {
   readonly color: string;
   readonly fontFamily: string;
   readonly fontWeight: string | number;
+  readonly textQuality: number;
   readonly backgroundColor: string;
   readonly backgroundSize: string | number;
   readonly isMouseEnabled: boolean;

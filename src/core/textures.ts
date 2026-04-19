@@ -6,6 +6,8 @@ export interface TextSourceOpts {
   color: string;
   fontFamily?: string;
   fontWeight?: string | number;
+  /** Oversample factor for the text canvas before upload. Higher = sharper edges. Default: 2 */
+  textQuality?: number;
 }
 
 export interface TextureSet {
@@ -58,36 +60,40 @@ export function createTextTextures(
   backgroundBitmap: ImageBitmap | null = null,
   backgroundSize: string | number = 'cover'
 ): TextureSet {
-  const { text, fontSize, color, fontFamily = 'sans-serif', fontWeight = 900 } = opts;
+  const { text, fontSize, color, fontFamily = 'sans-serif', fontWeight = 900, textQuality = 2 } = opts;
 
-  const tCanvas = new OffscreenCanvas(width, height);
+  // Render at higher resolution then let GPU bilinear-filter down → smooth edges
+  const q = Math.max(0.25, textQuality);
+  const tw = Math.round(width * q);
+  const th = Math.round(height * q);
+  const scaledFontSize = fontSize * q;
+
+  const tCanvas = new OffscreenCanvas(tw, th);
   const ctx = tCanvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 
-  const draw = (fillColor: string, blur = 0) => {
+  const draw = (fillColor: string) => {
     if (backgroundBitmap) {
-      ctx.clearRect(0, 0, width, height);
+      ctx.clearRect(0, 0, tw, th);
       ctx.fillStyle = 'black';
-      ctx.fillRect(0, 0, width, height);
+      ctx.fillRect(0, 0, tw, th);
       const { x, y, drawW, drawH } = computeImageTransform(
         backgroundBitmap.width,
         backgroundBitmap.height,
-        width,
-        height,
+        tw,
+        th,
         backgroundSize
       );
-      // ctx.filter = blur ? `brightness(0.1) blur(50px)` : '';
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
-      // ctx.filter = '';
     } else {
       ctx.fillStyle = 'black';
-      ctx.fillRect(0, 0, width, height);
+      ctx.fillRect(0, 0, tw, th);
     }
     ctx.shadowColor = fillColor;
     ctx.fillStyle = fillColor;
-    ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+    ctx.font = `${fontWeight} ${scaledFontSize}px ${fontFamily}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, width / 2, height / 2);
+    ctx.fillText(text, tw / 2, th / 2);
   };
 
   draw(color);
@@ -96,12 +102,12 @@ export function createTextTextures(
   // Obstacle: white text on black only — background bitmap must NOT bleed in,
   // or bright background pixels become false obstacles that zero velocity.
   ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(0, 0, tw, th);
   ctx.fillStyle = 'white';
-  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.font = `${fontWeight} ${scaledFontSize}px ${fontFamily}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, width / 2, height / 2);
+  ctx.fillText(text, tw / 2, th / 2);
   const obstacleTex = uploadTexture(gl, tCanvas);
 
   return { backgroundTex, obstacleTex, coverageTex: obstacleTex };

@@ -13,7 +13,7 @@ const defaultProps: Partial<FluidConfigLeva> = {
 export function TextExample() {
   const ref = useRef<FluidHandle>(null);
   const store = useCreateStore();
-  useFluidControls(ref, store, defaultProps);
+  const { preset, backgroundColor } = useFluidControls(ref, store, defaultProps);
 
   const props = useControls(
     'settings',
@@ -26,7 +26,13 @@ export function TextExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidText ref={ref} fontSize={200} {...props} />
+      <FluidText
+        ref={ref}
+        fontSize={200}
+        preset={preset}
+        backgroundColor={backgroundColor}
+        {...props}
+      />
     </ExampleWrapper>
   );
 }

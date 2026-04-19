@@ -25,6 +25,7 @@ export const DEFAULT_PROPS = {
   color: '#ffffff',
   fontFamily: 'sans-serif',
   fontWeight: 900 as string | number,
+  textQuality: 2,
   // Shared
   backgroundColor: '#0a0a0a',
   backgroundSize: 'cover' as string | number,
