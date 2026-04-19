@@ -1,4 +1,4 @@
-import { DEFAULT_PROPS } from './core/config';
+import { DEFAULT_PROPS_IMAGE } from './core/config';
 import { FluidSimulation } from './core/simulation';
 // @ts-ignore — Vite worker import syntax not understood by tsc
 import FluidWorker from './worker/index.js?worker&inline';
@@ -37,7 +37,7 @@ export class FluidController {
     }
   }
 
-  setImageSource(src: string, effect = DEFAULT_PROPS.effect, size: string | number = DEFAULT_PROPS.imageSize): void {
+  setImageSource(src: string, effect = DEFAULT_PROPS_IMAGE.effect, size: string | number = DEFAULT_PROPS_IMAGE.imageSize): void {
     if (this.#worker) {
       // Resolve relative URLs before passing to the worker — blob workers have no valid base URL
       const absoluteSrc = new URL(src, location.href).href;

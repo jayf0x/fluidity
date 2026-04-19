@@ -1,35 +1,35 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import { DEFAULT_PROPS, mergeConfig } from '../core/config';
+import { DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_TEXT, mergeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
 import { useFluid } from './useFluid';
 
 export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidText(
   {
     text,
-    fontSize = DEFAULT_PROPS.fontSize,
-    color = DEFAULT_PROPS.color,
-    fontFamily = DEFAULT_PROPS.fontFamily,
-    fontWeight = DEFAULT_PROPS.fontWeight,
-    textQuality = DEFAULT_PROPS.textQuality,
+    fontSize = DEFAULT_PROPS_TEXT.fontSize,
+    color = DEFAULT_PROPS_TEXT.color,
+    fontFamily = DEFAULT_PROPS_TEXT.fontFamily,
+    fontWeight = DEFAULT_PROPS_TEXT.fontWeight,
+    textQuality = DEFAULT_PROPS_TEXT.textQuality,
     className,
     style,
     config,
     preset,
     algorithm,
-    backgroundColor = DEFAULT_PROPS.backgroundColor,
+    backgroundColor = DEFAULT_PROPS_TEXT.backgroundColor,
     backgroundSrc,
-    backgroundSize = DEFAULT_PROPS.backgroundSize,
-    isMouseEnabled = DEFAULT_PROPS.isMouseEnabled,
-    isWorkerEnabled = DEFAULT_PROPS.isWorkerEnabled,
+    backgroundSize = DEFAULT_PROPS_TEXT.backgroundSize,
+    isMouseEnabled = DEFAULT_PROPS_TEXT.isMouseEnabled,
+    isWorkerEnabled = DEFAULT_PROPS_TEXT.isWorkerEnabled,
   },
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const controllerRef = useFluid(containerRef, {
     isWorkerEnabled,
-    config: mergeConfig({ ...config, ...(algorithm ? { algorithm } : {}) }, preset),
+    config: mergeConfig({ ...config, ...(algorithm ? { algorithm } : {}) }, preset, DEFAULT_CONFIG_TEXT),
   });
 
   useImperativeHandle(
@@ -56,12 +56,14 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight, textQuality });
   }, [text, fontSize, color, fontFamily, fontWeight, textQuality]);
 
-  // Sync preset/algorithm → updateConfig for reactive changes
+  // Sync config/preset/algorithm → updateConfig for reactive changes
+  const configKey = JSON.stringify(config);
   useEffect(() => {
     controllerRef.current?.updateConfig(
-      mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset)
+      mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset, DEFAULT_CONFIG_TEXT)
     );
-  }, [preset, algorithm, config]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preset, algorithm, configKey]);
 
   // Load + forward background image to the simulation
   useEffect(() => {

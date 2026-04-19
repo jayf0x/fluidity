@@ -14,21 +14,40 @@ export const DEFAULT_CONFIG: FluidConfig = {
   warpStrength: 0.015,
 };
 
-export const DEFAULT_PROPS = {
-  // FluidImage
+export const DEFAULT_CONFIG_TEXT: FluidConfig = {
+  ...DEFAULT_CONFIG,
+  densityDissipation: 0.99,
+  velocityDissipation: 0.98,
+  pressureIterations: 3,
+  curl: 0.15,
+  splatRadius: 0.01,
+  splatForce: 3,
+  refraction: 0.25,
+  specularExp: 1,
+  shine: 0.1,
+  glowColor: [0, 0.502, 1.0],
+};
+
+export const DEFAULT_PROPS_SHARED = {
+  backgroundColor: '#0a0a0a',
+  backgroundSize: 'cover' as string | number,
+  isMouseEnabled: true,
+  isWorkerEnabled: true,
+} as const;
+
+export const DEFAULT_PROPS_IMAGE = {
+  ...DEFAULT_PROPS_SHARED,
   effect: 0 as number,
   imageSize: 'cover' as string | number,
-  // FluidText
+} as const;
+
+export const DEFAULT_PROPS_TEXT = {
+  ...DEFAULT_PROPS_SHARED,
   fontSize: 100,
   color: '#ffffff',
   fontFamily: 'sans-serif',
   fontWeight: 900 as string | number,
   textQuality: 2,
-  // Shared
-  backgroundColor: '#0a0a0a',
-  backgroundSize: 'cover' as string | number,
-  isMouseEnabled: true,
-  isWorkerEnabled: true,
 } as const;
 
 export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
@@ -92,11 +111,7 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
   },
 };
 
-/**
- * Merges user-provided config with defaults, optionally layering a named preset.
- * Preset values take precedence over defaults; user values take precedence over preset.
- */
-export function mergeConfig(user: Partial<FluidConfig> = {}, preset?: PresetKey): FluidConfig {
-  const base = preset ? { ...DEFAULT_CONFIG, ...PRESETS[preset] } : DEFAULT_CONFIG;
-  return { ...base, ...user };
+export function mergeConfig(user: Partial<FluidConfig> = {}, preset?: PresetKey, base: FluidConfig = DEFAULT_CONFIG): FluidConfig {
+  const baseWithPreset = preset ? { ...base, ...PRESETS[preset] } : base;
+  return { ...baseWithPreset, ...user };
 }

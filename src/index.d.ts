@@ -36,20 +36,31 @@ export declare class FluidSimulation {
   readonly isRunning: boolean;
 }
 
-export declare const DEFAULT_CONFIG: FluidConfig;
-export declare const DEFAULT_PROPS: {
-  readonly effect: number;
-  readonly imageSize: string | number;
-  readonly fontSize: number;
-  readonly color: string;
-  readonly fontFamily: string;
-  readonly fontWeight: string | number;
-  readonly textQuality: number;
+export type DefaultPropsShared = {
   readonly backgroundColor: string;
   readonly backgroundSize: string | number;
   readonly isMouseEnabled: boolean;
   readonly isWorkerEnabled: boolean;
 };
+
+export type DefaultPropsImage = DefaultPropsShared & {
+  readonly effect: number;
+  readonly imageSize: string | number;
+};
+
+export type DefaultPropsText = DefaultPropsShared & {
+  readonly fontSize: number;
+  readonly color: string;
+  readonly fontFamily: string;
+  readonly fontWeight: string | number;
+  readonly textQuality: number;
+};
+
+export declare const DEFAULT_CONFIG: FluidConfig;
+export declare const DEFAULT_CONFIG_TEXT: FluidConfig;
+export declare const DEFAULT_PROPS_SHARED: DefaultPropsShared;
+export declare const DEFAULT_PROPS_IMAGE: DefaultPropsImage;
+export declare const DEFAULT_PROPS_TEXT: DefaultPropsText;
 export declare const PRESETS: Record<PresetKey, Partial<FluidConfig>>;
-export declare function mergeConfig(user?: Partial<FluidConfig>, preset?: PresetKey): FluidConfig;
+export declare function mergeConfig(user?: Partial<FluidConfig>, preset?: PresetKey, base?: FluidConfig): FluidConfig;
 export declare function loadImageBitmap(src: string): Promise<ImageBitmap>;

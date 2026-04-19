@@ -1,25 +1,25 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import { DEFAULT_PROPS, mergeConfig } from '../core/config';
+import { DEFAULT_PROPS_IMAGE, mergeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
 import { useFluid } from './useFluid';
 
 export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function FluidImage(
   {
     src,
-    effect = DEFAULT_PROPS.effect,
-    imageSize = DEFAULT_PROPS.imageSize,
+    effect = DEFAULT_PROPS_IMAGE.effect,
+    imageSize = DEFAULT_PROPS_IMAGE.imageSize,
     className,
     style,
     config,
     preset,
     algorithm,
-    backgroundColor = DEFAULT_PROPS.backgroundColor,
+    backgroundColor = DEFAULT_PROPS_IMAGE.backgroundColor,
     backgroundSrc,
-    backgroundSize = DEFAULT_PROPS.backgroundSize,
-    isMouseEnabled = DEFAULT_PROPS.isMouseEnabled,
-    isWorkerEnabled = DEFAULT_PROPS.isWorkerEnabled,
+    backgroundSize = DEFAULT_PROPS_IMAGE.backgroundSize,
+    isMouseEnabled = DEFAULT_PROPS_IMAGE.isMouseEnabled,
+    isWorkerEnabled = DEFAULT_PROPS_IMAGE.isWorkerEnabled,
   },
   ref
 ) {
@@ -54,12 +54,14 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     controllerRef.current?.setImageSource(src, effect, imageSize);
   }, [src, effect, imageSize]);
 
-  // Sync preset/algorithm → updateConfig for reactive changes
+  // Sync config/preset/algorithm → updateConfig for reactive changes
+  const configKey = JSON.stringify(config);
   useEffect(() => {
     controllerRef.current?.updateConfig(
       mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset)
     );
-  }, [preset, algorithm, config]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preset, algorithm, configKey]);
 
   // Load + forward background image to the simulation
   useEffect(() => {

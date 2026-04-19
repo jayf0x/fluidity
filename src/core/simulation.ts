@@ -165,10 +165,11 @@ export class FluidSimulation {
 
   resize(width?: number, height?: number): void {
     if (width !== undefined && width > 0) {
+      if (height === undefined || height <= 0) return;
       this.#width = this.#canvas.width = width;
-      this.#height = this.#canvas.height = height!;
+      this.#height = this.#canvas.height = height;
       this.#simWidth = width >> 1;
-      this.#simHeight = height! >> 1;
+      this.#simHeight = height >> 1;
       this.#initFBOs();
     } else {
       this.#applyDimensions();

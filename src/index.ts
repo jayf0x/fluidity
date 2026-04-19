@@ -10,7 +10,7 @@ export { FluidController } from './fluid-controller';
 export { FluidSimulation } from './core/simulation';
 
 // Config utilities
-export { DEFAULT_CONFIG, DEFAULT_PROPS, PRESETS, mergeConfig } from './core/config';
+export { DEFAULT_CONFIG, DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_SHARED, DEFAULT_PROPS_IMAGE, DEFAULT_PROPS_TEXT, PRESETS, mergeConfig } from './core/config';
 
 // Utilities
 export { loadImageBitmap } from './core/textures';
