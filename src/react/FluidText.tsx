@@ -38,7 +38,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
       reset() {
         controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight, textQuality });
       },
-      updateLocation({ x, y, strength = 1 }: { x: number; y: number; strength?: number }) {
+      move({ x, y, strength = 1 }: { x: number; y: number; strength?: number }) {
         controllerRef.current?.handleMove(x, y, strength);
       },
       splat(x: number, y: number, vx: number, vy: number, strength = 1) {

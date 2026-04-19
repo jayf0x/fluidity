@@ -38,7 +38,7 @@ export function ImageExample() {
       src: { label: 'image', options: IMAGE_OPTIONS, value: IMAGE_OPTIONS['forest'] },
       imageSize: { label: 'size', options: ['cover', 'contain', '80%', '50%'], value: 'cover' },
       reload: button(() => ref.current?.reset()),
-      splash: button(() => ref.current?.updateLocation({ x: 400, y: 300, strength: 12 })),
+      splash: button(() => ref.current?.move({ x: 400, y: 300, strength: 12 })),
     },
     { store }
   );

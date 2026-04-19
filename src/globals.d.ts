@@ -22,7 +22,7 @@ type PresetKey = 'calm' | 'storm' | 'wave' | 'neon' | 'smoke';
 
 interface FluidHandle {
   reset(): void;
-  updateLocation(opts: { x: number; y: number; strength?: number }): void;
+  move(opts: { x: number; y: number; strength?: number }): void;
   splat(x: number, y: number, vx: number, vy: number, strength?: number): void;
   updateConfig(config: Partial<FluidConfig>): void;
 }

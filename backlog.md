@@ -10,23 +10,6 @@ Expected:
 - All component, functions, objects, variables... must use strict typing that is globally defined in types/index.d.ts
 - if you encounter more issues like this, either create a separate bug or resolve.
 
-## BUG/CORE: Better UX and Refine Ref API functions
-
-Scope:
-
-- src/react/FluidImage.tsx
-- src/react/FluidText.tsx
-- src/fluid-controller.ts
-- src/core/simulation.ts
-
-Currently we support 4 functions on the imperative ref: reset, updateLocation, splat, updateConfig.
-
-TODO
-
-- FluidImage: `reset` triggers `setImageSource` in `simulation.ts`. Is the reload of the Bitmap really needed here or is there no valid reason? Double check and change if needed.
-- Rename `updateLocation` to `move` in the react hooks only.
-- Currently `FluidImage` and `FluidText` use the separate useImperative functions with similar functionality. Make sure there is strict typing to make sure each has all of the 4 functions.
-
 ## Final Cleanup and quality assessment
 
 Go through the readme and core files and see where there are inconsistencies, possible big improvements, bugs...

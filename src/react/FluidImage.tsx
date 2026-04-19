@@ -35,7 +35,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
       reset() {
         if (src) controllerRef.current?.setImageSource(src, effect, imageSize);
       },
-      updateLocation({ x, y, strength = 1 }: { x: number; y: number; strength?: number }) {
+      move({ x, y, strength = 1 }: { x: number; y: number; strength?: number }) {
         controllerRef.current?.handleMove(x, y, strength);
       },
       splat(x: number, y: number, vx: number, vy: number, strength = 1) {

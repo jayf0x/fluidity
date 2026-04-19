@@ -74,12 +74,12 @@ describe('FluidText', () => {
     );
   });
 
-  it('exposes updateLocation via ref', async () => {
+  it('exposes move via ref', async () => {
     const ref = createRef();
     await act(async () => {
       render(<FluidText ref={ref} text="X" />);
     });
-    ref.current.updateLocation({ x: 100, y: 200, strength: 3 });
+    ref.current.move({ x: 100, y: 200, strength: 3 });
     expect(mockController.handleMove).toHaveBeenCalledWith(100, 200, 3);
   });
 

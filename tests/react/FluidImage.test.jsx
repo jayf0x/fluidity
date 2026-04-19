@@ -97,12 +97,12 @@ describe('FluidImage', () => {
     expect(mockController.setImageSource).toHaveBeenLastCalledWith('https://example.com/img.jpg', 0.5, 'cover');
   });
 
-  it('exposes updateLocation via ref', async () => {
+  it('exposes move via ref', async () => {
     const ref = createRef();
     await act(async () => {
       render(<FluidImage ref={ref} src="https://example.com/img.jpg" />);
     });
-    ref.current.updateLocation({ x: 50, y: 75 });
+    ref.current.move({ x: 50, y: 75 });
     expect(mockController.handleMove).toHaveBeenCalledWith(50, 75, 1);
   });
 
