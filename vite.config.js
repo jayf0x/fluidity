@@ -9,10 +9,8 @@ function copyTypes() {
   return {
     name: 'copy-types',
     closeBundle() {
-      fs.copyFileSync(
-        resolve(__dir, 'types/index.d.ts'),
-        resolve(__dir, 'dist/index.d.ts')
-      );
+      fs.copyFileSync(resolve(__dir, 'src/index.d.ts'), resolve(__dir, 'dist/index.d.ts'));
+      fs.copyFileSync(resolve(__dir, 'src/globals.d.ts'), resolve(__dir, 'dist/globals.d.ts'));
     },
   };
 }

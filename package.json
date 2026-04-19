@@ -10,7 +10,7 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "types": "./dist/index.d.ts",
+  "types": "./src/index.d.ts",
   "files": [
     "dist",
     "README.md"
@@ -23,7 +23,7 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:claude": "PATH=~/.nvm/versions/node/v20.19.6/bin:$PATH npx vitest run 2>&1 | tail -8",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "bunx tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "deploy:demo": "bash scripts/deploy-demo.sh",

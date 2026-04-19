@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import type { RefObject } from 'react';
 
-import type { FluidAlgorithm, FluidConfig, FluidHandle, PresetKey } from 'fluidity-js';
 import { useControls } from 'leva';
 
 export function hexToRgb(hex: string): RGB {

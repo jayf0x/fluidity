@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-import { type FluidHandle, FluidImage } from 'fluidity-js';
+import { FluidImage } from 'fluidity-js';
 import { button, useControls, useCreateStore } from 'leva';
 
 import { ExampleWrapper } from '../components/ExampleWrapper';

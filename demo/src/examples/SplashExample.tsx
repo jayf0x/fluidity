@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { type FluidHandle, FluidText } from 'fluidity-js';
+import { FluidText } from 'fluidity-js';
 import { useControls, useCreateStore } from 'leva';
 
 import { ExampleWrapper } from '../components/ExampleWrapper';

@@ -1,7 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import type { FluidHandle, FluidTextProps } from '../../types/index';
 import { DEFAULT_PROPS, mergeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
 import { useFluid } from './useFluid';

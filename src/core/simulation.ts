@@ -1,9 +1,7 @@
-import type { FluidAlgorithm, FluidConfig } from '../../types/index';
 import { mergeConfig } from './config';
 import { createBlit, createDoubleFBO, createFBO, createPrograms, initWebGL } from './gl-utils';
 import type { DoubleFBO, FBO, Programs } from './gl-utils';
 import { createImageTextures, createTextTextures, loadImageBitmap } from './textures';
-import type { TextSourceOpts } from './textures';
 
 // rAF shim — works on main thread and in workers (Chrome 69+)
 const raf: (fn: FrameRequestCallback) => number =

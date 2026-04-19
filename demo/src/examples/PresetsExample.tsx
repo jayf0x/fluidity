@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-import { DEFAULT_CONFIG, type FluidHandle, FluidText, PRESETS, type PresetKey } from 'fluidity-js';
+import { DEFAULT_CONFIG, FluidText, PRESETS } from 'fluidity-js';
 import { button, useControls, useCreateStore } from 'leva';
 
 import { ExampleWrapper } from '../components/ExampleWrapper';

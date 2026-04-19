@@ -50,13 +50,14 @@ fluidity/
 
 ## Key commands
 
-A special command `pnpm test:claude` is added for you to run tests ("test:claude": "PATH=~/.nvm/versions/node/v20.19.6/bin:$PATH npx vitest run 2>&1 | tail -8",)
+A special command `bun test:claude` is added for you to run tests ("test:claude": "PATH=~/.nvm/versions/node/v20.19.6/bin:$PATH npx vitest run 2>&1 | tail -8",)
 
 ```bash
 # Demo (from /demo)
-pnpm dev
-pnpm build
-pnpm deploy   # gh-pages branch → https://jayf0x.github.io/fluidity
+bun dev
+bun build
+bun deploy   # gh-pages branch → https://jayf0x.github.io/fluidity
+bun test:claude # runs tests
 ```
 
 ## Public API (FluidHandle ref)
@@ -94,12 +95,20 @@ Centralised in `src/core/config.ts` and re-exported from `src/index.ts`. All com
 ```ts
 DEFAULT_PROPS = {
   // FluidImage
-  effect: 0, imageSize: 'cover',
+  effect: 0,
+  imageSize: 'cover',
   // FluidText
-  fontSize: 100, color: '#ffffff', fontFamily: 'sans-serif', fontWeight: 900, textQuality: 2,
+  fontSize: 100,
+  color: '#ffffff',
+  fontFamily: 'sans-serif',
+  fontWeight: 900,
+  textQuality: 2,
   // Shared
-  backgroundColor: '#0a0a0a', backgroundSize: 'cover', isMouseEnabled: true, isWorkerEnabled: true,
-}
+  backgroundColor: '#0a0a0a',
+  backgroundSize: 'cover',
+  isMouseEnabled: true,
+  isWorkerEnabled: true,
+};
 ```
 
 ## Simulation pipeline (per frame, simulation.ts #step)
@@ -166,7 +175,7 @@ All `src/**` imports use no file extension (e.g. `from './config'` not `from './
 
 ## Tests
 
-68 tests. All must pass before committing. Run with `pnpm test:claude` (see Key commands).
+68 tests. All must pass before committing. Run with `bun test:claude` (see Key commands).
 
 - `tests/setup.js` — WebGL mock (`createWebGLMock`), canvas mock (`createCanvasMock`). Mock includes `clearColor`, `clear`, `COLOR_BUFFER_BIT`, `TEXTURE0`–`TEXTURE4`.
 - React component mocks: `vi.mock('../../src/fluid-controller.ts', ...)` — note `.ts` extension required.

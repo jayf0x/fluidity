@@ -1,7 +1,6 @@
-import type { FluidConfig } from '../types/index';
 import { DEFAULT_PROPS } from './core/config';
 import { FluidSimulation } from './core/simulation';
-import type { TextSourceOpts } from './core/textures';
+// @ts-ignore — Vite worker import syntax not understood by tsc
 import FluidWorker from './worker/index.js?worker&inline';
 
 const WORKER_SUPPORTED = typeof Worker !== 'undefined' && typeof OffscreenCanvas !== 'undefined';
@@ -131,16 +130,16 @@ export class FluidController {
       return;
     }
 
-    this.#worker = new FluidWorker();
-    this.#worker.onerror = (e: ErrorEvent) => {
+    const worker = (this.#worker = new FluidWorker());
+    worker.onerror = (e: ErrorEvent) => {
       console.error('[fluidity-js] Worker error:', e.message);
     };
-    this.#worker.onmessage = (e: MessageEvent) => {
+    worker.onmessage = (e: MessageEvent) => {
       if (e.data.type === 'error') {
         console.error('[fluidity-js] Simulation error:', e.data.message);
       }
     };
 
-    this.#worker.postMessage({ type: 'init', canvas: offscreen, width, height, config }, [offscreen]);
+    worker.postMessage({ type: 'init', canvas: offscreen, width, height, config }, [offscreen]);
   }
 }

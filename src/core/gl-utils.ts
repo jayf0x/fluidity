@@ -49,7 +49,7 @@ export interface Programs {
 export function initWebGL(canvas: HTMLCanvasElement | OffscreenCanvas): { gl: GL; ext: GLExt; isWebGL2: boolean } {
   const params = { alpha: true, depth: false, stencil: false, antialias: true, preserveDrawingBuffer: false };
 
-  let gl = canvas.getContext('webgl2', params) as WebGL2RenderingContext | null;
+  let gl = canvas.getContext('webgl2', params) as WebGL2RenderingContext | WebGLRenderingContext | null;
   const isWebGL2 = !!gl;
 
   if (!isWebGL2) {

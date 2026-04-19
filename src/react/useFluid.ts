@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
+
 import { FluidController } from '../fluid-controller';
-import type { FluidConfig } from '../../types/index';
 
 /**
  * Manages the FluidController lifecycle.
@@ -34,7 +34,10 @@ export function useFluid(
     const rect = container.getBoundingClientRect();
     const initW = Math.round(rect.width) || container.clientWidth || 0;
     const initH = Math.round(rect.height) || container.clientHeight || 0;
-    if (initW > 0) { canvas.width = initW; canvas.height = initH; }
+    if (initW > 0) {
+      canvas.width = initW;
+      canvas.height = initH;
+    }
 
     const { isWorkerEnabled, config: initConfig } = initOptsRef.current;
     const controller = new FluidController(canvas, { isWorkerEnabled, config: initConfig });

@@ -1,4 +1,3 @@
-import type { FluidConfig } from 'fluidity-js';
 import { useCreateStore } from 'leva';
 
 declare global {

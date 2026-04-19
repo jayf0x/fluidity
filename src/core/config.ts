@@ -1,4 +1,3 @@
-import type { FluidAlgorithm, FluidConfig, PresetKey } from '../../types/index';
 
 export const DEFAULT_CONFIG: FluidConfig = {
   densityDissipation: 0.992,
@@ -18,7 +17,7 @@ export const DEFAULT_CONFIG: FluidConfig = {
 
 export const DEFAULT_PROPS = {
   // FluidImage
-  effect: 0,
+  effect: 0 as number,
   imageSize: 'cover' as string | number,
   // FluidText
   fontSize: 100,
