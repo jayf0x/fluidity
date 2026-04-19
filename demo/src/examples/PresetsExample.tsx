@@ -35,7 +35,6 @@ export function PresetsExample() {
   useEffect(() => {
     const selected = PRESETS[preset];
     set({
-      ...DEFAULT_CONFIG,
       ...selected,
       waterColor: rgbArrayToHex((selected.waterColor ?? DEFAULT_CONFIG.waterColor) as RGB),
       glowColor: rgbArrayToHex((selected.glowColor ?? DEFAULT_CONFIG.glowColor) as RGB),
@@ -48,7 +47,7 @@ export function PresetsExample() {
         ref={ref}
         text={preset}
         preset={preset}
-        fontSize={150}
+        fontSize={350}
         color={mappedPresetColor[preset]}
         backgroundColor={backgroundColor}
       />

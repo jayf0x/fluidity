@@ -12,7 +12,6 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     color = DEFAULT_PROPS_TEXT.color,
     fontFamily = DEFAULT_PROPS_TEXT.fontFamily,
     fontWeight = DEFAULT_PROPS_TEXT.fontWeight,
-    textQuality = DEFAULT_PROPS_TEXT.textQuality,
     className,
     style,
     config,
@@ -36,7 +35,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     ref,
     () => ({
       reset() {
-        controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight, textQuality });
+        controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight });
       },
       move({ x, y, strength = 1 }: { x: number; y: number; strength?: number }) {
         controllerRef.current?.handleMove(x, y, strength);
@@ -48,13 +47,13 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
         controllerRef.current?.updateConfig(cfg);
       },
     }),
-    [text, fontSize, color, fontFamily, fontWeight, textQuality]
+    [text, fontSize, color, fontFamily, fontWeight]
   );
 
   // Sync text source whenever relevant props change
   useEffect(() => {
-    controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight, textQuality });
-  }, [text, fontSize, color, fontFamily, fontWeight, textQuality]);
+    controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight });
+  }, [text, fontSize, color, fontFamily, fontWeight]);
 
   // Sync config/preset/algorithm → updateConfig for reactive changes
   const configKey = JSON.stringify(config);

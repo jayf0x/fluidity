@@ -53,7 +53,6 @@ export type DefaultPropsText = DefaultPropsShared & {
   readonly color: string;
   readonly fontFamily: string;
   readonly fontWeight: string | number;
-  readonly textQuality: number;
 };
 
 export declare const DEFAULT_CONFIG: FluidConfig;

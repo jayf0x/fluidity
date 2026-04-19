@@ -94,7 +94,8 @@ export class FluidController {
 
   resize(width: number, height: number): void {
     if (this.#worker) {
-      this.#worker.postMessage({ type: 'resize', width, height });
+      const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+      this.#worker.postMessage({ type: 'resize', width, height, dpr });
     } else {
       this.#sim!.resize(width, height);
     }
@@ -117,7 +118,11 @@ export class FluidController {
   // ---------------------------------------------------------------------------
 
   #initWorker(canvas: HTMLCanvasElement, config: Partial<FluidConfig>): void {
-    const { clientWidth: width, clientHeight: height } = canvas;
+    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+    const width = Math.round(canvas.clientWidth * dpr);
+    const height = Math.round(canvas.clientHeight * dpr);
+    canvas.width = width;
+    canvas.height = height;
 
     let offscreen: OffscreenCanvas;
     try {
@@ -142,6 +147,6 @@ export class FluidController {
       }
     };
 
-    worker.postMessage({ type: 'init', canvas: offscreen, width, height, config }, [offscreen]);
+    worker.postMessage({ type: 'init', canvas: offscreen, width, height, config, dpr }, [offscreen]);
   }
 }

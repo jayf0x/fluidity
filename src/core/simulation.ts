@@ -46,6 +46,7 @@ export class FluidSimulation {
   #height = 0;
   #simWidth = 0;
   #simHeight = 0;
+  #dpr = 1;
 
   #density: DoubleFBO | null = null;
   #velocity: DoubleFBO | null = null;
@@ -144,7 +145,7 @@ export class FluidSimulation {
 
     prog.bind();
     gl.uniform1f(prog.uniforms.aspectRatio, this.#width / this.#height);
-    gl.uniform2f(prog.uniforms.point, x / this.#width, 1.0 - y / this.#height);
+    gl.uniform2f(prog.uniforms.point, (x * this.#dpr) / this.#width, 1.0 - (y * this.#dpr) / this.#height);
     gl.uniform1f(prog.uniforms.radius, cfg.splatRadius);
 
     // Velocity splat
@@ -163,7 +164,9 @@ export class FluidSimulation {
     this.#density!.swap();
   }
 
-  resize(width?: number, height?: number): void {
+  resize(width?: number, height?: number, dpr?: number): void {
+    if (dpr !== undefined) this.#dpr = dpr;
+    else if (typeof window !== 'undefined' && window.devicePixelRatio) this.#dpr = window.devicePixelRatio;
     if (width !== undefined && width > 0) {
       if (height === undefined || height <= 0) return;
       this.#width = this.#canvas.width = width;
@@ -230,9 +233,15 @@ export class FluidSimulation {
   // ---------------------------------------------------------------------------
 
   #applyDimensions(): void {
-    const canvas = this.#canvas as HTMLCanvasElement;
-    this.#width = canvas.width = canvas.clientWidth || canvas.width;
-    this.#height = canvas.height = canvas.clientHeight || canvas.height;
+    const canvas = this.#canvas;
+    if ('clientWidth' in canvas && (canvas as HTMLCanvasElement).clientWidth > 0) {
+      this.#dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+      this.#width = (canvas as HTMLCanvasElement).width = Math.round((canvas as HTMLCanvasElement).clientWidth * this.#dpr);
+      this.#height = (canvas as HTMLCanvasElement).height = Math.round((canvas as HTMLCanvasElement).clientHeight * this.#dpr);
+    } else {
+      this.#width = canvas.width;
+      this.#height = canvas.height;
+    }
 
     if (this.#width === 0 || this.#height === 0) return;
 
@@ -385,7 +394,7 @@ export class FluidSimulation {
     if (this.#mouse.moved) {
       splat.bind();
       gl.uniform1f(splat.uniforms.aspectRatio, this.#width / this.#height);
-      gl.uniform2f(splat.uniforms.point, this.#mouse.x / this.#width, 1.0 - this.#mouse.y / this.#height);
+      gl.uniform2f(splat.uniforms.point, (this.#mouse.x * this.#dpr) / this.#width, 1.0 - (this.#mouse.y * this.#dpr) / this.#height);
       gl.uniform1f(splat.uniforms.radius, cfg.splatRadius);
 
       gl.uniform1i(splat.uniforms.uTarget, 0);

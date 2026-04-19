@@ -47,7 +47,6 @@ export const DEFAULT_PROPS_TEXT = {
   color: '#ffffff',
   fontFamily: 'sans-serif',
   fontWeight: 900 as string | number,
-  textQuality: 2,
 } as const;
 
 export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {

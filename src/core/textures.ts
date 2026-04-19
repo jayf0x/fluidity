@@ -60,40 +60,35 @@ export function createTextTextures(
   backgroundBitmap: ImageBitmap | null = null,
   backgroundSize: string | number = 'cover'
 ): TextureSet {
-  const { text, fontSize, color, fontFamily = 'sans-serif', fontWeight = 900, textQuality = 2 } = opts;
+  const { text, fontSize, color, fontFamily = 'sans-serif', fontWeight = 900 } = opts;
 
-  // Render at higher resolution then let GPU bilinear-filter down → smooth edges
-  const q = Math.max(0.25, textQuality);
-  const tw = Math.round(width * q);
-  const th = Math.round(height * q);
-  const scaledFontSize = fontSize * q;
-
-  const tCanvas = new OffscreenCanvas(tw, th);
+  // width/height are DPR-adjusted — draw at 1:1 device pixels for crisp text
+  const tCanvas = new OffscreenCanvas(width, height);
   const ctx = tCanvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
 
   const draw = (fillColor: string) => {
     if (backgroundBitmap) {
-      ctx.clearRect(0, 0, tw, th);
+      ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = 'black';
-      ctx.fillRect(0, 0, tw, th);
+      ctx.fillRect(0, 0, width, height);
       const { x, y, drawW, drawH } = computeImageTransform(
         backgroundBitmap.width,
         backgroundBitmap.height,
-        tw,
-        th,
+        width,
+        height,
         backgroundSize
       );
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
     } else {
       ctx.fillStyle = 'black';
-      ctx.fillRect(0, 0, tw, th);
+      ctx.fillRect(0, 0, width, height);
     }
     ctx.shadowColor = fillColor;
     ctx.fillStyle = fillColor;
-    ctx.font = `${fontWeight} ${scaledFontSize}px ${fontFamily}`;
+    ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(text, tw / 2, th / 2);
+    ctx.fillText(text, width / 2, height / 2);
   };
 
   draw(color);
@@ -102,12 +97,12 @@ export function createTextTextures(
   // Obstacle: white text on black only — background bitmap must NOT bleed in,
   // or bright background pixels become false obstacles that zero velocity.
   ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, tw, th);
+  ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = 'white';
-  ctx.font = `${fontWeight} ${scaledFontSize}px ${fontFamily}`;
+  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(text, tw / 2, th / 2);
+  ctx.fillText(text, width / 2, height / 2);
   const obstacleTex = uploadTexture(gl, tCanvas);
 
   return { backgroundTex, obstacleTex, coverageTex: obstacleTex };

@@ -5,9 +5,9 @@ import { button, useControls, useCreateStore } from 'leva';
 
 import { ExampleWrapper } from '../components/ExampleWrapper';
 import { useFluidConfig } from '../hooks/useFluidConfig';
+import { IMAGE_OPTIONS } from './ImageExample';
 
 const ALGORITHMS: FluidAlgorithm[] = ['standard', 'glass', 'ink', 'aurora', 'ripple'];
-export const SPLIT_IMAGE_SRC = 'https://images.unsplash.com/photo-1652119482620-505b32c669b1?w=1200';
 
 export function SplitExample() {
   const textRef = useRef<FluidHandle>(null);
@@ -47,8 +47,9 @@ export function SplitExample() {
           <FluidText
             ref={textRef}
             text={text}
-            fontSize={100}
+            fontSize={200}
             color="#ffffff"
+            backgroundColor=""
             isWorkerEnabled={false}
             config={{ shine: textShine, refraction: 0.25, glowColor: [0.4, 0.7, 1.0] }}
             style={{ width: '100%', height: '100%' }}
@@ -74,7 +75,7 @@ export function SplitExample() {
         <div style={{ position: 'relative' }}>
           <FluidImage
             ref={imageRef}
-            src={SPLIT_IMAGE_SRC}
+            src={IMAGE_OPTIONS.forest}
             effect={imgEffect}
             isWorkerEnabled={false}
             config={{ splatRadius: 0.007, velocityDissipation: 0.94 }}

@@ -34,15 +34,7 @@ export function TextExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidText
-        ref={ref}
-        fontSize={200}
-        fontFamily="Ubunutu"
-        preset={preset}
-        backgroundColor={backgroundColor}
-        textQuality={10}
-        {...props}
-      />
+      <FluidText ref={ref} fontSize={400} preset={preset} backgroundColor={backgroundColor} {...props} />
     </ExampleWrapper>
   );
 }

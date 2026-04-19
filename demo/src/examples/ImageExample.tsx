@@ -20,7 +20,7 @@ const defaultProps: Partial<FluidConfigLeva> = {
   algorithm: 'aurora',
 };
 
-const IMAGE_OPTIONS = {
+export const IMAGE_OPTIONS = {
   abstract: 'https://images.unsplash.com/photo-1652119482620-505b32c669b1?w=1600',
   forest: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600',
   ocean: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1600',

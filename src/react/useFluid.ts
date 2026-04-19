@@ -31,9 +31,10 @@ export function useFluid(
     container.appendChild(canvas);
 
     // Read initial dimensions from the container (valid after paint in useEffect)
+    const dpr = window.devicePixelRatio || 1;
     const rect = container.getBoundingClientRect();
-    const initW = Math.round(rect.width) || container.clientWidth || 0;
-    const initH = Math.round(rect.height) || container.clientHeight || 0;
+    const initW = Math.round((rect.width || container.clientWidth) * dpr) || 0;
+    const initH = Math.round((rect.height || container.clientHeight) * dpr) || 0;
     if (initW > 0) {
       canvas.width = initW;
       canvas.height = initH;
@@ -46,8 +47,9 @@ export function useFluid(
     // Forward container resizes to the simulation
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
+        const dpr = window.devicePixelRatio || 1;
         const { inlineSize: w, blockSize: h } = entry.contentBoxSize[0];
-        controller.resize(Math.round(w), Math.round(h));
+        controller.resize(Math.round(w * dpr), Math.round(h * dpr));
       }
     });
     ro.observe(container);

@@ -46,7 +46,6 @@ interface FluidTextProps extends FluidBaseProps {
   color?: string;
   fontFamily?: string;
   fontWeight?: string | number;
-  textQuality?: number;
 }
 
 interface FluidImageProps extends FluidBaseProps {
@@ -61,5 +60,4 @@ interface TextSourceOpts {
   color: string;
   fontFamily?: string;
   fontWeight?: string | number;
-  textQuality?: number;
 }
