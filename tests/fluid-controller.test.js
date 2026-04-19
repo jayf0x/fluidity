@@ -1,4 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { FluidSimulation } from '../src/core/simulation.ts';
+import { FluidController } from '../src/fluid-controller.ts';
 import { createCanvasMock, createWebGLMock } from './setup.js';
 
 // ---------------------------------------------------------------------------
@@ -34,9 +37,6 @@ vi.mock('../src/core/simulation.ts', () => ({
   })),
 }));
 
-import { FluidController } from '../src/fluid-controller.ts';
-import { FluidSimulation } from '../src/core/simulation.ts';
-
 describe('FluidController — worker mode', () => {
   let canvas;
 
@@ -57,9 +57,7 @@ describe('FluidController — worker mode', () => {
   it('forwards setTextSource to worker', () => {
     const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
     ctrl.setTextSource({ text: 'Hi', fontSize: 40, color: '#fff' });
-    expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'setTextSource' })
-    );
+    expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(expect.objectContaining({ type: 'setTextSource' }));
   });
 
   it('forwards setImageSource to worker', () => {
@@ -192,9 +190,7 @@ describe('FluidController — StrictMode / double-transfer fallback', () => {
 
     // Worker should NOT have been started
     // (postMessage would only be called on init in worker path)
-    const initCalls = mockWorkerInstance.postMessage.mock.calls.filter(
-      ([msg]) => msg?.type === 'init'
-    );
+    const initCalls = mockWorkerInstance.postMessage.mock.calls.filter(([msg]) => msg?.type === 'init');
     expect(initCalls).toHaveLength(0);
 
     // Calls should route to the sim fallback

@@ -1,6 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, act } from '@testing-library/react';
 import { createRef } from 'react';
+
+import { act, render } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { FluidImage } from '../../src/react/FluidImage.tsx';
 
 // ---------------------------------------------------------------------------
 // Mock FluidController
@@ -21,8 +24,6 @@ vi.mock('../../src/fluid-controller.ts', () => ({
   FluidController: vi.fn(() => mockController),
 }));
 
-import { FluidImage } from '../../src/react/FluidImage.tsx';
-
 describe('FluidImage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -39,9 +40,7 @@ describe('FluidImage', () => {
   });
 
   it('applies className to the container div', () => {
-    const { container } = render(
-      <FluidImage src="https://example.com/img.jpg" className="fluid-img" />
-    );
+    const { container } = render(<FluidImage src="https://example.com/img.jpg" className="fluid-img" />);
     expect(container.querySelector('div')).toHaveClass('fluid-img');
   });
 
@@ -61,13 +60,17 @@ describe('FluidImage', () => {
 
   it('calls setImageSource again when src changes', async () => {
     const { rerender } = render(<FluidImage src="https://example.com/a.jpg" />);
-    await act(async () => { rerender(<FluidImage src="https://example.com/b.jpg" />); });
+    await act(async () => {
+      rerender(<FluidImage src="https://example.com/b.jpg" />);
+    });
     expect(mockController.setImageSource).toHaveBeenLastCalledWith('https://example.com/b.jpg', 0, 'cover');
   });
 
   it('calls setImageSource again when effect changes', async () => {
     const { rerender } = render(<FluidImage src="https://example.com/a.jpg" effect={0.3} />);
-    await act(async () => { rerender(<FluidImage src="https://example.com/a.jpg" effect={0.7} />); });
+    await act(async () => {
+      rerender(<FluidImage src="https://example.com/a.jpg" effect={0.7} />);
+    });
     expect(mockController.setImageSource).toHaveBeenLastCalledWith('https://example.com/a.jpg', 0.7, 'cover');
   });
 
@@ -79,7 +82,9 @@ describe('FluidImage', () => {
   });
 
   it('does not call setImageSource when src is undefined', async () => {
-    await act(async () => { render(<FluidImage src={undefined} />); });
+    await act(async () => {
+      render(<FluidImage src={undefined} />);
+    });
     expect(mockController.setImageSource).not.toHaveBeenCalled();
   });
 
@@ -112,14 +117,18 @@ describe('FluidImage', () => {
 
   it('destroys the controller on unmount', async () => {
     const { unmount } = render(<FluidImage src="https://example.com/img.jpg" />);
-    await act(async () => { unmount(); });
+    await act(async () => {
+      unmount();
+    });
     expect(mockController.destroy).toHaveBeenCalledOnce();
   });
 
   it('removes the canvas from DOM on unmount', async () => {
     const { container, unmount } = render(<FluidImage src="https://example.com/img.jpg" />);
     expect(container.querySelector('canvas')).toBeTruthy();
-    await act(async () => { unmount(); });
+    await act(async () => {
+      unmount();
+    });
     expect(container.querySelector('canvas')).toBeNull();
   });
 });

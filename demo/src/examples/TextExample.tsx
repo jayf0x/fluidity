@@ -26,13 +26,7 @@ export function TextExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidText
-        ref={ref}
-        fontSize={200}
-        preset={preset}
-        backgroundColor={backgroundColor}
-        {...props}
-      />
+      <FluidText ref={ref} fontSize={200} preset={preset} backgroundColor={backgroundColor} {...props} />
     </ExampleWrapper>
   );
 }

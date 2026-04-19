@@ -1,4 +1,3 @@
-
 export const DEFAULT_CONFIG: FluidConfig = {
   densityDissipation: 0.992,
   velocityDissipation: 0.93,

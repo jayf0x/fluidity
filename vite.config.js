@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
 import fs from 'fs';
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
 
 const __dir = new URL('.', import.meta.url).pathname;
 

@@ -56,7 +56,8 @@ export function Cover() {
 
 ```tsx
 import { useRef } from 'react';
-import { FluidText, type FluidHandle } from '@jayf0x/fluidity-js';
+
+import { type FluidHandle, FluidText } from '@jayf0x/fluidity-js';
 
 export function Interactive() {
   const fluid = useRef<FluidHandle>(null);
@@ -81,14 +82,14 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 
 ### FluidText
 
-| Prop              | Type                   | Default        |
-| ----------------- | ---------------------- | -------------- |
-| `text`            | `string`               | —              |
-| `fontSize`        | `number`               | `100`          |
-| `color`           | `string`               | `'#ffffff'`    |
-| `fontFamily`      | `string`               | `'sans-serif'` |
-| `fontWeight`      | `string \| number`     | `900`          |
-| `textQuality`     | `number`               | `2`            |
+| Prop          | Type               | Default        |
+| ------------- | ------------------ | -------------- |
+| `text`        | `string`           | —              |
+| `fontSize`    | `number`           | `100`          |
+| `color`       | `string`           | `'#ffffff'`    |
+| `fontFamily`  | `string`           | `'sans-serif'` |
+| `fontWeight`  | `string \| number` | `900`          |
+| `textQuality` | `number`           | `2`            |
 
 `textQuality` controls the oversample factor for text rendering. `2` (default) renders at 2× the simulation resolution before upload so edges are antialiased. Set to `1` for the exact simulation resolution; higher values are sharper but use more texture memory.
 
@@ -102,30 +103,30 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 
 ### Shared props
 
-| Prop              | Type                   | Default     |
-| ----------------- | ---------------------- | ----------- |
-| `config`          | `Partial<FluidConfig>` | —           |
-| `preset`          | `PresetKey`            | —           |
-| `algorithm`       | `FluidAlgorithm`       | `'standard'`|
-| `backgroundColor` | `string`               | `'#0a0a0a'` |
-| `backgroundSrc`   | `string`               | —           |
-| `backgroundSize`  | `string \| number`     | `'cover'`   |
-| `isMouseEnabled`  | `boolean`              | `true`      |
-| `isWorkerEnabled` | `boolean`              | `true`      |
-| `className`       | `string`               | —           |
-| `style`           | `CSSProperties`        | —           |
+| Prop              | Type                   | Default      |
+| ----------------- | ---------------------- | ------------ |
+| `config`          | `Partial<FluidConfig>` | —            |
+| `preset`          | `PresetKey`            | —            |
+| `algorithm`       | `FluidAlgorithm`       | `'standard'` |
+| `backgroundColor` | `string`               | `'#0a0a0a'`  |
+| `backgroundSrc`   | `string`               | —            |
+| `backgroundSize`  | `string \| number`     | `'cover'`    |
+| `isMouseEnabled`  | `boolean`              | `true`       |
+| `isWorkerEnabled` | `boolean`              | `true`       |
+| `className`       | `string`               | —            |
+| `style`           | `CSSProperties`        | —            |
 
 ---
 
 ## Algorithms
 
-| Value        | Character                                        |
-| ------------ | ------------------------------------------------ |
-| `'standard'` | Colour overlay + gentle refraction (default)     |
-| `'glass'`    | Strong UV distortion only — bent-glass, no colour|
-| `'ink'`      | Dense opaque pigment that accumulates and stains |
-| `'aurora'`   | Velocity-field UV warp — liquid metal / lava-lamp|
-| `'ripple'`   | Exaggerated normals + Fresnel rim — still water  |
+| Value        | Character                                         |
+| ------------ | ------------------------------------------------- |
+| `'standard'` | Colour overlay + gentle refraction (default)      |
+| `'glass'`    | Strong UV distortion only — bent-glass, no colour |
+| `'ink'`      | Dense opaque pigment that accumulates and stains  |
+| `'aurora'`   | Velocity-field UV warp — liquid metal / lava-lamp |
+| `'ripple'`   | Exaggerated normals + Fresnel rim — still water   |
 
 ```tsx
 <FluidImage src="/photo.jpg" algorithm="aurora" />
@@ -136,31 +137,31 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 
 ## FluidConfig
 
-| Key                   | Default            | Description                                |
-| --------------------- | ------------------ | ------------------------------------------ |
-| `densityDissipation`  | `0.992`            | How long ink lingers (0–1)                 |
-| `velocityDissipation` | `0.93`             | How fast velocity decays (0–1)             |
-| `pressureIterations`  | `25`               | Jacobi iterations — accuracy vs. cost      |
+| Key                   | Default            | Description                               |
+| --------------------- | ------------------ | ----------------------------------------- |
+| `densityDissipation`  | `0.992`            | How long ink lingers (0–1)                |
+| `velocityDissipation` | `0.93`             | How fast velocity decays (0–1)            |
+| `pressureIterations`  | `25`               | Jacobi iterations — accuracy vs. cost     |
 | `curl`                | `0.0001`           | Vorticity / swirl. `0.2`–`0.5` for eddies |
-| `splatRadius`         | `0.004`            | Brush radius                               |
-| `splatForce`          | `0.91`             | Force applied by brush                     |
-| `refraction`          | `0.25`             | Background warp strength                   |
-| `specularExp`         | `1.01`             | Specular highlight sharpness               |
-| `shine`               | `0.01`             | Highlight intensity                        |
-| `waterColor`          | `[0, 0, 0]`        | Base fluid colour `[R, G, B]` (0–1)        |
+| `splatRadius`         | `0.004`            | Brush radius                              |
+| `splatForce`          | `0.91`             | Force applied by brush                    |
+| `refraction`          | `0.25`             | Background warp strength                  |
+| `specularExp`         | `1.01`             | Specular highlight sharpness              |
+| `shine`               | `0.01`             | Highlight intensity                       |
+| `waterColor`          | `[0, 0, 0]`        | Base fluid colour `[R, G, B]` (0–1)       |
 | `glowColor`           | `[0.7, 0.85, 1.0]` | Glow / specular colour `[R, G, B]` (0–1)  |
-| `warpStrength`        | `0.015`            | UV warp intensity (`aurora` algorithm)     |
+| `warpStrength`        | `0.015`            | UV warp intensity (`aurora` algorithm)    |
 
 ---
 
 ## FluidHandle (ref)
 
-| Method                                | Description                                         |
-| ------------------------------------- | --------------------------------------------------- |
-| `reset()`                             | Re-initialise simulation and reload source          |
-| `updateConfig(patch)`                 | Merge a partial config update into running sim      |
-| `updateLocation({ x, y, strength? })`)| Programmatic pointer input (canvas-relative px)     |
-| `splat(x, y, vx, vy, strength?)`      | Inject a fluid splat directly — safe to call N×/frame |
+| Method                                 | Description                                           |
+| -------------------------------------- | ----------------------------------------------------- |
+| `reset()`                              | Re-initialise simulation and reload source            |
+| `updateConfig(patch)`                  | Merge a partial config update into running sim        |
+| `updateLocation({ x, y, strength? })`) | Programmatic pointer input (canvas-relative px)       |
+| `splat(x, y, vx, vy, strength?)`       | Inject a fluid splat directly — safe to call N×/frame |
 
 ---
 

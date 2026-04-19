@@ -20,7 +20,6 @@
  *   ready
  *   error           { message }
  */
-
 import { FluidSimulation } from '../core/simulation';
 
 let sim: FluidSimulation | null = null;
@@ -52,13 +51,21 @@ self.onmessage = async (e: MessageEvent) => {
 
       case 'setImageSource': {
         if (!sim) return;
-        await sim.setImageSource(data.src as string, data.effect as number | undefined, data.size as string | number | undefined);
+        await sim.setImageSource(
+          data.src as string,
+          data.effect as number | undefined,
+          data.size as string | number | undefined
+        );
         break;
       }
 
       case 'setImageBitmap': {
         if (!sim) return;
-        sim.setImageBitmap(data.bitmap as ImageBitmap, data.effect as number | undefined, data.size as string | number | undefined);
+        sim.setImageBitmap(
+          data.bitmap as ImageBitmap,
+          data.effect as number | undefined,
+          data.size as string | number | undefined
+        );
         break;
       }
 
@@ -71,8 +78,10 @@ self.onmessage = async (e: MessageEvent) => {
       case 'splat': {
         if (!sim) return;
         sim.splat(
-          data.x as number, data.y as number,
-          data.vx as number, data.vy as number,
+          data.x as number,
+          data.y as number,
+          data.vx as number,
+          data.vy as number,
           (data.strength as number | undefined) ?? 1
         );
         break;

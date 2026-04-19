@@ -2,7 +2,8 @@
  * Smoke test — verifies every public export exists and has the right shape.
  * This catches import errors that unit tests with mocks might miss.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import * as pkg from '../src/index.ts';
 
 describe('package exports', () => {
@@ -75,9 +76,16 @@ describe('package exports', () => {
 
   it('has no unexpected named exports', () => {
     const expected = new Set([
-      'FluidText', 'FluidImage', 'useFluid',
-      'FluidController', 'FluidSimulation',
-      'DEFAULT_CONFIG', 'DEFAULT_PROPS', 'PRESETS', 'mergeConfig', 'loadImageBitmap',
+      'FluidText',
+      'FluidImage',
+      'useFluid',
+      'FluidController',
+      'FluidSimulation',
+      'DEFAULT_CONFIG',
+      'DEFAULT_PROPS',
+      'PRESETS',
+      'mergeConfig',
+      'loadImageBitmap',
     ]);
     for (const key of Object.keys(pkg)) {
       expect(expected.has(key), `Unexpected export: "${key}"`).toBe(true);

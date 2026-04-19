@@ -1,13 +1,13 @@
 import {
-  baseVertexShader,
   advectionShader,
-  divergenceShader,
-  pressureShader,
-  gradientSubtractShader,
-  splatShader,
+  baseVertexShader,
   curlShader,
-  vorticityShader,
   displayShader,
+  divergenceShader,
+  gradientSubtractShader,
+  pressureShader,
+  splatShader,
+  vorticityShader,
 } from './shaders';
 
 type GL = WebGLRenderingContext | WebGL2RenderingContext;
@@ -158,9 +158,15 @@ export function createDoubleFBO(gl: GL, ext: GLExt, w: number, h: number): Doubl
   let f1 = createFBO(gl, ext, w, h);
   let f2 = createFBO(gl, ext, w, h);
   return {
-    get read() { return f1; },
-    get write() { return f2; },
-    swap() { [f1, f2] = [f2, f1]; },
+    get read() {
+      return f1;
+    },
+    get write() {
+      return f2;
+    },
+    swap() {
+      [f1, f2] = [f2, f1];
+    },
     dispose() {
       gl.deleteTexture(f1.tex);
       gl.deleteFramebuffer(f1.fbo);
@@ -177,11 +183,7 @@ export function createDoubleFBO(gl: GL, ext: GLExt, w: number, h: number): Doubl
 export function createBlit(gl: GL): (target: WebGLFramebuffer | null) => void {
   const buffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]),
-    gl.STATIC_DRAW
-  );
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 1, 1, 1, 1, -1]), gl.STATIC_DRAW);
   // Set once — the quad buffer never changes between draws
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(0);

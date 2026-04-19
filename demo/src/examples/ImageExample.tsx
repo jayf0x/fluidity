@@ -45,7 +45,14 @@ export function ImageExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidImage ref={ref} src={src} effect={0} imageSize={imageSize} preset={preset} backgroundColor={backgroundColor} />
+      <FluidImage
+        ref={ref}
+        src={src}
+        effect={0}
+        imageSize={imageSize}
+        preset={preset}
+        backgroundColor={backgroundColor}
+      />
     </ExampleWrapper>
   );
 }

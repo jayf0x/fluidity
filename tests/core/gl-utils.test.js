@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { Program, createFBO, createDoubleFBO, createBlit } from '../../src/core/gl-utils.ts';
+import { describe, expect, it, vi } from 'vitest';
+
+import { Program, createBlit, createDoubleFBO, createFBO } from '../../src/core/gl-utils.ts';
 import { createWebGLMock } from '../setup.js';
 
 describe('Program', () => {
@@ -18,9 +19,7 @@ describe('Program', () => {
   it('caches uniform locations', () => {
     const gl = createWebGLMock();
     gl.getProgramParameter.mockReturnValue(2);
-    gl.getActiveUniform
-      .mockReturnValueOnce({ name: 'uTime' })
-      .mockReturnValueOnce({ name: 'uResolution' });
+    gl.getActiveUniform.mockReturnValueOnce({ name: 'uTime' }).mockReturnValueOnce({ name: 'uResolution' });
     const mockLoc = {};
     gl.getUniformLocation.mockReturnValue(mockLoc);
 

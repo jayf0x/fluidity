@@ -1,6 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, act } from '@testing-library/react';
-import { createRef, StrictMode } from 'react';
+import { StrictMode, createRef } from 'react';
+
+import { act, render } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { FluidText } from '../../src/react/FluidText.tsx';
 
 // ---------------------------------------------------------------------------
 // Mock FluidController so tests don't need a real WebGL context
@@ -20,8 +23,6 @@ const mockController = {
 vi.mock('../../src/fluid-controller.ts', () => ({
   FluidController: vi.fn(() => mockController),
 }));
-
-import { FluidText } from '../../src/react/FluidText.tsx';
 
 describe('FluidText', () => {
   beforeEach(() => {
@@ -56,10 +57,10 @@ describe('FluidText', () => {
 
   it('calls setTextSource again when text prop changes', async () => {
     const { rerender } = render(<FluidText text="Hello" />);
-    await act(async () => { rerender(<FluidText text="World" />); });
-    expect(mockController.setTextSource).toHaveBeenLastCalledWith(
-      expect.objectContaining({ text: 'World' })
-    );
+    await act(async () => {
+      rerender(<FluidText text="World" />);
+    });
+    expect(mockController.setTextSource).toHaveBeenLastCalledWith(expect.objectContaining({ text: 'World' }));
   });
 
   it('exposes reset via ref', async () => {
@@ -93,14 +94,18 @@ describe('FluidText', () => {
 
   it('destroys the controller on unmount', async () => {
     const { unmount } = render(<FluidText text="Bye" />);
-    await act(async () => { unmount(); });
+    await act(async () => {
+      unmount();
+    });
     expect(mockController.destroy).toHaveBeenCalledOnce();
   });
 
   it('removes the canvas from DOM on unmount', async () => {
     const { container, unmount } = render(<FluidText text="Gone" />);
     expect(container.querySelector('canvas')).toBeTruthy();
-    await act(async () => { unmount(); });
+    await act(async () => {
+      unmount();
+    });
     expect(container.querySelector('canvas')).toBeNull();
   });
 
@@ -128,7 +133,9 @@ describe('FluidText', () => {
     const div = container.querySelector('div');
     const removeSpy = vi.spyOn(div, 'removeEventListener');
 
-    await act(async () => { rerender(<FluidText text="X" isMouseEnabled={false} />); });
+    await act(async () => {
+      rerender(<FluidText text="X" isMouseEnabled={false} />);
+    });
 
     expect(removeSpy).toHaveBeenCalledWith('mousemove', expect.any(Function));
     expect(removeSpy).toHaveBeenCalledWith('touchmove', expect.any(Function));

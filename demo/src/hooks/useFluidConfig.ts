@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import type { RefObject } from 'react';
 
-
 export function useFluidConfig(ref: RefObject<FluidHandle | null>, config: Partial<FluidConfig> = {}) {
   useEffect(() => {
     ref.current?.updateConfig(config);

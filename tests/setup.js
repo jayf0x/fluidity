@@ -172,7 +172,9 @@ global.Worker = class MockWorker {
 // ---------------------------------------------------------------------------
 
 global.ResizeObserver = class ResizeObserver {
-  constructor(cb) { this._cb = cb; }
+  constructor(cb) {
+    this._cb = cb;
+  }
   observe = vi.fn();
   unobserve = vi.fn();
   disconnect = vi.fn();

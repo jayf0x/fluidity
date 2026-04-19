@@ -1,12 +1,21 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import { DEFAULT_CONFIG, mergeConfig } from '../../src/core/config.ts';
 
 describe('DEFAULT_CONFIG', () => {
   it('has all required keys', () => {
     const keys = [
-      'densityDissipation', 'velocityDissipation', 'pressureIterations',
-      'curl', 'splatRadius', 'splatForce', 'refraction', 'specularExp',
-      'shine', 'waterColor', 'glowColor',
+      'densityDissipation',
+      'velocityDissipation',
+      'pressureIterations',
+      'curl',
+      'splatRadius',
+      'splatForce',
+      'refraction',
+      'specularExp',
+      'shine',
+      'waterColor',
+      'glowColor',
     ];
     for (const key of keys) {
       expect(DEFAULT_CONFIG).toHaveProperty(key);
