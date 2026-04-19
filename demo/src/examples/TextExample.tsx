@@ -7,8 +7,16 @@ import { ExampleWrapper } from '../components/ExampleWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaultProps: Partial<FluidConfigLeva> = {
-  densityDissipation: 0.998,
-  // velocityDissipation: 0,
+  densityDissipation: 0.997,
+  velocityDissipation: 0.98,
+  pressureIterations: 3,
+  curl: 0.15,
+  splatRadius: 0.01,
+  splatForce: 3,
+  refraction: 0.25,
+  specularExp: 1,
+  shine: 0.1,
+  glowColor: '#0080ff',
 };
 export function TextExample() {
   const ref = useRef<FluidHandle>(null);
@@ -18,7 +26,7 @@ export function TextExample() {
   const props = useControls(
     'settings',
     {
-      text: { value: 'fluidity' },
+      text: { value: 'Fluidity' },
       reset: button(() => ref.current?.reset()),
     },
     { store }
@@ -26,7 +34,15 @@ export function TextExample() {
 
   return (
     <ExampleWrapper store={store}>
-      <FluidText ref={ref} fontSize={200} preset={preset} backgroundColor={backgroundColor} {...props} />
+      <FluidText
+        ref={ref}
+        fontSize={200}
+        fontFamily="Ubunutu"
+        preset={preset}
+        backgroundColor={backgroundColor}
+        textQuality={10}
+        {...props}
+      />
     </ExampleWrapper>
   );
 }

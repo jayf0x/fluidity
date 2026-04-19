@@ -59,7 +59,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     controllerRef.current?.updateConfig(
       mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset)
     );
-  }, [preset, algorithm]);
+  }, [preset, algorithm, config]);
 
   // Load + forward background image to the simulation
   useEffect(() => {

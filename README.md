@@ -16,9 +16,7 @@
 npm i @jayf0x/fluidity-js
 ```
 
-Requires React ≥ 17 and WebGL2.
-
-> Private package — you'll need a valid npm token with access to `@jayf0x`.
+Requires React ≥ 17 and WebGL (WebGL2 recommended; WebGL1 supported as fallback).
 
 ---
 
@@ -56,8 +54,7 @@ export function Cover() {
 
 ```tsx
 import { useRef } from 'react';
-
-import { type FluidHandle, FluidText } from '@jayf0x/fluidity-js';
+import { FluidText } from '@jayf0x/fluidity-js';
 
 export function Interactive() {
   const fluid = useRef<FluidHandle>(null);
@@ -73,6 +70,8 @@ export function Interactive() {
   );
 }
 ```
+
+`FluidHandle` is a global type — no import needed.
 
 More examples → [`demo/src/examples/`](./demo/src/examples/)
 
@@ -141,7 +140,7 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 | --------------------- | ------------------ | ----------------------------------------- |
 | `densityDissipation`  | `0.992`            | How long ink lingers (0–1)                |
 | `velocityDissipation` | `0.93`             | How fast velocity decays (0–1)            |
-| `pressureIterations`  | `25`               | Jacobi iterations — accuracy vs. cost     |
+| `pressureIterations`  | `1`                | Jacobi iterations — accuracy vs. cost     |
 | `curl`                | `0.0001`           | Vorticity / swirl. `0.2`–`0.5` for eddies |
 | `splatRadius`         | `0.004`            | Brush radius                              |
 | `splatForce`          | `0.91`             | Force applied by brush                    |
@@ -156,12 +155,12 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 
 ## FluidHandle (ref)
 
-| Method                                 | Description                                           |
-| -------------------------------------- | ----------------------------------------------------- |
-| `reset()`                              | Re-initialise simulation and reload source            |
-| `updateConfig(patch)`                  | Merge a partial config update into running sim        |
-| `updateLocation({ x, y, strength? })`) | Programmatic pointer input (canvas-relative px)       |
-| `splat(x, y, vx, vy, strength?)`       | Inject a fluid splat directly — safe to call N×/frame |
+| Method                           | Description                                           |
+| -------------------------------- | ----------------------------------------------------- |
+| `reset()`                        | Re-initialise simulation and reload source            |
+| `updateConfig(patch)`            | Merge a partial config update into running sim        |
+| `move({ x, y, strength? })`      | Programmatic pointer input (canvas-relative px)       |
+| `splat(x, y, vx, vy, strength?)` | Inject a fluid splat directly — safe to call N×/frame |
 
 ---
 
