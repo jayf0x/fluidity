@@ -69,6 +69,7 @@ export class FluidSimulation {
 
   #rafId: number | null = null;
   #isReady = false;
+  #destroyed = false;
 
   constructor(canvas: HTMLCanvasElement | OffscreenCanvas, config: Partial<FluidConfig> = {}) {
     this.#canvas = canvas;
@@ -97,6 +98,7 @@ export class FluidSimulation {
 
   async setImageSource(src: string, effect = 0.0, size: string | number = 'cover'): Promise<void> {
     const bitmap = await loadImageBitmap(src);
+    if (this.#destroyed) { bitmap.close(); return; }
     this.#source = { type: 'image', bitmap, effect, size };
     this.#applyDimensions();
     this.#applySource();
@@ -178,6 +180,7 @@ export class FluidSimulation {
       this.#applyDimensions();
     }
     if (this.#source) this.#applySource();
+    this.#ensureRunning();
   }
 
   updateConfig(partial: Partial<FluidConfig>): void {
@@ -185,6 +188,7 @@ export class FluidSimulation {
   }
 
   destroy(): void {
+    this.#destroyed = true;
     this.stop();
     const gl = this.#gl;
 
@@ -331,7 +335,7 @@ export class FluidSimulation {
   }
 
   #step(): void {
-    if (!this.#isReady || this.#width === 0) return;
+    if (!this.#isReady || this.#width === 0 || !this.#density || !this.#velocity) return;
 
     const gl = this.#gl;
     const cfg = this.#config;

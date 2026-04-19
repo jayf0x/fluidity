@@ -68,6 +68,32 @@ describe('FluidController — worker mode', () => {
     );
   });
 
+  it('resolves relative image paths to absolute URLs before sending to worker', () => {
+    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    ctrl.setImageSource('preview.png');
+    const call = mockWorkerInstance.postMessage.mock.calls.find(([m]) => m?.type === 'setImageSource');
+    expect(call).toBeDefined();
+    // Must be an absolute URL (not a bare relative path)
+    expect(call[0].src).toMatch(/^https?:\/\//);
+    expect(call[0].src).toContain('preview.png');
+  });
+
+  it('resolves root-relative paths to absolute URLs before sending to worker', () => {
+    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    ctrl.setImageSource('/assets/photo.png');
+    const call = mockWorkerInstance.postMessage.mock.calls.find(([m]) => m?.type === 'setImageSource');
+    expect(call[0].src).toMatch(/^https?:\/\//);
+    expect(call[0].src).toContain('/assets/photo.png');
+  });
+
+  it('passes dpr in resize message', () => {
+    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    ctrl.resize(1280, 720);
+    const call = mockWorkerInstance.postMessage.mock.calls.find(([m]) => m?.type === 'resize');
+    expect(call[0]).toMatchObject({ type: 'resize', width: 1280, height: 720 });
+    expect(typeof call[0].dpr).toBe('number');
+  });
+
   it('forwards handleMove to worker', () => {
     const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
     ctrl.handleMove(100, 200, 3);
