@@ -6,7 +6,17 @@
 [![license](https://img.shields.io/npm/l/@jayf0x/fluidity-js)](./LICENSE)
 [![size](https://img.shields.io/bundlephobia/minzip/@jayf0x/fluidity-js)](https://bundlephobia.com/package/@jayf0x/fluidity-js)
 
-[**Live demo →**](https://jayf0x.github.io/fluidity)
+ <a href="https://jayf0x.github.io/fluidity">
+  <p align="center" title='Try if you can make this effect.'>
+      <img align="center" src="assets/preview.png" alt="preview" height="300px"/>
+  </p>
+
+  <p align="center">
+    <strong>
+    Live demo →
+    </strong>
+  </p>
+</a>
 
 ---
 
