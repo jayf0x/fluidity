@@ -118,7 +118,7 @@ export class FluidSimulation {
     }
     this.#backgroundBitmap = bitmap;
     this.#backgroundSize = size ?? 'cover';
-    if (this.#source && this.#width > 0) this.#applySource();
+    if (this.#source && this.#width > 0 && this.#height > 0) this.#applySource();
   }
 
   handleMove(x: number, y: number, strength = 1): void {
@@ -270,7 +270,7 @@ export class FluidSimulation {
   }
 
   #applySource(): void {
-    if (!this.#source || this.#width === 0) return;
+    if (!this.#source || this.#width === 0 || this.#height === 0) return;
 
     this.#disposeTextures();
 

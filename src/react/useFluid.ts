@@ -40,6 +40,13 @@ export function useFluid(
       canvas.height = initH;
     }
 
+    if (initH === 0) {
+      console.warn(
+        '[fluidity-js] Container has zero height — simulation will not render. ' +
+          'Avoid height:auto or percentage heights without a sized ancestor. Use explicit pixel values instead.'
+      );
+    }
+
     const { isWorkerEnabled, config: initConfig } = initOptsRef.current;
     const controller = new FluidController(canvas, { isWorkerEnabled, config: initConfig });
     controllerRef.current = controller;
