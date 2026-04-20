@@ -17,6 +17,7 @@ const defaultProps: Partial<FluidConfigLeva> = {
   specularExp: 1,
   shine: 0.1,
   glowColor: '#0080ff',
+  waterColor: '#320030',
 };
 export function TextExample() {
   const ref = useRef<FluidHandle>(null);
