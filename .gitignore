@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+*.local
+.DS_Store
+
+.claude
+
+app/ # test app
+
+
+
+!demo/dist
