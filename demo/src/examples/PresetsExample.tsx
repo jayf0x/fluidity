@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 import { DEFAULT_CONFIG, FluidText, PRESETS } from 'fluidity-js';
 import { button, useControls, useCreateStore } from 'leva';
 
-import { ExampleWrapper } from '../components/ExampleWrapper';
+import { DemoWrapper } from '../components/DemoWrapper';
 import { rgbArrayToHex, useFluidControls } from '../hooks/useFluidControls';
 
 const mappedPresetColor: Record<PresetKey, string> = {
@@ -42,7 +42,7 @@ export function PresetsExample() {
   }, [preset, set]);
 
   return (
-    <ExampleWrapper store={store}>
+    <DemoWrapper store={store}>
       <FluidText
         ref={ref}
         text={preset}
@@ -51,6 +51,6 @@ export function PresetsExample() {
         color={mappedPresetColor[preset]}
         backgroundColor={backgroundColor}
       />
-    </ExampleWrapper>
+    </DemoWrapper>
   );
 }

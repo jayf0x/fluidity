@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { FluidText } from 'fluidity-js';
 import { useControls, useCreateStore } from 'leva';
 
-import { ExampleWrapper } from '../components/ExampleWrapper';
+import { DemoWrapper } from '../components/DemoWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaultConfig: Partial<FluidConfigLeva> = {
@@ -131,8 +131,8 @@ export function SplashExample() {
   }, [animate]);
 
   return (
-    <ExampleWrapper store={store}>
+    <DemoWrapper store={store}>
       <FluidText ref={ref} text={effect} fontSize={200} preset={preset} backgroundColor={backgroundColor} />
-    </ExampleWrapper>
+    </DemoWrapper>
   );
 }

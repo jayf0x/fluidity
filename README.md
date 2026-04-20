@@ -82,16 +82,13 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 
 ### FluidText
 
-| Prop          | Type               | Default        |
-| ------------- | ------------------ | -------------- |
-| `text`        | `string`           | —              |
-| `fontSize`    | `number`           | `100`          |
-| `color`       | `string`           | `'#ffffff'`    |
-| `fontFamily`  | `string`           | `'sans-serif'` |
-| `fontWeight`  | `string \| number` | `900`          |
-| `textQuality` | `number`           | `2`            |
-
-`textQuality` controls the oversample factor for text rendering. `2` (default) renders at 2× the simulation resolution before upload so edges are antialiased. Set to `1` for the exact simulation resolution; higher values are sharper but use more texture memory.
+| Prop         | Type               | Default        |
+| ------------ | ------------------ | -------------- |
+| `text`       | `string`           | —              |
+| `fontSize`   | `number`           | `100`          |
+| `color`      | `string`           | `'#ffffff'`    |
+| `fontFamily` | `string`           | `'sans-serif'` |
+| `fontWeight` | `string \| number` | `900`          |
 
 ### FluidImage
 
@@ -169,7 +166,7 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 
 ```tsx
 <FluidText text="Wicked" preset="neon" />
-<FluidText text="Wicked" preset="calm" config={{ curl: 0.1 }} />
+<FluidText text="Wicked" preset="calm" />
 ```
 
 Available: `calm` · `sand` · `wave` · `neon` · `smoke`

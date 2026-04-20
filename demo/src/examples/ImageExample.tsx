@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import { FluidImage } from 'fluidity-js';
 import { button, useControls, useCreateStore } from 'leva';
 
-import { ExampleWrapper } from '../components/ExampleWrapper';
+import { DemoWrapper } from '../components/DemoWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaultProps: Partial<FluidConfigLeva> = {
@@ -44,7 +44,7 @@ export function ImageExample() {
   );
 
   return (
-    <ExampleWrapper store={store}>
+    <DemoWrapper store={store}>
       <FluidImage
         ref={ref}
         src={src}
@@ -53,6 +53,6 @@ export function ImageExample() {
         preset={preset}
         backgroundColor={backgroundColor}
       />
-    </ExampleWrapper>
+    </DemoWrapper>
   );
 }

@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import { FluidText } from 'fluidity-js';
 import { button, useControls, useCreateStore } from 'leva';
 
-import { ExampleWrapper } from '../components/ExampleWrapper';
+import { DemoWrapper } from '../components/DemoWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaultProps: Partial<FluidConfigLeva> = {
@@ -33,8 +33,8 @@ export function TextExample() {
   );
 
   return (
-    <ExampleWrapper store={store}>
+    <DemoWrapper store={store}>
       <FluidText ref={ref} fontSize={400} preset={preset} backgroundColor={backgroundColor} {...props} />
-    </ExampleWrapper>
+    </DemoWrapper>
   );
 }

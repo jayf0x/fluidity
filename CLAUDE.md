@@ -10,8 +10,10 @@ WebGL fluid simulation React library. Navier-Stokes solver (advection, divergenc
 fluidity/
 ├── src/                     # Library source (.ts/.tsx — fully typed)
 │   ├── index.ts             # Exports
+│   ├── globals.d.ts         # Ambient global types (FluidConfig, FluidHandle, etc.) — no import needed
+│   ├── index.d.ts           # Public module declarations for consumers (re-exports globals.d.ts)
 │   ├── core/
-│   │   ├── config.ts        # DEFAULT_CONFIG + mergeConfig
+│   │   ├── config.ts        # DEFAULT_CONFIG, DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_*, mergeConfig
 │   │   ├── gl-utils.ts      # initWebGL, Program class, createFBO, createDoubleFBO, createBlit
 │   │   ├── shaders.ts       # All GLSL shader strings
 │   │   ├── simulation.ts    # FluidSimulation class (main simulation loop)
@@ -22,10 +24,12 @@ fluidity/
 │       ├── FluidText.tsx    # React component (forwardRef)
 │       ├── FluidImage.tsx   # React component (forwardRef), imageSize prop
 │       └── useFluid.ts      # Hook: creates canvas programmatically, mounts FluidController
-├── types/index.d.ts         # Manual TypeScript declarations (public API)
-├── tests/                   # Vitest + jsdom tests (68 total)
+├── tests/                   # Vitest + jsdom tests (75 total)
 │   ├── setup.js             # WebGL mock, canvas mock, Worker/OffscreenCanvas shims
 │   ├── core/
+│   │   ├── simulation.test.js
+│   │   ├── config.test.js
+│   │   └── gl-utils.test.js
 │   ├── fluid-controller.test.js
 │   ├── exports.test.js
 │   └── react/
@@ -50,7 +54,9 @@ fluidity/
 
 ## Key commands
 
-A special command `bun test:claude` is added for you to run tests ("test:claude": "PATH=~/.nvm/versions/node/v20.19.6/bin:$PATH npx vitest run 2>&1 | tail -8",)
+A special command `bun test:claude` is added for you to run tests ("test:claude": "PATH=~/.nvm/versions/node/v20.19.6/bin:$PATH npx vitest run 2>&1 | tail -8",).
+
+> **Only runs tests if you changed actual logic** (not just a comment or markdown files).
 
 ```bash
 # Demo (from /demo)
@@ -65,13 +71,13 @@ bun test:claude # runs tests
 ```ts
 interface FluidHandle {
   reset(): void;
-  updateLocation(opts: { x: number; y: number; strength?: number }): void;
+  move(opts: { x: number; y: number; strength?: number }): void;
   splat(x: number, y: number, vx: number, vy: number, strength?: number): void;
   updateConfig(config: Partial<FluidConfig>): void;
 }
 ```
 
-`splat()` writes directly to velocity+density FBOs. Safe N×/frame. Use for programmatic paths (attractors, particles). `updateLocation` goes through mouse-state machine (one splat per sim step, last-write-wins).
+`splat()` writes directly to velocity+density FBOs. Safe N×/frame. Use for programmatic paths (attractors, particles). `move` goes through mouse-state machine (one splat per sim step, last-write-wins).
 
 `FluidHandle` is a plain interface (no `extends Element`). `useImperativeHandle` returns the 4 methods above; extending a DOM type would make the factory un-satisfiable.
 
@@ -88,28 +94,28 @@ interface FluidHandle {
 }
 ```
 
-## Component defaults (DEFAULT_PROPS in config.ts)
+## Component defaults (config.ts)
 
-Centralised in `src/core/config.ts` and re-exported from `src/index.ts`. All component prop defaults live here so they are defined once and referenced by the components, FluidController, and the public type declaration.
+Split into three typed constants in `src/core/config.ts`, re-exported from `src/index.ts`.
 
 ```ts
-DEFAULT_PROPS = {
-  // FluidImage
-  effect: 0,
-  imageSize: 'cover',
-  // FluidText
-  fontSize: 100,
-  color: '#ffffff',
-  fontFamily: 'sans-serif',
-  fontWeight: 900,
-  textQuality: 2,
-  // Shared
+DEFAULT_PROPS_SHARED = {
   backgroundColor: '#0a0a0a',
   backgroundSize: 'cover',
   isMouseEnabled: true,
   isWorkerEnabled: true,
 };
+DEFAULT_PROPS_IMAGE = { ...DEFAULT_PROPS_SHARED, effect: 0, imageSize: 'cover' };
+DEFAULT_PROPS_TEXT = {
+  ...DEFAULT_PROPS_SHARED,
+  fontSize: 100,
+  color: '#ffffff',
+  fontFamily: 'sans-serif',
+  fontWeight: 900,
+};
 ```
+
+`DEFAULT_CONFIG_TEXT` — FluidText-specific simulation defaults (higher pressure, curl, splatForce etc.) used as the base config in `FluidText` instead of `DEFAULT_CONFIG`.
 
 ## Simulation pipeline (per frame, simulation.ts #step)
 
@@ -157,9 +163,9 @@ WebGL context: `alpha: true`. `gl.clearColor(0,0,0,0)`. Display shader outputs p
 
 **Background colour contamination fix (shaders.ts):** In non-coverage areas the `uBackground` texture is empty black canvas. All background samples are masked by coverage: `mix(uWaterColor, texture2D(uBackground, uv).rgb, coverage)`. This means fluid in transparent areas uses `uWaterColor` as its base instead of black, so the CSS `backgroundColor` bleeds through correctly regardless of `waterColor` or algorithm.
 
-### Text quality (textQuality prop)
+### DPR-aware canvas sizing
 
-`FluidText` accepts `textQuality: number` (default `2`). `createTextTextures` renders the 2D canvas at `width × textQuality` / `height × textQuality` with font size scaled proportionally, then uploads that larger canvas to WebGL. GPU bilinear filtering downsamples it at display time → antialiased edges. Set to `1` for original behaviour. Stored in `TextSourceOpts` so it travels through the worker message unchanged.
+All canvas sizing is DPR-aware. `useFluid` multiplies `clientWidth/clientHeight` by `window.devicePixelRatio` when setting initial canvas dimensions and in the ResizeObserver callback. `FluidController.#initWorker` computes `width = clientWidth * dpr` before transferring the canvas. The simulation stores `#dpr` (set from `window.devicePixelRatio` or passed via the `resize(w, h, dpr)` call for the worker path). Mouse/splat coordinates (CSS pixels) are multiplied by `#dpr` before normalising to [0,1] UV space so cursor alignment is correct on HiDPI screens.
 
 ### Preset reactivity
 
@@ -175,9 +181,10 @@ All `src/**` imports use no file extension (e.g. `from './config'` not `from './
 
 ## Tests
 
-68 tests. All must pass before committing. Run with `bun test:claude` (see Key commands).
+75 tests. All must pass before committing. Run with `bun test:claude` (see Key commands).
 
 - `tests/setup.js` — WebGL mock (`createWebGLMock`), canvas mock (`createCanvasMock`). Mock includes `clearColor`, `clear`, `COLOR_BUFFER_BIT`, `TEXTURE0`–`TEXTURE4`.
 - React component mocks: `vi.mock('../../src/fluid-controller.ts', ...)` — note `.ts` extension required.
 - Worker mock: `vi.mock('../src/worker/index.ts?worker&inline', ...)`
 - `FluidText`/`FluidImage` are forwardRef ExoticComponents — check `$$typeof`, not `typeof`.
+- `tests/core/simulation.test.js` — simulation lifecycle: destroy-during-fetch, resize-triggers-loop, URL handling.

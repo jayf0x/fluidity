@@ -1,10 +1,3 @@
-## CORE/BUG: documentation about web working with multiple instances is inaccurate
-
-Currently in readme and `demo/src/examples/SplitExample.tsx` it's documented that you need to disable the web-worker if you want to use 2 elements.
-But it works fine without disabling this. However there was an articles that highlighted that this could cause issues, but that might already be outdated by modern standards. Research this.
-
-Task: find out where this confusion comes from and resolve it. Update documentation and code (eg. `/demo/src/examples/SplitExample.tsx`) accordingly.
-
 ## CORE/BUG: text in range of splatRadius flickers
 
 Setup: background=black, text-color=white.
@@ -33,6 +26,10 @@ Either to have this source of blackness set to the text-color so there are no co
 
 Or maybe make the text itself just 1px larger or the backdrop text 1px smaller?
 
+## CORE/BUG backgroundSrc not working for text
+
+tbd.
+
 ---
 
 ## CORE/FEATURE: native string color support
@@ -53,4 +50,6 @@ Currently no support to move text to left or align on right.
 Task: add prop `textAlign` to `<FluidText` to update text positioning in `src/core/textures.ts`.
 Default remains 'center'.
 
-## CORE/FEATURE
+## CORE/FEATURE: Support transparent colors
+
+tbd.
