@@ -9,7 +9,6 @@ import { useFluidControls } from '../hooks/useFluidControls';
 const defaultProps: Partial<FluidConfigLeva> = {
   densityDissipation: 0.99,
   velocityDissipation: 0.99,
-  pressureIterations: 21.0,
   curl: 0.0,
   splatRadius: 0.005,
   splatForce: 0.5,

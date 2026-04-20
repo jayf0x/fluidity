@@ -83,7 +83,6 @@ export function createTextTextures(
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, width, height);
     }
-    ctx.shadowColor = fillColor;
     ctx.fillStyle = fillColor;
     ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
     ctx.textAlign = 'center';

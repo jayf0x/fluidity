@@ -164,8 +164,9 @@ export const displayShader = /* glsl */ `
   uniform int   uAlgorithm;
 
   void main () {
-    float density  = max(texture2D(uTexture,   vUv).r, 0.0);
     float obs      = texture2D(uObstacle,  vUv).r;
+    // Mask density inside obstacles so splats don't flicker the text/image content.
+    float density  = max(texture2D(uTexture, vUv).r, 0.0) * (1.0 - step(0.5, obs));
     float coverage = texture2D(uCoverage,  vUv).r;
 
     float dL = max(texture2D(uTexture, vUv - vec2(texelSize.x * 2.0, 0.0)).r, 0.0);

@@ -1,20 +1,3 @@
-## CORE/BUG: text in range of splatRadius flickers
-
-Setup: background=black, text-color=white.
-
-Text in range of the cursor (aka. `splatRadius`) flickers.
-The flicker gets more heavy when the cursor is closer. When fully on top the flicker is most visible.
-
-Conditions for flicker:
-
-- in range fo text. The close the more the flicker is visible.
-- cursor needs to move. No movement (aka. no new splats), no flicker.
-- only visible with `<FluidText`.
-
-Possibly related or cause:
-I can see the `splatRadius` as a radial shadow on top of the text.
-This might be the cause of the splat as when the cursor moves, the shadow is not visible and we see the full white text or letter. But when the cursor is idle, the 'shadow' appears. This could cause the flicker as we switch from shadow to no-shadow when a new splat is triggered.
-
 ## CORE/BUG: black outline on Text
 
 On `<FluidText` there is a tiny black border on the text. Even visible when setting all colors (background, text, shine...) to white, there is still a tiny black border.
