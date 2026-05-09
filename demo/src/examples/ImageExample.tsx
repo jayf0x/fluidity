@@ -29,7 +29,7 @@ export const IMAGE_OPTIONS = {
 export function ImageExample() {
   const ref = useRef<FluidHandle>(null);
   const store = useCreateStore();
-  const { preset, backgroundColor } = useFluidControls(ref, store, defaultProps);
+  const { preset, backgroundColor, quality } = useFluidControls(ref, store, defaultProps);
 
   const { src, imageSize } = useControls(
     'settings',
@@ -51,6 +51,7 @@ export function ImageExample() {
         imageSize={imageSize}
         preset={preset}
         backgroundColor={backgroundColor}
+        quality={quality}
       />
     </DemoWrapper>
   );

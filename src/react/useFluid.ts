@@ -14,10 +14,10 @@ import { FluidController } from '../fluid-controller';
  */
 export function useFluid(
   containerRef: RefObject<HTMLElement | null>,
-  { isWorkerEnabled = true, config = {} }: { isWorkerEnabled?: boolean; config?: Partial<FluidConfig> } = {}
+  { isWorkerEnabled = true, quality = {}, config = {} }: { isWorkerEnabled?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
 ): RefObject<FluidController | null> {
   const controllerRef = useRef<FluidController | null>(null);
-  const initOptsRef = useRef({ isWorkerEnabled, config });
+  const initOptsRef = useRef({ isWorkerEnabled, quality, config });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -31,7 +31,9 @@ export function useFluid(
     container.appendChild(canvas);
 
     // Read initial dimensions from the container (valid after paint in useEffect)
-    const dpr = window.devicePixelRatio || 1;
+    const { isWorkerEnabled, quality: q, config: initConfig } = initOptsRef.current;
+    const clampedDpr = Math.max(0.1, Math.min(1, q.dpr ?? 1));
+    const dpr = (window.devicePixelRatio || 1) * clampedDpr;
     const rect = container.getBoundingClientRect();
     const initW = Math.round((rect.width || container.clientWidth) * dpr) || 0;
     const initH = Math.round((rect.height || container.clientHeight) * dpr) || 0;
@@ -47,16 +49,15 @@ export function useFluid(
       );
     }
 
-    const { isWorkerEnabled, config: initConfig } = initOptsRef.current;
-    const controller = new FluidController(canvas, { isWorkerEnabled, config: initConfig });
+    const controller = new FluidController(canvas, { isWorkerEnabled, quality: q, config: initConfig });
     controllerRef.current = controller;
 
     // Forward container resizes to the simulation
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const dpr = window.devicePixelRatio || 1;
+        const resizeDpr = (window.devicePixelRatio || 1) * clampedDpr;
         const { inlineSize: w, blockSize: h } = entry.contentBoxSize[0];
-        controller.resize(Math.round(w * dpr), Math.round(h * dpr));
+        controller.resize(Math.round(w * resizeDpr), Math.round(h * resizeDpr));
       }
     });
     ro.observe(container);

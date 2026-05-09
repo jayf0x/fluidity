@@ -47,6 +47,8 @@ export class FluidSimulation {
   #simWidth = 0;
   #simHeight = 0;
   #dpr = 1;
+  #qualityDpr = 1;
+  #simScale = 0.5;
 
   #density: DoubleFBO | null = null;
   #velocity: DoubleFBO | null = null;
@@ -71,8 +73,10 @@ export class FluidSimulation {
   #isReady = false;
   #destroyed = false;
 
-  constructor(canvas: HTMLCanvasElement | OffscreenCanvas, config: Partial<FluidConfig> = {}) {
+  constructor(canvas: HTMLCanvasElement | OffscreenCanvas, config: Partial<FluidConfig> = {}, quality: FluidQuality = {}) {
     this.#canvas = canvas;
+    this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
+    this.#simScale = Math.max(0.1, Math.min(1, quality.sim ?? 0.5));
     this.#config = mergeConfig(config);
 
     const { gl, ext } = initWebGL(canvas);
@@ -173,8 +177,8 @@ export class FluidSimulation {
       if (height === undefined || height <= 0) return;
       this.#width = this.#canvas.width = width;
       this.#height = this.#canvas.height = height;
-      this.#simWidth = width >> 1;
-      this.#simHeight = height >> 1;
+      this.#simWidth = Math.max(1, Math.round(width * this.#simScale));
+      this.#simHeight = Math.max(1, Math.round(height * this.#simScale));
       this.#initFBOs();
     } else {
       this.#applyDimensions();
@@ -239,7 +243,7 @@ export class FluidSimulation {
   #applyDimensions(): void {
     const canvas = this.#canvas;
     if ('clientWidth' in canvas && (canvas as HTMLCanvasElement).clientWidth > 0) {
-      this.#dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+      this.#dpr = ((typeof window !== 'undefined' && window.devicePixelRatio) || 1) * this.#qualityDpr;
       this.#width = (canvas as HTMLCanvasElement).width = Math.round((canvas as HTMLCanvasElement).clientWidth * this.#dpr);
       this.#height = (canvas as HTMLCanvasElement).height = Math.round((canvas as HTMLCanvasElement).clientHeight * this.#dpr);
     } else {
@@ -249,8 +253,8 @@ export class FluidSimulation {
 
     if (this.#width === 0 || this.#height === 0) return;
 
-    this.#simWidth = this.#width >> 1;
-    this.#simHeight = this.#height >> 1;
+    this.#simWidth = Math.max(1, Math.round(this.#width * this.#simScale));
+    this.#simHeight = Math.max(1, Math.round(this.#height * this.#simScale));
     this.#initFBOs();
   }
 

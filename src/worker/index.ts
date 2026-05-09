@@ -30,16 +30,17 @@ self.onmessage = async (e: MessageEvent) => {
   try {
     switch (type) {
       case 'init': {
-        const { canvas, width, height, config, dpr } = data as {
+        const { canvas, width, height, config, dpr, quality } = data as {
           canvas: OffscreenCanvas;
           width: number;
           height: number;
           config: Record<string, unknown>;
           dpr: number;
+          quality?: FluidQuality;
         };
         canvas.width = width;
         canvas.height = height;
-        sim = new FluidSimulation(canvas, config);
+        sim = new FluidSimulation(canvas, config, quality ?? {});
         sim.resize(width, height, dpr || 1);
         self.postMessage({ type: 'ready' });
         break;

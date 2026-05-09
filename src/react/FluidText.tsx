@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import { DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_TEXT, mergeConfig } from '../core/config';
+import { DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_SHARED, DEFAULT_PROPS_TEXT, mergeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
 import { useFluid } from './useFluid';
 
@@ -22,12 +22,14 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     backgroundSize = DEFAULT_PROPS_TEXT.backgroundSize,
     isMouseEnabled = DEFAULT_PROPS_TEXT.isMouseEnabled,
     isWorkerEnabled = DEFAULT_PROPS_TEXT.isWorkerEnabled,
+    quality = DEFAULT_PROPS_SHARED.quality as FluidQuality,
   },
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const controllerRef = useFluid(containerRef, {
     isWorkerEnabled,
+    quality,
     config: mergeConfig({ ...config, ...(algorithm ? { algorithm } : {}) }, preset, DEFAULT_CONFIG_TEXT),
   });
 
@@ -37,11 +39,11 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
       reset() {
         controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight });
       },
-      move({ x, y, strength = 1 }: { x: number; y: number; strength?: number }) {
+      move(x: number, y: number, strength = 1) {
         controllerRef.current?.handleMove(x, y, strength);
       },
-      splat(x: number, y: number, vx: number, vy: number, strength = 1) {
-        controllerRef.current?.splat(x, y, vx, vy, strength);
+      splat(x: number, y: number, velocityX: number, velocityY: number, strength = 1) {
+        controllerRef.current?.splat(x, y, velocityX, velocityY, strength);
       },
       updateConfig(cfg) {
         controllerRef.current?.updateConfig(cfg);

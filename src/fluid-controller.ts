@@ -9,19 +9,25 @@ export class FluidController {
   #worker: Worker | null = null;
   #sim: FluidSimulation | null = null;
   #useWorker: boolean;
-  #canvas: HTMLCanvasElement;
+  #qualityDpr: number;
+  #qualitySim: number;
 
   constructor(
     canvas: HTMLCanvasElement,
-    { isWorkerEnabled = true, config = {} }: { isWorkerEnabled?: boolean; config?: Partial<FluidConfig> } = {}
+    {
+      isWorkerEnabled = true,
+      quality = {},
+      config = {},
+    }: { isWorkerEnabled?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
   ) {
-    this.#canvas = canvas;
+    this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
+    this.#qualitySim = Math.max(0.1, Math.min(1, quality.sim ?? 0.5));
     this.#useWorker = isWorkerEnabled && WORKER_SUPPORTED;
 
     if (this.#useWorker) {
       this.#initWorker(canvas, config);
     } else {
-      this.#sim = new FluidSimulation(canvas, config);
+      this.#sim = new FluidSimulation(canvas, config, { dpr: this.#qualityDpr, sim: this.#qualitySim });
     }
   }
 
@@ -37,7 +43,11 @@ export class FluidController {
     }
   }
 
-  setImageSource(src: string, effect = DEFAULT_PROPS_IMAGE.effect, size: string | number = DEFAULT_PROPS_IMAGE.imageSize): void {
+  setImageSource(
+    src: string,
+    effect = DEFAULT_PROPS_IMAGE.effect,
+    size: string | number = DEFAULT_PROPS_IMAGE.imageSize
+  ): void {
     if (this.#worker) {
       // Resolve relative URLs before passing to the worker — blob workers have no valid base URL
       const absoluteSrc = new URL(src, location.href).href;
@@ -93,11 +103,11 @@ export class FluidController {
   }
 
   resize(width: number, height: number): void {
+    const effectiveDpr = ((typeof window !== 'undefined' && window.devicePixelRatio) || 1) * this.#qualityDpr;
     if (this.#worker) {
-      const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
-      this.#worker.postMessage({ type: 'resize', width, height, dpr });
+      this.#worker.postMessage({ type: 'resize', width, height, dpr: effectiveDpr });
     } else {
-      this.#sim!.resize(width, height);
+      this.#sim!.resize(width, height, effectiveDpr);
     }
   }
 
@@ -118,7 +128,7 @@ export class FluidController {
   // ---------------------------------------------------------------------------
 
   #initWorker(canvas: HTMLCanvasElement, config: Partial<FluidConfig>): void {
-    const dpr = (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
+    const dpr = ((typeof window !== 'undefined' && window.devicePixelRatio) || 1) * this.#qualityDpr;
     const width = Math.round(canvas.clientWidth * dpr);
     const height = Math.round(canvas.clientHeight * dpr);
     canvas.width = width;
@@ -133,7 +143,7 @@ export class FluidController {
           'This is expected in React StrictMode development.'
       );
       this.#useWorker = false;
-      this.#sim = new FluidSimulation(canvas, config);
+      this.#sim = new FluidSimulation(canvas, config, { dpr: this.#qualityDpr, sim: this.#qualitySim });
       return;
     }
 
@@ -147,6 +157,9 @@ export class FluidController {
       }
     };
 
-    worker.postMessage({ type: 'init', canvas: offscreen, width, height, config, dpr }, [offscreen]);
+    worker.postMessage(
+      { type: 'init', canvas: offscreen, width, height, config, dpr, quality: { sim: this.#qualitySim } },
+      [offscreen]
+    );
   }
 }

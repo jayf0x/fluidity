@@ -193,7 +193,7 @@ describe('FluidController — main-thread mode (isWorkerEnabled=false)', () => {
     expect(sim.updateConfig).toHaveBeenCalledWith({ curl: 0.5 });
 
     ctrl.resize(800, 600);
-    expect(sim.resize).toHaveBeenCalledWith(800, 600);
+    expect(sim.resize).toHaveBeenCalledWith(800, 600, expect.any(Number));
 
     ctrl.destroy();
     expect(sim.destroy).toHaveBeenCalledOnce();

@@ -28,11 +28,14 @@ export const DEFAULT_CONFIG_TEXT: FluidConfig = {
   glowColor: [0, 0.502, 1.0],
 };
 
+export const DEFAULT_QUALITY: FluidQuality = { dpr: 1, sim: 0.5 };
+
 export const DEFAULT_PROPS_SHARED = {
   backgroundColor: '#0a0a0a',
   backgroundSize: 'cover' as string | number,
   isMouseEnabled: true,
   isWorkerEnabled: true,
+  quality: DEFAULT_QUALITY,
 } as const;
 
 export const DEFAULT_PROPS_IMAGE = {

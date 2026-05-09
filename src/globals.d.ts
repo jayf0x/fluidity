@@ -2,6 +2,18 @@
 
 type FluidAlgorithm = 'standard' | 'glass' | 'ink' | 'aurora' | 'ripple';
 
+/**
+ * Granular performance/quality controls. Both axes are independent — you can
+ * run a sharp display at a coarser simulation, or vice versa.
+ * Init-only: changes after mount are ignored.
+ */
+interface FluidQuality {
+  /** devicePixelRatio multiplier for canvas backing resolution. Range [0.1, 1]. Default 1 (native). On Retina, 0.5 → 1× pixels (75% less fill). */
+  dpr?: number;
+  /** Simulation FBO size as a fraction of canvas size. Range [0.1, 1]. Default 0.5 (current behavior). Higher = more fluid detail, more GPU. */
+  sim?: number;
+}
+
 interface FluidConfig {
   densityDissipation: number;
   velocityDissipation: number;
@@ -22,8 +34,8 @@ type PresetKey = 'calm' | 'sand' | 'wave' | 'neon' | 'smoke';
 
 interface FluidHandle {
   reset(): void;
-  move(opts: { x: number; y: number; strength?: number }): void;
-  splat(x: number, y: number, vx: number, vy: number, strength?: number): void;
+  move(x: number, y: number, strength?: number): void;
+  splat(x: number, y: number, velocityX: number, velocityY: number, strength?: number): void;
   updateConfig(config: Partial<FluidConfig>): void;
 }
 
@@ -33,6 +45,7 @@ interface FluidBaseProps {
   config?: Partial<FluidConfig>;
   isMouseEnabled?: boolean;
   isWorkerEnabled?: boolean;
+  quality?: FluidQuality;
   preset?: PresetKey;
   algorithm?: FluidAlgorithm;
   backgroundColor?: string;

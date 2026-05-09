@@ -22,7 +22,7 @@ const defaultProps: Partial<FluidConfigLeva> = {
 export function TextExample() {
   const ref = useRef<FluidHandle>(null);
   const store = useCreateStore();
-  const { preset, backgroundColor } = useFluidControls(ref, store, defaultProps);
+  const { preset, backgroundColor, quality } = useFluidControls(ref, store, defaultProps);
 
   const props = useControls(
     'settings',
@@ -36,7 +36,14 @@ export function TextExample() {
 
   return (
     <DemoWrapper store={store}>
-      <FluidText ref={ref} fontFamily="Ubuntu" preset={preset} backgroundColor={backgroundColor} {...props} />
+      <FluidText
+        // isWorkerEnabled={false}
+        ref={ref}
+        fontFamily="Ubuntu"
+        preset={preset}
+        backgroundColor={backgroundColor}
+        {...props}
+      />
     </DemoWrapper>
   );
 }

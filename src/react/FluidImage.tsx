@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import { DEFAULT_PROPS_IMAGE, mergeConfig } from '../core/config';
+import { DEFAULT_PROPS_IMAGE, DEFAULT_PROPS_SHARED, mergeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
 import { useFluid } from './useFluid';
 
@@ -20,12 +20,14 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     backgroundSize = DEFAULT_PROPS_IMAGE.backgroundSize,
     isMouseEnabled = DEFAULT_PROPS_IMAGE.isMouseEnabled,
     isWorkerEnabled = DEFAULT_PROPS_IMAGE.isWorkerEnabled,
+    quality = DEFAULT_PROPS_SHARED.quality as FluidQuality,
   },
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const controllerRef = useFluid(containerRef, {
     isWorkerEnabled,
+    quality,
     config: mergeConfig({ ...config, ...(algorithm ? { algorithm } : {}) }, preset),
   });
 
@@ -35,11 +37,11 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
       reset() {
         if (src) controllerRef.current?.setImageSource(src, effect, imageSize);
       },
-      move({ x, y, strength = 1 }: { x: number; y: number; strength?: number }) {
+      move(x, y, strength = 1) {
         controllerRef.current?.handleMove(x, y, strength);
       },
-      splat(x: number, y: number, vx: number, vy: number, strength = 1) {
-        controllerRef.current?.splat(x, y, vx, vy, strength);
+      splat(x: number, y: number, velocityX: number, velocityY: number, strength = 1) {
+        controllerRef.current?.splat(x, y, velocityX, velocityY, strength);
       },
       updateConfig(cfg) {
         controllerRef.current?.updateConfig(cfg);

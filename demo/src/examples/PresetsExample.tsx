@@ -17,7 +17,7 @@ const mappedPresetColor: Record<PresetKey, string> = {
 export function PresetsExample() {
   const ref = useRef<FluidHandle>(null);
   const store = useCreateStore();
-  const { set, backgroundColor } = useFluidControls(ref, store);
+  const { set, backgroundColor, quality } = useFluidControls(ref, store);
 
   const [{ preset }] = useControls(
     'settings',
@@ -50,6 +50,7 @@ export function PresetsExample() {
         fontSize={350}
         color={mappedPresetColor[preset]}
         backgroundColor={backgroundColor}
+        quality={quality}
       />
     </DemoWrapper>
   );
