@@ -42,6 +42,7 @@ export function TextExample() {
         fontFamily="Ubuntu"
         preset={preset}
         backgroundColor={backgroundColor}
+        quality={quality}
         {...props}
       />
     </DemoWrapper>
