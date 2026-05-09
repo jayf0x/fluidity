@@ -102,6 +102,12 @@ self.onmessage = async (e: MessageEvent) => {
         break;
       }
 
+      case 'updateQuality': {
+        if (!sim) return;
+        sim.updateQuality(data.quality as FluidQuality);
+        break;
+      }
+
       case 'updateConfig': {
         if (!sim) return;
         sim.updateConfig(data.config as Record<string, unknown>);

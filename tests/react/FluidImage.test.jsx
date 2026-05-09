@@ -102,7 +102,7 @@ describe('FluidImage', () => {
     await act(async () => {
       render(<FluidImage ref={ref} src="https://example.com/img.jpg" />);
     });
-    ref.current.move({ x: 50, y: 75 });
+    ref.current.move(50, 75);
     expect(mockController.handleMove).toHaveBeenCalledWith(50, 75, 1);
   });
 

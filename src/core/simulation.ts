@@ -170,6 +170,11 @@ export class FluidSimulation {
     this.#density!.swap();
   }
 
+  updateQuality(quality: FluidQuality): void {
+    if (quality.dpr !== undefined) this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr));
+    if (quality.sim !== undefined) this.#simScale = Math.max(0.1, Math.min(1, quality.sim));
+  }
+
   resize(width?: number, height?: number, dpr?: number): void {
     if (dpr !== undefined) this.#dpr = dpr;
     else if (typeof window !== 'undefined' && window.devicePixelRatio) this.#dpr = window.devicePixelRatio;

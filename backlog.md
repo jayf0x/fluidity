@@ -33,6 +33,6 @@ Currently no support to move text to left or align on right.
 Task: add prop `textAlign` to `<FluidText` to update text positioning in `src/core/textures.ts`.
 Default remains 'center'.
 
-## CORE/FEATURE: Support transparent colors
+## CORE/FEATURE: Support transparency in colors
 
 tbd.

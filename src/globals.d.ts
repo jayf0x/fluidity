@@ -5,7 +5,7 @@ type FluidAlgorithm = 'standard' | 'glass' | 'ink' | 'aurora' | 'ripple';
 /**
  * Granular performance/quality controls. Both axes are independent — you can
  * run a sharp display at a coarser simulation, or vice versa.
- * Init-only: changes after mount are ignored.
+ * Reactive: changes after mount are applied on the next animation frame.
  */
 interface FluidQuality {
   /** devicePixelRatio multiplier for canvas backing resolution. Range [0.1, 1]. Default 1 (native). On Retina, 0.5 → 1× pixels (75% less fill). */

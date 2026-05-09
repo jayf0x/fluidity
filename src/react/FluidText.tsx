@@ -22,7 +22,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     backgroundSize = DEFAULT_PROPS_TEXT.backgroundSize,
     isMouseEnabled = DEFAULT_PROPS_TEXT.isMouseEnabled,
     isWorkerEnabled = DEFAULT_PROPS_TEXT.isWorkerEnabled,
-    quality = DEFAULT_PROPS_SHARED.quality as FluidQuality,
+    quality = DEFAULT_PROPS_SHARED.quality,
   },
   ref
 ) {

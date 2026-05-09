@@ -18,6 +18,11 @@ export function useFluid(
 ): RefObject<FluidController | null> {
   const controllerRef = useRef<FluidController | null>(null);
   const initOptsRef = useRef({ isWorkerEnabled, quality, config });
+  const clampedDprRef = useRef(Math.max(0.1, Math.min(1, quality.dpr ?? 1)));
+  const prevQualityRef = useRef<{ dpr: number | undefined; sim: number | undefined }>({
+    dpr: quality.dpr,
+    sim: quality.sim,
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -32,8 +37,7 @@ export function useFluid(
 
     // Read initial dimensions from the container (valid after paint in useEffect)
     const { isWorkerEnabled, quality: q, config: initConfig } = initOptsRef.current;
-    const clampedDpr = Math.max(0.1, Math.min(1, q.dpr ?? 1));
-    const dpr = (window.devicePixelRatio || 1) * clampedDpr;
+    const dpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
     const rect = container.getBoundingClientRect();
     const initW = Math.round((rect.width || container.clientWidth) * dpr) || 0;
     const initH = Math.round((rect.height || container.clientHeight) * dpr) || 0;
@@ -52,10 +56,10 @@ export function useFluid(
     const controller = new FluidController(canvas, { isWorkerEnabled, quality: q, config: initConfig });
     controllerRef.current = controller;
 
-    // Forward container resizes to the simulation
+    // Forward container resizes to the simulation — reads clampedDprRef so DPR quality changes are picked up
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const resizeDpr = (window.devicePixelRatio || 1) * clampedDpr;
+        const resizeDpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
         const { inlineSize: w, blockSize: h } = entry.contentBoxSize[0];
         controller.resize(Math.round(w * resizeDpr), Math.round(h * resizeDpr));
       }
@@ -69,6 +73,22 @@ export function useFluid(
       controllerRef.current = null;
     };
   }, []); // intentionally empty — one-time init per mount
+
+  // Propagate quality changes after mount
+  useEffect(() => {
+    clampedDprRef.current = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
+    const prev = prevQualityRef.current;
+    prevQualityRef.current = { dpr: quality.dpr, sim: quality.sim };
+    const controller = controllerRef.current;
+    const container = containerRef.current;
+    if (!controller || !container || (prev.dpr === quality.dpr && prev.sim === quality.sim)) return;
+    controller.updateQuality(quality);
+    const resizeDpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    if (w > 0 && h > 0) controller.resize(Math.round(w * resizeDpr), Math.round(h * resizeDpr));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quality.dpr, quality.sim]);
 
   return controllerRef;
 }

@@ -94,6 +94,16 @@ export class FluidController {
   // Config + control
   // ---------------------------------------------------------------------------
 
+  updateQuality(quality: FluidQuality): void {
+    this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? this.#qualityDpr));
+    this.#qualitySim = Math.max(0.1, Math.min(1, quality.sim ?? this.#qualitySim));
+    if (this.#worker) {
+      this.#worker.postMessage({ type: 'updateQuality', quality: { dpr: this.#qualityDpr, sim: this.#qualitySim } });
+    } else {
+      this.#sim!.updateQuality(quality);
+    }
+  }
+
   updateConfig(config: Partial<FluidConfig>): void {
     if (this.#worker) {
       this.#worker.postMessage({ type: 'updateConfig', config });
@@ -158,7 +168,7 @@ export class FluidController {
     };
 
     worker.postMessage(
-      { type: 'init', canvas: offscreen, width, height, config, dpr, quality: { sim: this.#qualitySim } },
+      { type: 'init', canvas: offscreen, width, height, config, dpr, quality: { dpr: this.#qualityDpr, sim: this.#qualitySim } },
       [offscreen]
     );
   }

@@ -20,7 +20,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     backgroundSize = DEFAULT_PROPS_IMAGE.backgroundSize,
     isMouseEnabled = DEFAULT_PROPS_IMAGE.isMouseEnabled,
     isWorkerEnabled = DEFAULT_PROPS_IMAGE.isWorkerEnabled,
-    quality = DEFAULT_PROPS_SHARED.quality as FluidQuality,
+    quality = DEFAULT_PROPS_SHARED.quality,
   },
   ref
 ) {
@@ -91,7 +91,10 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     if (!isMouseEnabled) return;
     const el = containerRef.current;
     if (!el) return;
-
+    // TODO: const rect = el.getBoundingClientRect(); is called on every move, this should be outside fn
+    // but then we do need to update on resize
+    // possibly add a ref to keep track of width and update this useEffect when width changes
+    // possibly add a watcher on the `containerRef` and add a prop to optionally disable
     const onMouseMove = (e: MouseEvent) => {
       const rect = el.getBoundingClientRect();
       controllerRef.current?.handleMove(e.clientX - rect.left, e.clientY - rect.top, 2);
