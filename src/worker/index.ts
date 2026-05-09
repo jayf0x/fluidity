@@ -6,13 +6,14 @@
  * exposed as message types.
  *
  * Message types (main → worker):
- *   init            { canvas: OffscreenCanvas, width, height, config }
+ *   init            { canvas: OffscreenCanvas, width, height, config, dpr, quality: { dpr, sim } }
  *   setTextSource   { opts: TextSourceOpts }
  *   setImageSource  { src: string, effect?: number, size?: string | number }
  *   setImageBitmap  { bitmap: ImageBitmap, effect?: number, size?: string | number }  (transferable)
  *   setBackground   { bitmap: ImageBitmap | null, size?: string | number }  (transferable if bitmap)
  *   move            { x, y, strength? }
- *   resize          { width, height }
+ *   resize          { width, height, dpr }
+ *   updateQuality   { quality: { dpr, sim } }
  *   updateConfig    { config }
  *   destroy
  *

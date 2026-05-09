@@ -99,11 +99,14 @@ interface FluidHandle {
 Split into three typed constants in `src/core/config.ts`, re-exported from `src/index.ts`.
 
 ```ts
+DEFAULT_QUALITY = { dpr: 1, sim: 0.5 };
+
 DEFAULT_PROPS_SHARED = {
   backgroundColor: '#0a0a0a',
   backgroundSize: 'cover',
   isMouseEnabled: true,
   isWorkerEnabled: true,
+  quality: DEFAULT_QUALITY,
 };
 DEFAULT_PROPS_IMAGE = { ...DEFAULT_PROPS_SHARED, effect: 0, imageSize: 'cover' };
 DEFAULT_PROPS_TEXT = {
@@ -165,11 +168,22 @@ WebGL context: `alpha: true`. `gl.clearColor(0,0,0,0)`. Display shader outputs p
 
 ### DPR-aware canvas sizing
 
-All canvas sizing is DPR-aware. `useFluid` multiplies `clientWidth/clientHeight` by `window.devicePixelRatio` when setting initial canvas dimensions and in the ResizeObserver callback. `FluidController.#initWorker` computes `width = clientWidth * dpr` before transferring the canvas. The simulation stores `#dpr` (set from `window.devicePixelRatio` or passed via the `resize(w, h, dpr)` call for the worker path). Mouse/splat coordinates (CSS pixels) are multiplied by `#dpr` before normalising to [0,1] UV space so cursor alignment is correct on HiDPI screens.
+All canvas sizing is DPR-aware. `useFluid` multiplies `clientWidth/clientHeight` by `window.devicePixelRatio * quality.dpr` when setting initial canvas dimensions. The ResizeObserver reads `clampedDprRef` (a ref, not a closure) so it always uses the current DPR quality factor. `FluidController.#initWorker` computes `width = clientWidth * effectiveDpr` before transferring the canvas. The simulation stores `#dpr` (set from `window.devicePixelRatio` or passed via the `resize(w, h, dpr)` call for the worker path). Mouse/splat coordinates (CSS pixels) are multiplied by `#dpr` before normalising to [0,1] UV space so cursor alignment is correct on HiDPI screens.
 
 ### Preset reactivity
 
 `FluidText` and `FluidImage` have a `useEffect([preset, algorithm])` that calls `updateConfig(mergeConfig({ ...config, algorithm? }, preset))` whenever preset or algorithm props change. This replaces the old algorithm-only effect. On components with no preset/algorithm prop the effect fires once on mount with `DEFAULT_CONFIG` as a reset, then the parent's Leva sync overrides it (React parent effects run after child effects).
+
+### Quality reactivity
+
+`useFluid` has a `useEffect([quality.dpr, quality.sim])` that propagates quality changes after mount. It:
+1. Updates `clampedDprRef.current` so future ResizeObserver callbacks use the new DPR factor.
+2. Calls `controller.updateQuality(quality)` — updates `#qualityDpr` / `#qualitySim` in the controller and posts an `updateQuality` message to the worker (or updates the sim directly on main thread).
+3. Calls `controller.resize(w * newDpr, h * newDpr)` to resize the canvas and rebuild FBOs with the new `simScale`.
+
+The effect compares against `prevQualityRef` to skip on first mount (initial quality is already applied by the constructor) and to avoid redundant resizes when values are unchanged.
+
+Worker message added: `updateQuality { quality: { dpr, sim } }` — worker calls `sim.updateQuality(quality)` which updates `#qualityDpr` and `#simScale`. FBO rebuild happens on the subsequent `resize` message.
 
 ### backgroundSrc bitmap lifecycle
 

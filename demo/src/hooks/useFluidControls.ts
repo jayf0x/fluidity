@@ -79,8 +79,8 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
         value: values.preset ?? ('none' as PresetKey | 'none'),
         options: ['none', 'calm', 'sand', 'wave', 'neon', 'smoke'] satisfies (PresetKey | 'none')[],
       },
-      qualityDpr: { value: values.quality.dpr, min: 0.01, max: 2, step: 0.01 },
-      qualitySim: { value: values.quality.sim, min: 0.01, max: 2, step: 0.01 },
+      qualityDpr: { value: values.quality.dpr, min: 0.01, max: 1, step: 0.01 },
+      qualitySim: { value: values.quality.sim, min: 0.01, max: 1, step: 0.01 },
       backgroundColor: values.backgroundColor,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps

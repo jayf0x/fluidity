@@ -115,6 +115,7 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 | `config`          | `Partial<FluidConfig>` | —            |
 | `preset`          | `PresetKey`            | —            |
 | `algorithm`       | `FluidAlgorithm`       | `'standard'` |
+| `quality`         | `FluidQuality`         | `{ dpr: 1, sim: 0.5 }` |
 | `backgroundColor` | `string`               | `'#0a0a0a'`  |
 | `backgroundSrc`   | `string`               | —            |
 | `backgroundSize`  | `string \| number`     | `'cover'`    |
@@ -138,6 +139,31 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 ```tsx
 <FluidImage src="/photo.jpg" algorithm="aurora" />
 <FluidText text="fluid" algorithm="ripple" config={{ warpStrength: 0.03 }} />
+```
+
+---
+
+## Quality
+
+`quality` controls rendering resolution on two independent axes. Both props are reactive — you can adjust them at runtime.
+
+| Field | Range    | Default | Description                                                                 |
+| ----- | -------- | ------- | --------------------------------------------------------------------------- |
+| `dpr` | 0.1 – 1  | `1`     | Canvas backing resolution as a fraction of `devicePixelRatio`. `0.5` on a Retina screen renders at 1× instead of 2×, saving ~75% fill rate. |
+| `sim` | 0.1 – 1  | `0.5`   | Simulation FBO size as a fraction of canvas size. Lower = cheaper GPU, less fluid detail. |
+
+```tsx
+<FluidText text="hello" quality={{ dpr: 0.75, sim: 0.25 }} />
+```
+
+`dpr` and `sim` are independent — you can run a sharp canvas at a coarser simulation:
+
+```tsx
+// Sharp display, cheap simulation
+<FluidImage src="/hero.jpg" quality={{ dpr: 1, sim: 0.2 }} />
+
+// Lower display res, full simulation quality
+<FluidImage src="/hero.jpg" quality={{ dpr: 0.5, sim: 1 }} />
 ```
 
 ---
