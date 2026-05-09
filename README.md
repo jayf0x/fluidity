@@ -8,7 +8,7 @@
 
  <a href="https://jayf0x.github.io/fluidity">
   <p align="center" title='Try if you can make this effect.'>
-      <img align="center" src="assets/preview.png" alt="preview" height="300px"/>
+      <img align="center" src="assets/preview.gif" alt="preview" height="300px"/>
   </p>
 
   <p align="center">
@@ -110,19 +110,19 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 
 ### Shared props
 
-| Prop              | Type                   | Default      |
-| ----------------- | ---------------------- | ------------ |
-| `config`          | `Partial<FluidConfig>` | —            |
-| `preset`          | `PresetKey`            | —            |
-| `algorithm`       | `FluidAlgorithm`       | `'standard'` |
+| Prop              | Type                   | Default                |
+| ----------------- | ---------------------- | ---------------------- |
+| `config`          | `Partial<FluidConfig>` | —                      |
+| `preset`          | `PresetKey`            | —                      |
+| `algorithm`       | `FluidAlgorithm`       | `'standard'`           |
 | `quality`         | `FluidQuality`         | `{ dpr: 1, sim: 0.5 }` |
-| `backgroundColor` | `string`               | `'#0a0a0a'`  |
-| `backgroundSrc`   | `string`               | —            |
-| `backgroundSize`  | `string \| number`     | `'cover'`    |
-| `isMouseEnabled`  | `boolean`              | `true`       |
-| `isWorkerEnabled` | `boolean`              | `true`       |
-| `className`       | `string`               | —            |
-| `style`           | `CSSProperties`        | —            |
+| `backgroundColor` | `string`               | `'#0a0a0a'`            |
+| `backgroundSrc`   | `string`               | —                      |
+| `backgroundSize`  | `string \| number`     | `'cover'`              |
+| `isMouseEnabled`  | `boolean`              | `true`                 |
+| `isWorkerEnabled` | `boolean`              | `true`                 |
+| `className`       | `string`               | —                      |
+| `style`           | `CSSProperties`        | —                      |
 
 ---
 
@@ -147,10 +147,10 @@ More examples → [`demo/src/examples/`](./demo/src/examples/)
 
 `quality` controls rendering resolution on two independent axes. Both props are reactive — you can adjust them at runtime.
 
-| Field | Range    | Default | Description                                                                 |
-| ----- | -------- | ------- | --------------------------------------------------------------------------- |
-| `dpr` | 0.1 – 1  | `1`     | Canvas backing resolution as a fraction of `devicePixelRatio`. `0.5` on a Retina screen renders at 1× instead of 2×, saving ~75% fill rate. |
-| `sim` | 0.1 – 1  | `0.5`   | Simulation FBO size as a fraction of canvas size. Lower = cheaper GPU, less fluid detail. |
+| Field | Range   | Default | Description                                                                                                                                 |
+| ----- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dpr` | 0.1 – 1 | `1`     | Canvas backing resolution as a fraction of `devicePixelRatio`. `0.5` on a Retina screen renders at 1× instead of 2×, saving ~75% fill rate. |
+| `sim` | 0.1 – 1 | `0.5`   | Simulation FBO size as a fraction of canvas size. Lower = cheaper GPU, less fluid detail.                                                   |
 
 ```tsx
 <FluidText text="hello" quality={{ dpr: 0.75, sim: 0.25 }} />
