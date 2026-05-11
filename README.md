@@ -1,6 +1,4 @@
-# fluidity-js
-
-**WebGL fluid simulation for React — interactive text and image effects powered by Navier-Stokes.**
+# fluidity-js - 🔥Upgrade your UX🔥
 
 [![npm](https://img.shields.io/npm/v/@jayf0x/fluidity-js)](https://www.npmjs.com/package/@jayf0x/fluidity-js)
 [![license](https://img.shields.io/npm/l/@jayf0x/fluidity-js)](./LICENSE)
@@ -18,49 +16,47 @@
   </p>
 </a>
 
----
-
-## Install
-
 ```bash
-npm i @jayf0x/fluidity-js
+bun add @jayf0x/fluidity-js
+yarn install @jayf0x/fluidity-js
+pnpm install @jayf0x/fluidity-js
 ```
 
-Requires React ≥ 17 and WebGL (WebGL2 recommended; WebGL1 supported as fallback).
+> uses latest `WebGPU` 🔥 With WebGL2 or WebGL1 supported as fallback
 
 ---
 
-## Usage
+## React examples
 
-### FluidText
+**FluidText:**
 
 ```tsx
 import { FluidText } from '@jayf0x/fluidity-js';
 
-export function Hero() {
+export const FancyHero = () => {
   return (
     <div style={{ width: '100%', height: 300 }}>
-      <FluidText text="hello" fontSize={120} color="#ffffff" />
+      <FluidText text="🔥 SupportsEmoji 🔥" fontSize={120} color="#ffffff" />
     </div>
   );
-}
+};
 ```
 
-### FluidImage
+**FluidImage:**
 
 ```tsx
 import { FluidImage } from '@jayf0x/fluidity-js';
 
 export function Cover() {
   return (
-    <div style={{ width: '100%', height: '100vh' }}>
+    <div className="size-full">
       <FluidImage src="/hero.jpg" algorithm="aurora" />
     </div>
   );
 }
 ```
 
-### Ref API
+**Handle custom events with a ref**
 
 ```tsx
 import { useRef } from 'react';
@@ -68,13 +64,10 @@ import { useRef } from 'react';
 import { FluidText } from '@jayf0x/fluidity-js';
 
 export function Interactive() {
-  const fluid = useRef<FluidHandle>(null);
-
+  const fluidRef = useRef<FluidHandle>(null);
   return (
     <>
-      <div style={{ width: '100%', height: 300 }}>
-        <FluidText ref={fluid} text="fluid" fontSize={120} color="#fff" />
-      </div>
+      <FluidText ref={fluidRef} isMouseEnabled={false} text="Amazing" fontSize={120} color="#fff" />
       <button onClick={() => fluid.current?.reset()}>Reset</button>
       <button onClick={() => fluid.current?.updateConfig({ curl: 0.3 })}>Swirl</button>
     </>
@@ -82,9 +75,7 @@ export function Interactive() {
 }
 ```
 
-`FluidHandle` is a global type — no import needed.
-
-More examples → [`demo/src/examples/`](./demo/src/examples/)
+Official examples → [`demo/src/examples/`](./demo/src/examples/)
 
 ---
 
