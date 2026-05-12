@@ -22,6 +22,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     backgroundSize = DEFAULT_PROPS_TEXT.backgroundSize,
     isMouseEnabled = DEFAULT_PROPS_TEXT.isMouseEnabled,
     isWorkerEnabled = DEFAULT_PROPS_TEXT.isWorkerEnabled,
+    useWebGPU = true,
     quality = DEFAULT_PROPS_SHARED.quality,
   },
   ref
@@ -29,6 +30,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
   const containerRef = useRef<HTMLDivElement>(null);
   const controllerRef = useFluid(containerRef, {
     isWorkerEnabled,
+    useWebGPU,
     quality,
     config: mergeConfig({ ...config, ...(algorithm ? { algorithm } : {}) }, preset, DEFAULT_CONFIG_TEXT),
   });

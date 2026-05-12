@@ -44,6 +44,7 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
       glowColor: '#b3d9ff',
       algorithm: 'standard' satisfies FluidAlgorithm,
       preset: undefined satisfies PresetKey | undefined,
+      useWebGPU: true,
       backgroundColor: '#0a0a0a',
       quality: {
         dpr: 1,
@@ -81,13 +82,14 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
       },
       qualityDpr: { value: values.quality.dpr, min: 0.01, max: 1, step: 0.01 },
       qualitySim: { value: values.quality.sim, min: 0.01, max: 1, step: 0.01 },
+      useWebGPU: values.useWebGPU,
       backgroundColor: values.backgroundColor,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  const [{ waterColor, glowColor, preset: presetRaw, backgroundColor, ...simConfig }, set] = useControls(
+  const [{ waterColor, glowColor, preset: presetRaw, backgroundColor, useWebGPU, ...simConfig }, set] = useControls(
     'fluid config',
     fluidSchema,
     { store }
@@ -110,5 +112,6 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
     sim: simConfig.qualitySim,
     dpr: simConfig.qualityDpr,
   };
-  return { set, preset, backgroundColor, quality };
+
+  return { set, preset, backgroundColor, quality, useWebGPU };
 }

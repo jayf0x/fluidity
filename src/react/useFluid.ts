@@ -14,10 +14,10 @@ import { FluidController } from '../fluid-controller';
  */
 export function useFluid(
   containerRef: RefObject<HTMLElement | null>,
-  { isWorkerEnabled = true, quality = {}, config = {} }: { isWorkerEnabled?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
+  { isWorkerEnabled = true, useWebGPU = true, quality = {}, config = {} }: { isWorkerEnabled?: boolean; useWebGPU?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
 ): RefObject<FluidController | null> {
   const controllerRef = useRef<FluidController | null>(null);
-  const initOptsRef = useRef({ isWorkerEnabled, quality, config });
+  const initOptsRef = useRef({ isWorkerEnabled, useWebGPU, quality, config });
   const clampedDprRef = useRef(Math.max(0.1, Math.min(1, quality.dpr ?? 1)));
   const prevQualityRef = useRef<{ dpr: number | undefined; sim: number | undefined }>({
     dpr: quality.dpr,
@@ -36,7 +36,7 @@ export function useFluid(
     container.appendChild(canvas);
 
     // Read initial dimensions from the container (valid after paint in useEffect)
-    const { isWorkerEnabled, quality: q, config: initConfig } = initOptsRef.current;
+    const { isWorkerEnabled, useWebGPU: wgpu, quality: q, config: initConfig } = initOptsRef.current;
     const dpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
     const rect = container.getBoundingClientRect();
     const initW = Math.round((rect.width || container.clientWidth) * dpr) || 0;
@@ -53,7 +53,7 @@ export function useFluid(
       );
     }
 
-    const controller = new FluidController(canvas, { isWorkerEnabled, quality: q, config: initConfig });
+    const controller = new FluidController(canvas, { isWorkerEnabled, useWebGPU: wgpu, quality: q, config: initConfig });
     controllerRef.current = controller;
 
     // Forward container resizes to the simulation — reads clampedDprRef so DPR quality changes are picked up

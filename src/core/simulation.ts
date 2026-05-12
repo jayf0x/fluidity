@@ -171,9 +171,10 @@ export class FluidSimulation {
   static async create(
     canvas: HTMLCanvasElement | OffscreenCanvas,
     config: Partial<FluidConfig> = {},
-    quality: FluidQuality = {}
+    quality: FluidQuality = {},
+    useWebGPU = true
   ): Promise<FluidSimulation> {
-    const gpuCtx = await initWebGPU(canvas);
+    const gpuCtx = useWebGPU ? await initWebGPU(canvas) : null;
     return new FluidSimulation(canvas, config, quality, gpuCtx ?? undefined);
   }
 

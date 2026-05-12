@@ -37,18 +37,18 @@ self.onmessage = async (e: MessageEvent) => {
   try {
     switch (type) {
       case 'init': {
-        const { canvas, width, height, config, dpr, quality } = data as {
+        const { canvas, width, height, config, dpr, quality, useWebGPU } = data as {
           canvas: OffscreenCanvas;
           width: number;
           height: number;
           config: Record<string, unknown>;
           dpr: number;
           quality?: FluidQuality;
+          useWebGPU?: boolean;
         };
         canvas.width = width;
         canvas.height = height;
-        // WebGPU-first: FluidSimulation.create() tries WebGPU then falls back to WebGL
-        sim = await FluidSimulation.create(canvas, config, quality ?? {});
+        sim = await FluidSimulation.create(canvas, config, quality ?? {}, useWebGPU ?? true);
         sim.resize(width, height, dpr || 1);
         _markReady!();
         self.postMessage({ type: 'ready' });

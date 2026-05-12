@@ -20,6 +20,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     backgroundSize = DEFAULT_PROPS_IMAGE.backgroundSize,
     isMouseEnabled = DEFAULT_PROPS_IMAGE.isMouseEnabled,
     isWorkerEnabled = DEFAULT_PROPS_IMAGE.isWorkerEnabled,
+    useWebGPU = true,
     quality = DEFAULT_PROPS_SHARED.quality,
   },
   ref
@@ -27,6 +28,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
   const containerRef = useRef<HTMLDivElement>(null);
   const controllerRef = useFluid(containerRef, {
     isWorkerEnabled,
+    useWebGPU,
     quality,
     config: mergeConfig({ ...config, ...(algorithm ? { algorithm } : {}) }, preset),
   });

@@ -9,6 +9,7 @@ export class FluidController {
   #worker: Worker | null = null;
   #sim: FluidSimulation | null = null;
   #useWorker: boolean;
+  #useWebGPU: boolean;
   #qualityDpr: number;
   #qualitySim: number;
 
@@ -20,12 +21,14 @@ export class FluidController {
     canvas: HTMLCanvasElement,
     {
       isWorkerEnabled = true,
+      useWebGPU = true,
       quality = {},
       config = {},
-    }: { isWorkerEnabled?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
+    }: { isWorkerEnabled?: boolean; useWebGPU?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
   ) {
     this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
     this.#qualitySim = Math.max(0.1, Math.min(1, quality.sim ?? 0.5));
+    this.#useWebGPU = useWebGPU;
     this.#useWorker = isWorkerEnabled && WORKER_SUPPORTED;
 
     if (this.#useWorker) {
@@ -160,11 +163,11 @@ export class FluidController {
    */
   #initMainThread(canvas: HTMLCanvasElement, config: Partial<FluidConfig>): void {
     const quality = { dpr: this.#qualityDpr, sim: this.#qualitySim };
-    const hasGPU = typeof navigator !== 'undefined' && !!navigator.gpu;
+    const hasGPU = this.#useWebGPU && typeof navigator !== 'undefined' && !!navigator.gpu;
 
     if (hasGPU) {
       // Async WebGPU-first: source calls arriving before resolve are queued.
-      FluidSimulation.create(canvas, config, quality).then((sim) => {
+      FluidSimulation.create(canvas, config, quality, true).then((sim) => {
         this.#sim = sim;
         if (this.#pendingTextSource) {
           sim.setTextSource(this.#pendingTextSource);
@@ -214,7 +217,7 @@ export class FluidController {
     };
 
     worker.postMessage(
-      { type: 'init', canvas: offscreen, width, height, config, dpr, quality: { dpr: this.#qualityDpr, sim: this.#qualitySim } },
+      { type: 'init', canvas: offscreen, width, height, config, dpr, quality: { dpr: this.#qualityDpr, sim: this.#qualitySim }, useWebGPU: this.#useWebGPU },
       [offscreen]
     );
   }

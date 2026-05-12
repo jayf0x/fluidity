@@ -51,6 +51,7 @@ interface FluidBaseProps {
   backgroundColor?: string;
   backgroundSrc?: string;
   backgroundSize?: string | number;
+  /** enabled greater performance, but not every browser supports it */
   useWebGPU?: boolean;
 }
 

@@ -20,17 +20,16 @@ const defaultProps: Partial<FluidConfigLeva> = {
 };
 
 export const IMAGE_OPTIONS = {
-  a: 'https://images.unsplash.com/photo-1613645695025-20e3f38de4a6?q=80&w=2370&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  abstract: 'https://images.unsplash.com/photo-1652119482620-505b32c669b1?w=1600',
-  forest: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1600',
+  wall: 'https://images.unsplash.com/photo-1613645695025-20e3f38de4a6?q=80&w=2370',
+  person: 'https://images.unsplash.com/photo-1663180575542-653ac6904a85?q=80&w=1287',
+  lights: 'https://plus.unsplash.com/premium_photo-1669814666151-c254da68476f?q=80&w=2787',
   ocean: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1600',
-  fox: 'preview.png',
 };
 
 export function ImageExample() {
   const ref = useRef<FluidHandle>(null);
   const store = useCreateStore();
-  const { preset, backgroundColor, quality } = useFluidControls(ref, store, defaultProps);
+  const args = useFluidControls(ref, store, defaultProps);
 
   const { src, imageSize } = useControls(
     'settings',
@@ -45,15 +44,7 @@ export function ImageExample() {
 
   return (
     <DemoWrapper store={store}>
-      <FluidImage
-        ref={ref}
-        src={src}
-        effect={0}
-        imageSize={imageSize}
-        preset={preset}
-        backgroundColor={backgroundColor}
-        quality={quality}
-      />
+      <FluidImage ref={ref} src={src} effect={0} imageSize={imageSize} {...args} />
     </DemoWrapper>
   );
 }
