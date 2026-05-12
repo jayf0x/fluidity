@@ -2,7 +2,7 @@
 
 ## What this is
 
-WebGL fluid simulation React library. Navier-Stokes solver (advection, divergence, pressure, vorticity). Two render targets: text (draws text on canvas, uses as obstacle+background) and image (loads bitmap, same). Runs in Web Worker via OffscreenCanvas by default.
+WebGPU-first fluid simulation React library (falls back to WebGL2 → WebGL1). Navier-Stokes solver (advection, divergence, pressure, vorticity). Two render targets: text (draws text on canvas, uses as obstacle+background) and image (loads bitmap, same). Runs in Web Worker via OffscreenCanvas by default.
 
 ## Repo layout
 
@@ -14,18 +14,20 @@ fluidity/
 │   ├── index.d.ts           # Public module declarations for consumers (re-exports globals.d.ts)
 │   ├── core/
 │   │   ├── config.ts        # DEFAULT_CONFIG, DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_*, mergeConfig
-│   │   ├── gl-utils.ts      # initWebGL, Program class, createFBO, createDoubleFBO, createBlit
-│   │   ├── shaders.ts       # All GLSL shader strings
-│   │   ├── simulation.ts    # FluidSimulation class (main simulation loop)
-│   │   └── textures.ts      # createTextTextures, createImageTextures, loadImageBitmap, computeImageTransform
+│   │   ├── gl-utils.ts      # initGLContext, initWebGPU, initRenderer, Program class, createFBO, createDoubleFBO, createBlit
+│   │   ├── gpu-utils.ts     # WebGPU helpers: createGPUPrograms, createGPUDoubleFBO, uniform writers, gpuRenderToTexture
+│   │   ├── shaders.ts       # All GLSL shader strings (WebGL path)
+│   │   ├── wgsl-shaders.ts  # All WGSL shader strings (WebGPU path)
+│   │   ├── simulation.ts    # FluidSimulation class — dual WebGPU/WebGL paths; use FluidSimulation.create() for WebGPU-first
+│   │   └── textures.ts      # createTextTextures, createImageTextures (GL); createTextTexturesGPU, createImageTexturesGPU; loadImageBitmap
 │   ├── worker/index.ts      # Web Worker: receives messages, delegates to FluidSimulation
 │   ├── fluid-controller.ts  # FluidController: worker vs main-thread abstraction
 │   └── react/
 │       ├── FluidText.tsx    # React component (forwardRef)
 │       ├── FluidImage.tsx   # React component (forwardRef), imageSize prop
 │       └── useFluid.ts      # Hook: creates canvas programmatically, mounts FluidController
-├── tests/                   # Vitest + jsdom tests (75 total)
-│   ├── setup.js             # WebGL mock, canvas mock, Worker/OffscreenCanvas shims
+├── tests/                   # Vitest + jsdom tests (83 total)
+│   ├── setup.js             # WebGL mock, canvas mock, Worker/OffscreenCanvas shims; navigator.gpu absent → all tests on WebGL path
 │   ├── core/
 │   │   ├── simulation.test.js
 │   │   ├── config.test.js
@@ -195,7 +197,7 @@ All `src/**` imports use no file extension (e.g. `from './config'` not `from './
 
 ## Tests
 
-75 tests. All must pass before committing. Run with `bun test:claude` (see Key commands).
+83 tests. All must pass before committing. Run with `bun test:claude` (see Key commands).
 
 - `tests/setup.js` — WebGL mock (`createWebGLMock`), canvas mock (`createCanvasMock`). Mock includes `clearColor`, `clear`, `COLOR_BUFFER_BIT`, `TEXTURE0`–`TEXTURE4`.
 - React component mocks: `vi.mock('../../src/fluid-controller.ts', ...)` — note `.ts` extension required.

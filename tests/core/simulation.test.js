@@ -89,3 +89,30 @@ describe('FluidSimulation — URL handling', () => {
     sim.destroy();
   });
 });
+
+describe('FluidSimulation.create()', () => {
+  it('returns a FluidSimulation instance', async () => {
+    const canvas = createCanvasMock();
+    // navigator.gpu is absent in jsdom — create() falls back to WebGL synchronously
+    const sim = await FluidSimulation.create(canvas, {});
+    expect(sim).toBeInstanceOf(FluidSimulation);
+    sim.destroy();
+  });
+
+  it('starts on the WebGL path when WebGPU is unavailable', async () => {
+    const canvas = createCanvasMock();
+    const sim = await FluidSimulation.create(canvas, {});
+    // initWebGPU short-circuits (navigator.gpu absent) before touching the canvas context.
+    // The GL fallback then requests webgl2.
+    expect(canvas.getContext).toHaveBeenCalledWith('webgl2', expect.any(Object));
+    expect(canvas.getContext).not.toHaveBeenCalledWith('webgpu');
+    sim.destroy();
+  });
+
+  it('is not running before a source is set', async () => {
+    const canvas = createCanvasMock();
+    const sim = await FluidSimulation.create(canvas, {});
+    expect(sim.isRunning).toBe(false);
+    sim.destroy();
+  });
+});

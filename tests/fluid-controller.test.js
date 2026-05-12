@@ -19,9 +19,9 @@ vi.mock('../src/worker/index.ts?worker&inline', () => ({
   default: vi.fn(() => mockWorkerInstance),
 }));
 
-// Use the real FluidSimulation (with mocked WebGL) to validate the fallback path
-vi.mock('../src/core/simulation.ts', () => ({
-  FluidSimulation: vi.fn().mockImplementation(() => ({
+// Mock FluidSimulation — both the constructor and the static create() factory
+vi.mock('../src/core/simulation.ts', () => {
+  const mockSim = {
     setTextSource: vi.fn(),
     setImageSource: vi.fn(),
     setImageBitmap: vi.fn(),
@@ -30,12 +30,17 @@ vi.mock('../src/core/simulation.ts', () => ({
     splat: vi.fn(),
     resize: vi.fn(),
     updateConfig: vi.fn(),
+    updateQuality: vi.fn(),
     start: vi.fn(),
     stop: vi.fn(),
     destroy: vi.fn(),
     isRunning: false,
-  })),
-}));
+  };
+  const FluidSimulation = vi.fn().mockImplementation(() => mockSim);
+  // Static factory — resolves to the same mock instance
+  FluidSimulation.create = vi.fn().mockResolvedValue(mockSim);
+  return { FluidSimulation };
+});
 
 describe('FluidController — worker mode', () => {
   let canvas;

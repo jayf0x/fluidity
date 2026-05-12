@@ -15,6 +15,7 @@
  *   resize          { width, height, dpr }
  *   updateQuality   { quality: { dpr, sim } }
  *   updateConfig    { config }
+ *   splat           { x, y, vx, vy, strength? }
  *   destroy
  *
  * Message types (worker → main):
@@ -24,6 +25,11 @@
 import { FluidSimulation } from '../core/simulation';
 
 let sim: FluidSimulation | null = null;
+
+// Resolved once 'init' completes so that messages arriving during the async
+// WebGPU adapter request are queued (via await) rather than dropped.
+let _markReady: (() => void) | undefined;
+const simReady = new Promise<void>((r) => { _markReady = r; });
 
 self.onmessage = async (e: MessageEvent) => {
   const { type, ...data } = e.data as { type: string; [key: string]: unknown };
@@ -41,19 +47,23 @@ self.onmessage = async (e: MessageEvent) => {
         };
         canvas.width = width;
         canvas.height = height;
-        sim = new FluidSimulation(canvas, config, quality ?? {});
+        // WebGPU-first: FluidSimulation.create() tries WebGPU then falls back to WebGL
+        sim = await FluidSimulation.create(canvas, config, quality ?? {});
         sim.resize(width, height, dpr || 1);
+        _markReady!();
         self.postMessage({ type: 'ready' });
         break;
       }
 
       case 'setTextSource': {
+        await simReady;
         if (!sim) return;
         sim.setTextSource(data.opts as Parameters<FluidSimulation['setTextSource']>[0]);
         break;
       }
 
       case 'setImageSource': {
+        await simReady;
         if (!sim) return;
         await sim.setImageSource(
           data.src as string,
@@ -64,6 +74,7 @@ self.onmessage = async (e: MessageEvent) => {
       }
 
       case 'setImageBitmap': {
+        await simReady;
         if (!sim) return;
         sim.setImageBitmap(
           data.bitmap as ImageBitmap,
@@ -74,12 +85,14 @@ self.onmessage = async (e: MessageEvent) => {
       }
 
       case 'setBackground': {
+        await simReady;
         if (!sim) return;
         sim.setBackground(data.bitmap as ImageBitmap | null, data.size as string | number | undefined);
         break;
       }
 
       case 'splat': {
+        await simReady;
         if (!sim) return;
         sim.splat(
           data.x as number,
@@ -92,30 +105,35 @@ self.onmessage = async (e: MessageEvent) => {
       }
 
       case 'move': {
+        await simReady;
         if (!sim) return;
         sim.handleMove(data.x as number, data.y as number, (data.strength as number | undefined) ?? 1);
         break;
       }
 
       case 'resize': {
+        await simReady;
         if (!sim) return;
         sim.resize(data.width as number, data.height as number, data.dpr as number | undefined);
         break;
       }
 
       case 'updateQuality': {
+        await simReady;
         if (!sim) return;
         sim.updateQuality(data.quality as FluidQuality);
         break;
       }
 
       case 'updateConfig': {
+        await simReady;
         if (!sim) return;
         sim.updateConfig(data.config as Record<string, unknown>);
         break;
       }
 
       case 'destroy': {
+        await simReady;
         sim?.destroy();
         sim = null;
         break;

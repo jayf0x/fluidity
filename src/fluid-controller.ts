@@ -12,6 +12,10 @@ export class FluidController {
   #qualityDpr: number;
   #qualitySim: number;
 
+  // Pending source calls queued while WebGPU async init is in progress (main-thread only)
+  #pendingTextSource: TextSourceOpts | null = null;
+  #pendingImageSrc: { src: string; effect: number; size: string | number } | null = null;
+
   constructor(
     canvas: HTMLCanvasElement,
     {
@@ -27,7 +31,7 @@ export class FluidController {
     if (this.#useWorker) {
       this.#initWorker(canvas, config);
     } else {
-      this.#sim = new FluidSimulation(canvas, config, { dpr: this.#qualityDpr, sim: this.#qualitySim });
+      this.#initMainThread(canvas, config);
     }
   }
 
@@ -38,8 +42,12 @@ export class FluidController {
   setTextSource(opts: TextSourceOpts): void {
     if (this.#worker) {
       this.#worker.postMessage({ type: 'setTextSource', opts });
+    } else if (this.#sim) {
+      this.#sim.setTextSource(opts);
     } else {
-      this.#sim!.setTextSource(opts);
+      // Sim not yet ready — queue (last-write-wins within a source type)
+      this.#pendingTextSource = opts;
+      this.#pendingImageSrc   = null;
     }
   }
 
@@ -52,8 +60,11 @@ export class FluidController {
       // Resolve relative URLs before passing to the worker — blob workers have no valid base URL
       const absoluteSrc = new URL(src, location.href).href;
       this.#worker.postMessage({ type: 'setImageSource', src: absoluteSrc, effect, size });
+    } else if (this.#sim) {
+      this.#sim.setImageSource(src, effect, size);
     } else {
-      this.#sim!.setImageSource(src, effect, size);
+      this.#pendingImageSrc   = { src, effect, size };
+      this.#pendingTextSource = null;
     }
   }
 
@@ -137,6 +148,41 @@ export class FluidController {
   // Private
   // ---------------------------------------------------------------------------
 
+  /**
+   * Main-thread renderer init.
+   *
+   * When `navigator.gpu` is present we attempt WebGPU asynchronously and
+   * queue any source calls that arrive before the init resolves.
+   *
+   * When `navigator.gpu` is absent we fall back to WebGL synchronously —
+   * this is the common path in jsdom/test environments and keeps the
+   * constructor behaviour synchronous where possible.
+   */
+  #initMainThread(canvas: HTMLCanvasElement, config: Partial<FluidConfig>): void {
+    const quality = { dpr: this.#qualityDpr, sim: this.#qualitySim };
+    const hasGPU = typeof navigator !== 'undefined' && !!navigator.gpu;
+
+    if (hasGPU) {
+      // Async WebGPU-first: source calls arriving before resolve are queued.
+      FluidSimulation.create(canvas, config, quality).then((sim) => {
+        this.#sim = sim;
+        if (this.#pendingTextSource) {
+          sim.setTextSource(this.#pendingTextSource);
+          this.#pendingTextSource = null;
+        } else if (this.#pendingImageSrc) {
+          const { src, effect, size } = this.#pendingImageSrc;
+          sim.setImageSource(src, effect, size);
+          this.#pendingImageSrc = null;
+        }
+      }).catch((err) => {
+        console.error('[fluidity-js] Renderer init failed:', err);
+      });
+    } else {
+      // Sync WebGL fallback — no queuing needed.
+      this.#sim = new FluidSimulation(canvas, config, quality);
+    }
+  }
+
   #initWorker(canvas: HTMLCanvasElement, config: Partial<FluidConfig>): void {
     const dpr = ((typeof window !== 'undefined' && window.devicePixelRatio) || 1) * this.#qualityDpr;
     const width = Math.round(canvas.clientWidth * dpr);
@@ -153,7 +199,7 @@ export class FluidController {
           'This is expected in React StrictMode development.'
       );
       this.#useWorker = false;
-      this.#sim = new FluidSimulation(canvas, config, { dpr: this.#qualityDpr, sim: this.#qualitySim });
+      this.#initMainThread(canvas, config);
       return;
     }
 

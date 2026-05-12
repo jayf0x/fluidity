@@ -1,7 +1,66 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { Program, createBlit, createDoubleFBO, createFBO } from '../../src/core/gl-utils.ts';
-import { createWebGLMock } from '../setup.js';
+import { Program, createBlit, createDoubleFBO, createFBO, initGLContext, initRenderer, initWebGPU } from '../../src/core/gl-utils.ts';
+import { createCanvasMock, createWebGLMock } from '../setup.js';
+
+describe('initGLContext', () => {
+  it('returns a GLContext with type webgl2 when webgl2 is available', () => {
+    const canvas = createCanvasMock();
+    const ctx = initGLContext(canvas);
+    expect(ctx.type).toBe('webgl2');
+    expect(ctx.isWebGL2).toBe(true);
+    expect(ctx.gl).toBeDefined();
+    expect(ctx.ext).toBeDefined();
+  });
+
+  it('falls back to webgl1 when webgl2 is unavailable', () => {
+    const gl = createWebGLMock();
+    // Simulate OES_texture_half_float extension for webgl1 path
+    gl.getExtension.mockImplementation((name) => {
+      if (name === 'OES_texture_half_float') return { HALF_FLOAT_OES: 0x8d61 };
+      if (name === 'WEBGL_lose_context')    return { loseContext: vi.fn() };
+      return null;
+    });
+    const canvas = {
+      ...createCanvasMock(gl),
+      getContext: vi.fn((type) => {
+        if (type === 'webgl2') return null; // force webgl1 fallback
+        if (type === 'webgl' || type === 'experimental-webgl') return gl;
+        return null;
+      }),
+    };
+    const ctx = initGLContext(canvas);
+    expect(ctx.type).toBe('webgl1');
+    expect(ctx.isWebGL2).toBe(false);
+  });
+});
+
+describe('initWebGPU', () => {
+  it('returns null when navigator.gpu is absent', async () => {
+    const canvas = createCanvasMock();
+    // navigator.gpu is undefined in jsdom (set in setup.js)
+    const result = await initWebGPU(canvas);
+    expect(result).toBeNull();
+  });
+});
+
+describe('initRenderer', () => {
+  it('falls back to WebGL when WebGPU is unavailable', async () => {
+    const canvas = createCanvasMock();
+    // navigator.gpu is absent in jsdom — initRenderer should fall back to WebGL
+    const ctx = await initRenderer(canvas);
+    expect(['webgl1', 'webgl2']).toContain(ctx.type);
+    expect(ctx.type).not.toBe('webgpu');
+  });
+
+  it('returns a context with gl and ext properties on WebGL fallback', async () => {
+    const canvas = createCanvasMock();
+    const ctx = await initRenderer(canvas);
+    // On the GL fallback path the context must expose gl and ext
+    expect('gl' in ctx).toBe(true);
+    expect('ext' in ctx).toBe(true);
+  });
+});
 
 describe('Program', () => {
   it('creates and links a program', () => {
@@ -80,7 +139,7 @@ describe('createDoubleFBO', () => {
     const ext = { internalFormat: gl.RGBA, format: gl.RGBA, type: gl.HALF_FLOAT };
 
     const dfbo = createDoubleFBO(gl, ext, 64, 64);
-    const readBefore = dfbo.read;
+    const readBefore  = dfbo.read;
     const writeBefore = dfbo.write;
 
     dfbo.swap();

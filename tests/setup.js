@@ -8,9 +8,9 @@ import { vi } from 'vitest';
 // ---------------------------------------------------------------------------
 
 export function createWebGLMock() {
-  const TEX = () => ({ _type: 'texture' });
-  const FBO = () => ({ _type: 'framebuffer' });
-  const BUF = () => ({ _type: 'buffer' });
+  const TEX  = () => ({ _type: 'texture' });
+  const FBO  = () => ({ _type: 'framebuffer' });
+  const BUF  = () => ({ _type: 'buffer' });
   const PROG = () => ({ _type: 'program' });
   const SHDR = () => ({ _type: 'shader' });
 
@@ -116,6 +116,7 @@ export function createCanvasMock(gl = createWebGLMock()) {
     clientHeight: 600,
     getContext: vi.fn((type) => {
       if (type === 'webgl2' || type === 'webgl' || type === 'experimental-webgl') return gl;
+      // 'webgpu' returns null so initWebGPU gracefully falls back to WebGL in tests
       return null;
     }),
     transferControlToOffscreen: vi.fn(() => createCanvasMock(gl)),
@@ -186,4 +187,13 @@ global.ResizeObserver = class ResizeObserver {
 
 if (typeof createImageBitmap === 'undefined') {
   global.createImageBitmap = vi.fn(async () => ({ width: 100, height: 100, close: vi.fn() }));
+}
+
+// ---------------------------------------------------------------------------
+// navigator.gpu mock — absent in jsdom; initWebGPU checks for it and returns
+// null immediately, so all tests stay on the WebGL path automatically.
+// ---------------------------------------------------------------------------
+
+if (typeof navigator !== 'undefined' && !('gpu' in navigator)) {
+  Object.defineProperty(navigator, 'gpu', { value: undefined, configurable: true });
 }

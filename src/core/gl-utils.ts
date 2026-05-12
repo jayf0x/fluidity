@@ -43,10 +43,31 @@ export interface Programs {
   display: Program;
 }
 
+// ─── Renderer context types ───────────────────────────────────────────────────
+
+export interface GLContext {
+  type: 'webgl2' | 'webgl1';
+  gl: GL;
+  ext: GLExt;
+  isWebGL2: boolean;
+}
+
+export interface WebGPUContext {
+  type: 'webgpu';
+  adapter: GPUAdapter;
+  device: GPUDevice;
+  context: GPUCanvasContext;
+  format: GPUTextureFormat;
+}
+
+export type RendererContext = GLContext | WebGPUContext;
+
+// ─── WebGL context init ───────────────────────────────────────────────────────
+
 /**
  * Initialises a WebGL2 (or WebGL1 fallback) context.
  */
-export function initWebGL(canvas: HTMLCanvasElement | OffscreenCanvas): { gl: GL; ext: GLExt; isWebGL2: boolean } {
+export function initGLContext(canvas: HTMLCanvasElement | OffscreenCanvas): GLContext {
   const params = { alpha: true, depth: false, stencil: false, antialias: true, preserveDrawingBuffer: false };
 
   let gl = canvas.getContext('webgl2', params) as WebGL2RenderingContext | WebGLRenderingContext | null;
@@ -66,6 +87,7 @@ export function initWebGL(canvas: HTMLCanvasElement | OffscreenCanvas): { gl: GL
   gl!.getExtension('OES_texture_half_float_linear');
 
   return {
+    type: isWebGL2 ? 'webgl2' : 'webgl1',
     gl: gl!,
     isWebGL2,
     ext: {
@@ -75,6 +97,44 @@ export function initWebGL(canvas: HTMLCanvasElement | OffscreenCanvas): { gl: GL
     },
   };
 }
+
+// ─── WebGPU context init ──────────────────────────────────────────────────────
+
+/**
+ * Attempts to initialise a WebGPU context on the given canvas.
+ * Returns null when WebGPU is unavailable or the canvas already has a different context.
+ */
+export async function initWebGPU(canvas: HTMLCanvasElement | OffscreenCanvas): Promise<WebGPUContext | null> {
+  if (typeof navigator === 'undefined' || !navigator.gpu) return null;
+
+  try {
+    const adapter = await navigator.gpu.requestAdapter();
+    if (!adapter) return null;
+
+    const device = await adapter.requestDevice();
+
+    const context = canvas.getContext('webgpu') as GPUCanvasContext | null;
+    if (!context) return null;
+
+    const format = navigator.gpu.getPreferredCanvasFormat();
+    context.configure({ device, format, alphaMode: 'premultiplied' });
+
+    return { type: 'webgpu', adapter, device, context, format };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Renderer auto-detection: tries WebGPU first, falls back to WebGL2 → WebGL1.
+ */
+export async function initRenderer(canvas: HTMLCanvasElement | OffscreenCanvas): Promise<RendererContext> {
+  const gpu = await initWebGPU(canvas);
+  if (gpu) return gpu;
+  return initGLContext(canvas);
+}
+
+// ─── WebGL utilities ─────────────────────────────────────────────────────────
 
 /**
  * Compiles and links a WebGL program, caching uniform locations.

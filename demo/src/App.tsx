@@ -76,16 +76,16 @@ export function App() {
         rel="noreferrer"
         style={{
           position: 'absolute',
-          top: 18,
-          right: 16,
-          fontSize: 10,
+          top: '1vh',
+          left: '1vw',
+          fontSize: 15,
           fontFamily: 'ui-monospace, monospace',
           color: '#333',
           textDecoration: 'none',
-          zIndex: 20,
+          zIndex: 9999,
         }}
       >
-        fluidity-js ↗
+        Github ↗
       </a>
     </div>
   );

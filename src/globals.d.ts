@@ -51,6 +51,7 @@ interface FluidBaseProps {
   backgroundColor?: string;
   backgroundSrc?: string;
   backgroundSize?: string | number;
+  useWebGPU?: boolean;
 }
 
 interface FluidTextProps extends FluidBaseProps {
