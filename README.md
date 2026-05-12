@@ -4,72 +4,77 @@
 [![license](https://img.shields.io/npm/l/@jayf0x/fluidity-js)](./LICENSE)
 [![size](https://img.shields.io/bundlephobia/minzip/@jayf0x/fluidity-js)](https://bundlephobia.com/package/@jayf0x/fluidity-js)
 
- <a href="https://jayf0x.github.io/fluidity">
-  <p align="center" title='Try if you can make this effect.'>
-      <img align="center" src="assets/preview.gif" alt="preview" height="300px"/>
-  </p>
-
+<a href="https://jayf0x.github.io/fluidity">
   <p align="center">
-    <strong>
-    Live demo →
-    </strong>
+    <img src="assets/preview.gif" alt="preview" height="300px"/>
   </p>
+  <p align="center"><strong>Live demo →</strong></p>
 </a>
 
 ```bash
 bun add @jayf0x/fluidity-js
-yarn install @jayf0x/fluidity-js
-pnpm install @jayf0x/fluidity-js
+# or: npm install  /  yarn add  /  pnpm add
 ```
 
-> uses latest `WebGPU` 🔥 With WebGL2 or WebGL1 supported as fallback
+> **WebGPU-first** 🔥 — falls back automatically to WebGL2 / WebGL1.
 
 ---
 
 ## React examples
 
-**FluidText:**
+**Hero text that moves with your cursor:**
 
 ```tsx
 import { FluidText } from '@jayf0x/fluidity-js';
 
-export const FancyHero = () => {
+export function Hero() {
   return (
-    <div style={{ width: '100%', height: 300 }}>
-      <FluidText text="🔥 SupportsEmoji 🔥" fontSize={120} color="#ffffff" />
+    <div style={{ width: '100%', height: 400 }}>
+      <FluidText text="Hello World" fontSize={140} color="#ffffff" />
     </div>
   );
-};
+}
 ```
 
-**FluidImage:**
+**Full-bleed image cover — one line to make it alive:**
 
 ```tsx
 import { FluidImage } from '@jayf0x/fluidity-js';
 
 export function Cover() {
   return (
-    <div className="size-full">
+    <div style={{ width: '100%', height: '100vh' }}>
       <FluidImage src="/hero.jpg" algorithm="aurora" />
     </div>
   );
 }
 ```
 
-**Handle custom events with a ref**
+**Go further — presets, algorithms, live config:**
+
+```tsx
+<FluidText text="Wicked" preset="neon" algorithm="glass" />
+<FluidImage src="/poster.jpg" algorithm="ripple" config={{ curl: 0.4, splatRadius: 0.008 }} />
+<FluidText text="Chill" preset="calm" quality={{ dpr: 1, sim: 0.75 }} />
+```
+
+**Trigger effects programmatically:**
 
 ```tsx
 import { useRef } from 'react';
-
 import { FluidText } from '@jayf0x/fluidity-js';
 
 export function Interactive() {
-  const fluidRef = useRef<FluidHandle>(null);
+  const fluid = useRef<FluidHandle>(null);
+
   return (
     <>
-      <FluidText ref={fluidRef} isMouseEnabled={false} text="Amazing" fontSize={120} color="#fff" />
+      <div style={{ width: '100%', height: 400 }}>
+        <FluidText ref={fluid} text="Touch me" fontSize={120} color="#fff" />
+      </div>
+      <button onClick={() => fluid.current?.splat(200, 200, 8, -4)}>Splat</button>
+      <button onClick={() => fluid.current?.updateConfig({ curl: 0.5 })}>Swirl</button>
       <button onClick={() => fluid.current?.reset()}>Reset</button>
-      <button onClick={() => fluid.current?.updateConfig({ curl: 0.3 })}>Swirl</button>
     </>
   );
 }
@@ -112,6 +117,7 @@ Official examples → [`demo/src/examples/`](./demo/src/examples/)
 | `backgroundSize`  | `string \| number`     | `'cover'`              |
 | `isMouseEnabled`  | `boolean`              | `true`                 |
 | `isWorkerEnabled` | `boolean`              | `true`                 |
+| `useWebGPU`       | `boolean`              | `true`                 |
 | `className`       | `string`               | —                      |
 | `style`           | `CSSProperties`        | —                      |
 
