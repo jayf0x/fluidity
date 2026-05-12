@@ -96,7 +96,7 @@ export function SplashExample() {
   const stateRef = useRef<State>({ x: 0.1, y: 0, z: 0, vx: 0, vy: 0 });
   const store = useCreateStore();
 
-  const { preset, backgroundColor } = useFluidControls(ref, store, defaultConfig);
+  const args = useFluidControls(ref, store, defaultConfig);
 
   const { effect } = useControls(
     {
@@ -132,7 +132,7 @@ export function SplashExample() {
 
   return (
     <DemoWrapper store={store}>
-      <FluidText ref={ref} text={effect} fontSize={200} preset={preset} backgroundColor={backgroundColor} />
+      <FluidText ref={ref} text={effect} fontSize={200} {...args} />
     </DemoWrapper>
   );
 }

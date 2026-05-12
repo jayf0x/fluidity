@@ -40,7 +40,9 @@ interface FluidHandle {
 }
 
 interface FluidBaseProps {
+  /** Will apply to canvas container */
   className?: string;
+  /** Will apply to canvas container */
   style?: React.CSSProperties;
   config?: Partial<FluidConfig>;
   isMouseEnabled?: boolean;

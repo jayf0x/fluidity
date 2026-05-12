@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 
 import { FluidController } from '../fluid-controller';
@@ -14,29 +14,36 @@ import { FluidController } from '../fluid-controller';
  */
 export function useFluid(
   containerRef: RefObject<HTMLElement | null>,
-  { isWorkerEnabled = true, useWebGPU = true, quality = {}, config = {} }: { isWorkerEnabled?: boolean; useWebGPU?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
+  {
+    isWorkerEnabled = true,
+    useWebGPU = true,
+    quality = {},
+    config = {},
+  }: { isWorkerEnabled?: boolean; useWebGPU?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
 ): RefObject<FluidController | null> {
   const controllerRef = useRef<FluidController | null>(null);
-  const initOptsRef = useRef({ isWorkerEnabled, useWebGPU, quality, config });
+  const initOptsRef = useRef({ isWorkerEnabled, quality, config });
   const clampedDprRef = useRef(Math.max(0.1, Math.min(1, quality.dpr ?? 1)));
   const prevQualityRef = useRef<{ dpr: number | undefined; sim: number | undefined }>({
     dpr: quality.dpr,
     sim: quality.sim,
   });
 
+  // Re-runs when useWebGPU changes (full teardown + reinit). Other init opts
+  // are stable refs — they don't need to trigger reinit.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // --- Create a fresh canvas every mount ---
-    // This is the key: a newly-created canvas has never had transferControlToOffscreen
-    // called on it, so it's safe to use regardless of prior mount/unmount cycles.
+    // Create a fresh canvas every (re)init — transferControlToOffscreen is
+    // irreversible so we can never reuse a canvas across init cycles.
     const canvas = document.createElement('canvas');
+    canvas.id = `fluid_canvas_${Date.now()}`;
     canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;';
     container.appendChild(canvas);
 
-    // Read initial dimensions from the container (valid after paint in useEffect)
-    const { isWorkerEnabled, useWebGPU: wgpu, quality: q, config: initConfig } = initOptsRef.current;
+    // Read stable opts from ref; useWebGPU comes from the closure (it's the dep).
+    const { isWorkerEnabled, quality: q, config: initConfig } = initOptsRef.current;
     const dpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
     const rect = container.getBoundingClientRect();
     const initW = Math.round((rect.width || container.clientWidth) * dpr) || 0;
@@ -53,7 +60,7 @@ export function useFluid(
       );
     }
 
-    const controller = new FluidController(canvas, { isWorkerEnabled, useWebGPU: wgpu, quality: q, config: initConfig });
+    const controller = new FluidController(canvas, { isWorkerEnabled, useWebGPU, quality: q, config: initConfig });
     controllerRef.current = controller;
 
     // Forward container resizes to the simulation — reads clampedDprRef so DPR quality changes are picked up
@@ -72,7 +79,8 @@ export function useFluid(
       canvas.remove();
       controllerRef.current = null;
     };
-  }, []); // intentionally empty — one-time init per mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useWebGPU]);
 
   // Propagate quality changes after mount
   useEffect(() => {
@@ -88,7 +96,7 @@ export function useFluid(
     const h = container.clientHeight;
     if (w > 0 && h > 0) controller.resize(Math.round(w * resizeDpr), Math.round(h * resizeDpr));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quality.dpr, quality.sim]);
+  }, [quality.dpr, quality.sim, useWebGPU]);
 
   return controllerRef;
 }

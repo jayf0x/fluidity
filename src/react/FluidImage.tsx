@@ -52,11 +52,11 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     [src, effect, imageSize]
   );
 
-  // Reload whenever src, effect, or imageSize changes
+  // Reload whenever src, effect, or imageSize changes (useWebGPU triggers reinit → re-set source)
   useEffect(() => {
     if (!src) return;
     controllerRef.current?.setImageSource(src, effect, imageSize);
-  }, [src, effect, imageSize]);
+  }, [src, effect, imageSize, useWebGPU]);
 
   // Sync config/preset/algorithm → updateConfig for reactive changes
   const configKey = JSON.stringify(config);
@@ -65,7 +65,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
       mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, algorithm, configKey]);
+  }, [preset, algorithm, configKey, useWebGPU]);
 
   // Load + forward background image to the simulation
   useEffect(() => {
@@ -86,7 +86,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     return () => {
       cancelled = true;
     };
-  }, [backgroundSrc, backgroundSize]);
+  }, [backgroundSrc, backgroundSize, useWebGPU]);
 
   // Built-in pointer tracking
   useEffect(() => {

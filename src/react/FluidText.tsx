@@ -54,10 +54,10 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     [text, fontSize, color, fontFamily, fontWeight]
   );
 
-  // Sync text source whenever relevant props change
+  // Sync text source whenever relevant props change (useWebGPU triggers reinit → re-set source)
   useEffect(() => {
     controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight });
-  }, [text, fontSize, color, fontFamily, fontWeight]);
+  }, [text, fontSize, color, fontFamily, fontWeight, useWebGPU]);
 
   // Sync config/preset/algorithm → updateConfig for reactive changes
   const configKey = JSON.stringify(config);
@@ -66,7 +66,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
       mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset, DEFAULT_CONFIG_TEXT)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, algorithm, configKey]);
+  }, [preset, algorithm, configKey, useWebGPU]);
 
   // Load + forward background image to the simulation
   useEffect(() => {
@@ -87,7 +87,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     return () => {
       cancelled = true;
     };
-  }, [backgroundSrc, backgroundSize]);
+  }, [backgroundSrc, backgroundSize, useWebGPU]);
 
   // Built-in pointer tracking
   useEffect(() => {
