@@ -15,6 +15,22 @@ tbd.
 
 ---
 
+## CORE/FEATURE + DEMO/FEATURE: better value ranges
+
+Currently values are not correctly reflected. This also needs to be visible in the DEMO os that the DEMO is a reflection of the ideal/basic use case.
+Ideally all inputs in the DEMO also are a float and we normalize them internally.
+
+eg.
+"densityDissipation" can is a float, but the actual value is in between 0.95 and 0.998 or 1. So the float value that can be inputted should be normalized to fit that 0.95-1.0 ratio without the user having to worry about this.
+
+Needs investigation and tests using values from DEMO and defaults.
+
+Expected:
+
+- all values that can be passed in components or DEMO are a float
+- internally the float is normalized to a fitting range for some unique use cases.
+- no max or min, the user can choose to pass custom values that don't fit the normal.
+
 ## CORE/FEATURE: native string color support
 
 Add native support for multiple string color values for configs like `glowColor` and `waterColor` to be set to hex or rgb values.
