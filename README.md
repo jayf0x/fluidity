@@ -22,7 +22,7 @@ bun add @jayf0x/fluidity-js
 
 ## React examples
 
-**Hero text that moves with your cursor:**
+**Text that moves with your cursor:**
 
 ```tsx
 import { FluidText } from '@jayf0x/fluidity-js';
