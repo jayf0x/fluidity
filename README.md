@@ -4,7 +4,7 @@
 [![license](https://img.shields.io/npm/l/@jayf0x/fluidity-js)](./LICENSE)
 [![size](https://img.shields.io/bundlephobia/minzip/@jayf0x/fluidity-js)](https://bundlephobia.com/package/@jayf0x/fluidity-js)
 
-<a href="https://jayf0x.github.io/fluidity">
+<a href="https://raw.githubusercontent.com/jayf0x/fluidity/main/assets/preview.gif">
   <p align="center">
     <img src="assets/preview.gif" alt="preview" height="300px"/>
   </p>
@@ -62,6 +62,7 @@ export function Cover() {
 
 ```tsx
 import { useRef } from 'react';
+
 import { FluidText } from '@jayf0x/fluidity-js';
 
 export function Interactive() {
