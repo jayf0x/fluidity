@@ -63,8 +63,8 @@ describe('package exports', () => {
       refraction: expect.any(Number),
       specularExp: expect.any(Number),
       shine: expect.any(Number),
-      waterColor: expect.any(Array),
-      glowColor: expect.any(Array),
+      waterColor: expect.anything(),
+      glowColor: expect.anything(),
       algorithm: expect.any(String),
       warpStrength: expect.any(Number),
     });
@@ -88,6 +88,7 @@ describe('package exports', () => {
       'DEFAULT_PROPS_TEXT',
       'PRESETS',
       'mergeConfig',
+      'parseColor',
       'loadImageBitmap',
     ]);
     for (const key of Object.keys(pkg)) {

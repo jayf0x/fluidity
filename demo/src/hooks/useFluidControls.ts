@@ -3,19 +3,6 @@ import type { RefObject } from 'react';
 
 import { useControls } from 'leva';
 
-export function hexToRgb(hex: string): RGB {
-  const n = parseInt(hex.replace('#', ''), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
-}
-
-export function rgbArrayToHex([r, g, b]: RGB): string {
-  const h = (v: number) =>
-    Math.round(v * 255)
-      .toString(16)
-      .padStart(2, '0');
-  return `#${h(r)}${h(g)}${h(b)}`;
-}
-
 type Defaults = Partial<FluidConfigLeva> & {
   preset?: PresetKey;
   backgroundColor?: string;
@@ -103,8 +90,8 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
     ref.current?.updateConfig({
       ...simConfig,
       algorithm: simConfig.algorithm as FluidAlgorithm,
-      waterColor: hexToRgb(waterColor),
-      glowColor: hexToRgb(glowColor),
+      waterColor: waterColor as FluidColor,
+      glowColor: glowColor as FluidColor,
     } satisfies Partial<FluidConfig>);
   }, [ref, simConfig, waterColor, glowColor]);
 

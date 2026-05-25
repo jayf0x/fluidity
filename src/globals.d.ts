@@ -2,6 +2,9 @@
 
 type FluidAlgorithm = 'standard' | 'glass' | 'ink' | 'aurora' | 'ripple';
 
+/** RGB tuple (values 0–1) or a CSS hex string (#RGB, #RRGGBB, #RRGGBBAA — alpha stripped). */
+type FluidColor = [number, number, number] | `#${string}`;
+
 /**
  * Granular performance/quality controls. Both axes are independent — you can
  * run a sharp display at a coarser simulation, or vice versa.
@@ -24,8 +27,8 @@ interface FluidConfig {
   refraction: number;
   specularExp: number;
   shine: number;
-  waterColor: [number, number, number];
-  glowColor: [number, number, number];
+  waterColor: FluidColor;
+  glowColor: FluidColor;
   algorithm: FluidAlgorithm;
   warpStrength: number;
 }

@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
 
-import { DEFAULT_CONFIG, FluidText, PRESETS } from 'fluidity-js';
+import { FluidText, PRESETS } from 'fluidity-js';
 import { button, useControls, useCreateStore } from 'leva';
 
 import { DemoWrapper } from '../components/DemoWrapper';
-import { rgbArrayToHex, useFluidControls } from '../hooks/useFluidControls';
+import { useFluidControls } from '../hooks/useFluidControls';
 
 const mappedPresetColor: Record<PresetKey, string> = {
   calm: '#a8d8ea',
@@ -36,8 +36,8 @@ export function PresetsExample() {
     const selected = PRESETS[preset];
     set({
       ...selected,
-      waterColor: rgbArrayToHex((selected.waterColor ?? DEFAULT_CONFIG.waterColor) as RGB),
-      glowColor: rgbArrayToHex((selected.glowColor ?? DEFAULT_CONFIG.glowColor) as RGB),
+      waterColor: (selected.waterColor ?? '#000000') as string,
+      glowColor: (selected.glowColor ?? '#b3d9ff') as string,
     });
   }, [preset, set]);
 

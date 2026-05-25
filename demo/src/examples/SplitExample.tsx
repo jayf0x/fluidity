@@ -21,7 +21,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     color: '#ff2d78',
     backgroundColor: '#08000f',
     algorithm: 'aurora',
-    config: { curl: 0.4, warpStrength: 0.025, glowColor: [1, 0.1, 0.45] },
+    config: { curl: 0.4, warpStrength: 0.025, glowColor: '#ff1a73' },
   },
   {
     type: 'image',
@@ -37,7 +37,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     color: '#00e5ff',
     backgroundColor: '#00080f',
     algorithm: 'ripple',
-    config: { curl: 0.2, shine: 0.06, glowColor: [0, 0.8, 1] },
+    config: { curl: 0.2, shine: 0.06, glowColor: '#00ccff' },
   },
   {
     type: 'image',
@@ -53,7 +53,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     color: '#b980ff',
     backgroundColor: '#06000e',
     algorithm: 'ink',
-    config: { densityDissipation: 0.988, curl: 0.15, glowColor: [0.6, 0.3, 1] },
+    config: { densityDissipation: 0.988, curl: 0.15, glowColor: '#994dff' },
   },
   {
     type: 'image',

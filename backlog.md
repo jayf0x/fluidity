@@ -1,11 +1,6 @@
-## CORE/FEATURE: native string color support
+## ~~CORE/FEATURE: native string color support~~ ✅ RESOLVED
 
-Add native support for multiple string color values for configs like `glowColor` and `waterColor` to be set to hex or rgb values.
-For all color values you can pass number[] or `#${string}`. Note that transparency might not work out of the box, but we can ignore that for now and simply pass it along and the webgpu or formatting functions will resolve that.
-We only
-
-Expected:
-Can pass raw hex colors. Transparency should not be accounted for (unless it would break the colors, then omit it from the hex parse)
+`FluidColor = [number, number, number] | \`#${string}\`` — `parseColor()` converts at the GL/GPU call site. Alpha stripped from 8-char hex. Exported from public API.
 
 ## CORE/FEATURE: make alpha optional
 

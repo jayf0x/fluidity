@@ -1,4 +1,4 @@
-import { mergeConfig } from './config';
+import { mergeConfig, parseColor } from './config';
 import {
   createBlit,
   createDoubleFBO,
@@ -526,8 +526,8 @@ export class FluidSimulation {
     writeDisplayUniforms(dev, this.#gpuUniDisp!,
       1 / FW, 1 / FH,
       cfg.refraction, cfg.specularExp,
-      cfg.waterColor as [number,number,number],
-      cfg.glowColor  as [number,number,number],
+      parseColor(cfg.waterColor),
+      parseColor(cfg.glowColor),
       cfg.shine, cfg.warpStrength ?? 0.015,
       ALGORITHM_INT[cfg.algorithm] ?? 0
     );
@@ -902,8 +902,8 @@ export class FluidSimulation {
 
     display.bind();
     gl.uniform2f(display.uniforms.texelSize, 1 / this.#width, 1 / this.#height);
-    gl.uniform3fv(display.uniforms.uWaterColor, cfg.waterColor);
-    gl.uniform3fv(display.uniforms.uGlowColor, cfg.glowColor);
+    gl.uniform3fv(display.uniforms.uWaterColor, parseColor(cfg.waterColor));
+    gl.uniform3fv(display.uniforms.uGlowColor, parseColor(cfg.glowColor));
     gl.uniform1f(display.uniforms.uRefraction, cfg.refraction);
     gl.uniform1f(display.uniforms.uSpecularExp, cfg.specularExp);
     gl.uniform1f(display.uniforms.uShine, cfg.shine);

@@ -27,11 +27,10 @@ describe('DEFAULT_CONFIG', () => {
     expect(typeof DEFAULT_CONFIG.pressureIterations).toBe('number');
   });
 
-  it('has RGB arrays of length 3 for color fields', () => {
-    expect(Array.isArray(DEFAULT_CONFIG.waterColor)).toBe(true);
-    expect(DEFAULT_CONFIG.waterColor).toHaveLength(3);
-    expect(Array.isArray(DEFAULT_CONFIG.glowColor)).toBe(true);
-    expect(DEFAULT_CONFIG.glowColor).toHaveLength(3);
+  it('has valid FluidColor values for color fields', () => {
+    const isFluidColor = (v) => Array.isArray(v) || (typeof v === 'string' && v.startsWith('#'));
+    expect(isFluidColor(DEFAULT_CONFIG.waterColor)).toBe(true);
+    expect(isFluidColor(DEFAULT_CONFIG.glowColor)).toBe(true);
   });
 });
 

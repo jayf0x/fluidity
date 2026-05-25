@@ -8,8 +8,8 @@ export const DEFAULT_CONFIG: FluidConfig = {
   refraction: 0.25,
   specularExp: 1.01,
   shine: 0.01,
-  waterColor: [0.0, 0.0, 0.0],
-  glowColor: [0.7, 0.85, 1.0],
+  waterColor: '#000000',
+  glowColor: '#b3d9ff',
   algorithm: 'standard' as FluidAlgorithm,
   warpStrength: 0.015,
 };
@@ -25,7 +25,7 @@ export const DEFAULT_CONFIG_TEXT: FluidConfig = {
   refraction: 0.25,
   specularExp: 1,
   shine: 0.1,
-  glowColor: [0, 0.502, 1.0],
+  glowColor: '#0080ff',
 };
 
 export const DEFAULT_QUALITY: FluidQuality = { dpr: 1, sim: 0.5 };
@@ -61,8 +61,8 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
     splatForce: 0.5,
     refraction: 0.15,
     shine: 0.005,
-    glowColor: [0.6, 0.85, 1.0],
-    waterColor: [0, 0.02, 0.05],
+    glowColor: '#99d9ff',
+    waterColor: '#00050d',
   },
   sand: {
     densityDissipation: 0.997,
@@ -73,8 +73,8 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
     refraction: 0.8,
     specularExp: 0.1,
     shine: 0.05,
-    glowColor: [0.027, 0.027, 0.027],
-    waterColor: [0.451, 0.329, 0.125],
+    glowColor: '#070707',
+    waterColor: '#735420',
   },
   wave: {
     densityDissipation: 0.994,
@@ -84,8 +84,8 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
     splatForce: 1.2,
     refraction: 0.35,
     shine: 0.03,
-    glowColor: [0.5, 0.8, 1.0],
-    waterColor: [0, 0.01, 0.03],
+    glowColor: '#80ccff',
+    waterColor: '#000308',
   },
   neon: {
     densityDissipation: 0.985,
@@ -96,8 +96,8 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
     refraction: 0.25,
     specularExp: 0.5,
     shine: 0.14,
-    glowColor: [1, 0.2, 0.8],
-    waterColor: [0.05, 0, 0.08],
+    glowColor: '#ff33cc',
+    waterColor: '#0d0014',
   },
   smoke: {
     densityDissipation: 0.996,
@@ -107,10 +107,29 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
     splatForce: 0.8,
     refraction: 0.08,
     shine: 0,
-    glowColor: [0.5, 0.5, 0.5],
-    waterColor: [0.06, 0.06, 0.06],
+    glowColor: '#808080',
+    waterColor: '#0f0f0f',
   },
 };
+
+/** Normalise a FluidColor to an RGB tuple with values in [0, 1]. */
+export function parseColor(color: FluidColor): [number, number, number] {
+  if (Array.isArray(color)) return color;
+  // Strip leading '#', take at most 6 hex chars (drops alpha if present)
+  const hex = (color as string).slice(1, 7);
+  if (hex.length === 3) {
+    return [
+      parseInt(hex[0] + hex[0], 16) / 255,
+      parseInt(hex[1] + hex[1], 16) / 255,
+      parseInt(hex[2] + hex[2], 16) / 255,
+    ];
+  }
+  return [
+    parseInt(hex.slice(0, 2), 16) / 255,
+    parseInt(hex.slice(2, 4), 16) / 255,
+    parseInt(hex.slice(4, 6), 16) / 255,
+  ];
+}
 
 export function mergeConfig(
   user: Partial<FluidConfig> = {},
