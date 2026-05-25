@@ -1,19 +1,32 @@
-## CORE/BUG: black outline on Text
+## CORE/FEATURE: native string color support
 
-On `<FluidText` there is a tiny black border on the text. Even visible when setting all colors (background, text, shine...) to white, there is still a tiny black border.
-
-It looks like some source of blackness is filling the pixelated edges of the text.
+Add native support for multiple string color values for configs like `glowColor` and `waterColor` to be set to hex or rgb values.
+For all color values you can pass number[] or `#${string}`. Note that transparency might not work out of the box, but we can ignore that for now and simply pass it along and the webgpu or formatting functions will resolve that.
+We only
 
 Expected:
-Either to have this source of blackness set to the text-color so there are no conflicts or no fill at all (if possible).
+Can pass raw hex colors. Transparency should not be accounted for (unless it would break the colors, then omit it from the hex parse)
 
-Or maybe make the text itself just 1px larger or the backdrop text 1px smaller?
+## CORE/FEATURE: make alpha optional
 
-## CORE/BUG backgroundSrc not working for text
+Minor performance gain. Make `alpha` and `alphaMode` optional with a prop `enableAlpha: boolean`, so that a user can optionally enable transparency.
 
-tbd.
+Also, ror webGPU there are still some settings that could optionally be added to the createRenderPipeline:
 
----
+```ts
+blend: {
+  color: {
+    operation: 'add',
+    srcFactor: 'one',
+    dstFactor: 'zero',
+  },
+  alpha: {
+    operation: 'add',
+    srcFactor: 'one',
+    dstFactor: 'zero',
+  },
+}
+```
 
 ## CORE/FEATURE + DEMO/FEATURE: better value ranges
 
@@ -31,9 +44,8 @@ Expected:
 - internally the float is normalized to a fitting range for some unique use cases.
 - no max or min, the user can choose to pass custom values that don't fit the normal.
 
-## CORE/FEATURE: native string color support
-
-Add native support for multiple string color values for configs like `glowColor` and `waterColor` to be set to hex or rgb values.
+Important:
+Do not resolve this feature if you have no idea what the values should be! Then simply ask the user to figure this otu and provide them (or some). You can either way already setup some functionality using "densityDissipation".
 
 ## CORE/FEATURE: merge props config into main
 
@@ -52,3 +64,20 @@ Default remains 'center'.
 ## CORE/FEATURE: Support transparency in colors
 
 tbd.
+
+## CORE/BUG: black outline on Text
+
+On `<FluidText` there is a tiny black border on the text. Even visible when setting all colors (background, text, shine...) to white, there is still a tiny black border.
+
+It looks like some source of blackness is filling the pixelated edges of the text.
+
+Expected:
+Either to have this source of blackness set to the text-color so there are no conflicts or no fill at all (if possible).
+
+Or maybe make the text itself just 1px larger or the backdrop text 1px smaller?
+
+## CORE/BUG backgroundSrc not working for text
+
+tbd.
+
+---
