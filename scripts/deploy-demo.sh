@@ -9,7 +9,13 @@ export PATH="$HOME/.nvm/versions/node/v20.19.6/bin:$PATH"
 cd "$REPO_ROOT/demo"
 bun run build
 
+
 npx gh-pages -d dist --dotfiles
 
 echo ""
 echo "✓ Demo deployed to gh-pages branch → https://jayf0x.github.io/fluidity"
+
+git add .
+git commit -m "(job: build demo)"
+git push origin main
+
