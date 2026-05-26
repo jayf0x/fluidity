@@ -1,6 +1,6 @@
 {
   "name": "@jayf0x/fluidity-js",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "High-performance WebGPU fluid simulation for React — text and image effects",
   "type": "module",
   "module": "./dist/index.js",
