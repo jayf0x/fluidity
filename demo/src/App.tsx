@@ -1,5 +1,6 @@
 import { useState } from 'react';
 
+import { FPSTracker } from './components/FPSTracker';
 import { ImageExample } from './examples/ImageExample';
 import { PresetsExample } from './examples/PresetsExample';
 import { SplashExample } from './examples/SplashExample';
@@ -60,6 +61,8 @@ export function App() {
         ))}
       </nav>
 
+      <FPSTracker />
+
       {/* ── Examples ────────────────────────── */}
       <div style={{ width: '100%', height: '100%' }}>
         {tab === 'text' && <TextExample />}
@@ -76,7 +79,7 @@ export function App() {
         rel="noreferrer"
         style={{
           position: 'absolute',
-          top: '1vh',
+          bottom: '1vh',
           left: '1vw',
           fontSize: 15,
           fontFamily: 'ui-monospace, monospace',

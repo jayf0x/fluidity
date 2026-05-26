@@ -1,28 +1,3 @@
-## ~~CORE/FEATURE: native string color support~~ ✅ RESOLVED
-
-`FluidColor = [number, number, number] | \`#${string}\`` — `parseColor()` converts at the GL/GPU call site. Alpha stripped from 8-char hex. Exported from public API.
-
-## CORE/FEATURE: make alpha optional
-
-Minor performance gain. Make `alpha` and `alphaMode` optional with a prop `enableAlpha: boolean`, so that a user can optionally enable transparency.
-
-Also, ror webGPU there are still some settings that could optionally be added to the createRenderPipeline:
-
-```ts
-blend: {
-  color: {
-    operation: 'add',
-    srcFactor: 'one',
-    dstFactor: 'zero',
-  },
-  alpha: {
-    operation: 'add',
-    srcFactor: 'one',
-    dstFactor: 'zero',
-  },
-}
-```
-
 ## CORE/FEATURE + DEMO/FEATURE: better value ranges
 
 Currently values are not correctly reflected. This also needs to be visible in the DEMO os that the DEMO is a reflection of the ideal/basic use case.

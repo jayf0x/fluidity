@@ -162,6 +162,7 @@ export const displayShader = /* glsl */ `
   uniform float uShine;
   uniform float uWarpStrength;
   uniform int   uAlgorithm;
+  uniform int   uEnableAlpha;
 
   void main () {
     float obs      = texture2D(uObstacle,  vUv).r;
@@ -236,9 +237,13 @@ export const displayShader = /* glsl */ `
       color  = mix(color, bg * 0.5, obs * 0.2);
     }
 
-    // Premultiplied alpha — transparent where there is neither content nor fluid,
-    // letting the CSS backgroundColor on the container div show through.
+    // Output: premultiplied alpha when transparency is enabled (lets CSS backgroundColor
+    // show through), or straight opaque colour when enableAlpha is off (perf mode).
     float alpha = clamp(max(density * 1.5, coverage), 0.0, 1.0);
-    gl_FragColor = vec4(color * alpha, alpha);
+    if (uEnableAlpha == 1) {
+      gl_FragColor = vec4(color * alpha, alpha);
+    } else {
+      gl_FragColor = vec4(color, 1.0);
+    }
   }
 `;

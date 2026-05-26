@@ -6,6 +6,7 @@ import { useControls } from 'leva';
 type Defaults = Partial<FluidConfigLeva> & {
   preset?: PresetKey;
   backgroundColor?: string;
+  enableAlpha?: boolean;
 };
 
 /**
@@ -32,6 +33,7 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
       algorithm: 'standard' satisfies FluidAlgorithm,
       preset: undefined satisfies PresetKey | undefined,
       useWebGPU: true,
+      enableAlpha: true,
       backgroundColor: '#0a0a0a',
       quality: {
         dpr: 1,
@@ -70,17 +72,15 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
       qualityDpr: { value: values.quality.dpr, min: 0.01, max: 1, step: 0.01 },
       qualitySim: { value: values.quality.sim, min: 0.01, max: 1, step: 0.01 },
       useWebGPU: values.useWebGPU,
+      enableAlpha: values.enableAlpha,
       backgroundColor: values.backgroundColor,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  const [{ waterColor, glowColor, preset: presetRaw, backgroundColor, useWebGPU, ...simConfig }, set] = useControls(
-    'fluid config',
-    fluidSchema,
-    { store }
-  );
+  const [{ waterColor, glowColor, preset: presetRaw, backgroundColor, useWebGPU, enableAlpha, ...simConfig }, set] =
+    useControls('fluid config', fluidSchema, { store });
 
   // Resolve 'none' sentinel back to undefined so callers can pass it straight to preset prop
   const preset = presetRaw === 'none' ? undefined : (presetRaw as PresetKey);
@@ -100,5 +100,5 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
     dpr: simConfig.qualityDpr,
   };
 
-  return { set, preset, backgroundColor, quality, useWebGPU };
+  return { set, preset, backgroundColor, quality, useWebGPU, enableAlpha };
 }

@@ -23,6 +23,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     isMouseEnabled = DEFAULT_PROPS_TEXT.isMouseEnabled,
     isWorkerEnabled = DEFAULT_PROPS_TEXT.isWorkerEnabled,
     useWebGPU = true,
+    enableAlpha = true,
     quality = DEFAULT_PROPS_SHARED.quality,
   },
   ref
@@ -31,6 +32,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
   const controllerRef = useFluid(containerRef, {
     isWorkerEnabled,
     useWebGPU,
+    enableAlpha,
     quality,
     config: mergeConfig({ ...config, ...(algorithm ? { algorithm } : {}) }, preset, DEFAULT_CONFIG_TEXT),
   });
@@ -54,10 +56,10 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     [text, fontSize, color, fontFamily, fontWeight]
   );
 
-  // Sync text source whenever relevant props change (useWebGPU triggers reinit → re-set source)
+  // Sync text source whenever relevant props change (useWebGPU/enableAlpha trigger reinit → re-set source)
   useEffect(() => {
     controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight });
-  }, [text, fontSize, color, fontFamily, fontWeight, useWebGPU]);
+  }, [text, fontSize, color, fontFamily, fontWeight, useWebGPU, enableAlpha]);
 
   // Sync config/preset/algorithm → updateConfig for reactive changes
   const configKey = JSON.stringify(config);
@@ -66,7 +68,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
       mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset, DEFAULT_CONFIG_TEXT)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, algorithm, configKey, useWebGPU]);
+  }, [preset, algorithm, configKey, useWebGPU, enableAlpha]);
 
   // Load + forward background image to the simulation
   useEffect(() => {
@@ -87,7 +89,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     return () => {
       cancelled = true;
     };
-  }, [backgroundSrc, backgroundSize, useWebGPU]);
+  }, [backgroundSrc, backgroundSize, useWebGPU, enableAlpha]);
 
   // Built-in pointer tracking
   useEffect(() => {

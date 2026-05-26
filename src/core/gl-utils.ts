@@ -67,8 +67,8 @@ export type RendererContext = GLContext | WebGPUContext;
 /**
  * Initialises a WebGL2 (or WebGL1 fallback) context.
  */
-export function initGLContext(canvas: HTMLCanvasElement | OffscreenCanvas): GLContext {
-  const params = { alpha: true, depth: false, stencil: false, antialias: true, preserveDrawingBuffer: false };
+export function initGLContext(canvas: HTMLCanvasElement | OffscreenCanvas, enableAlpha = true): GLContext {
+  const params = { alpha: enableAlpha, depth: false, stencil: false, antialias: true, preserveDrawingBuffer: false };
 
   let gl = canvas.getContext('webgl2', params) as WebGL2RenderingContext | WebGLRenderingContext | null;
   const isWebGL2 = !!gl;
@@ -104,7 +104,7 @@ export function initGLContext(canvas: HTMLCanvasElement | OffscreenCanvas): GLCo
  * Attempts to initialise a WebGPU context on the given canvas.
  * Returns null when WebGPU is unavailable or the canvas already has a different context.
  */
-export async function initWebGPU(canvas: HTMLCanvasElement | OffscreenCanvas): Promise<WebGPUContext | null> {
+export async function initWebGPU(canvas: HTMLCanvasElement | OffscreenCanvas, enableAlpha = true): Promise<WebGPUContext | null> {
   if (typeof navigator === 'undefined' || !navigator.gpu) return null;
 
   try {
@@ -117,7 +117,7 @@ export async function initWebGPU(canvas: HTMLCanvasElement | OffscreenCanvas): P
     if (!context) return null;
 
     const format = navigator.gpu.getPreferredCanvasFormat();
-    context.configure({ device, format, alphaMode: 'premultiplied' });
+    context.configure({ device, format, alphaMode: enableAlpha ? 'premultiplied' : 'opaque' });
 
     return { type: 'webgpu', adapter, device, context, format };
   } catch {
@@ -128,10 +128,10 @@ export async function initWebGPU(canvas: HTMLCanvasElement | OffscreenCanvas): P
 /**
  * Renderer auto-detection: tries WebGPU first, falls back to WebGL2 → WebGL1.
  */
-export async function initRenderer(canvas: HTMLCanvasElement | OffscreenCanvas): Promise<RendererContext> {
-  const gpu = await initWebGPU(canvas);
+export async function initRenderer(canvas: HTMLCanvasElement | OffscreenCanvas, enableAlpha = true): Promise<RendererContext> {
+  const gpu = await initWebGPU(canvas, enableAlpha);
   if (gpu) return gpu;
-  return initGLContext(canvas);
+  return initGLContext(canvas, enableAlpha);
 }
 
 // ─── WebGL utilities ─────────────────────────────────────────────────────────

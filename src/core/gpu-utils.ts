@@ -79,17 +79,22 @@ export function createGPUDoubleFBO(device: GPUDevice, format: GPUTextureFormat, 
 
 // ─── Pipeline factory ─────────────────────────────────────────────────────────
 
-function makePipeline(device: GPUDevice, wgsl: string, targetFmt: GPUTextureFormat): GPURenderPipeline {
+function makePipeline(device: GPUDevice, wgsl: string, targetFmt: GPUTextureFormat, blend?: GPUBlendState): GPURenderPipeline {
   const mod = device.createShaderModule({ code: wgsl });
   return device.createRenderPipeline({
     layout: 'auto',
     vertex: { module: mod, entryPoint: 'vs', buffers: [GPU_VERTEX_LAYOUT] },
-    fragment: { module: mod, entryPoint: 'fs', targets: [{ format: targetFmt }] },
+    fragment: { module: mod, entryPoint: 'fs', targets: [{ format: targetFmt, ...(blend ? { blend } : {}) }] },
     primitive: { topology: 'triangle-list' },
   });
 }
 
-export function createGPUPrograms(device: GPUDevice, swapFormat: GPUTextureFormat): GPUPrograms {
+const BLEND_OPAQUE: GPUBlendState = {
+  color: { operation: 'add', srcFactor: 'one', dstFactor: 'zero' },
+  alpha: { operation: 'add', srcFactor: 'one', dstFactor: 'zero' },
+};
+
+export function createGPUPrograms(device: GPUDevice, swapFormat: GPUTextureFormat, enableAlpha = true): GPUPrograms {
   const sim = 'rgba16float' as GPUTextureFormat;
   return {
     advection:       makePipeline(device, advectionWGSL,       sim),
@@ -99,7 +104,7 @@ export function createGPUPrograms(device: GPUDevice, swapFormat: GPUTextureForma
     splat:           makePipeline(device, splatWGSL,           sim),
     curl:            makePipeline(device, curlWGSL,            sim),
     vorticity:       makePipeline(device, vorticityWGSL,       sim),
-    display:         makePipeline(device, displayWGSL,         swapFormat),
+    display:         makePipeline(device, displayWGSL,         swapFormat, enableAlpha ? undefined : BLEND_OPAQUE),
   };
 }
 
@@ -162,13 +167,14 @@ export function writeSplatUniforms(
 // Writes display uniforms (64 bytes):
 //   texelSize(vec2f), refraction(f32), specularExp(f32),
 //   waterColor(vec4f), glowColor(vec4f),
-//   shine(f32), warpStrength(f32), algorithm(i32), _pad(f32)
+//   shine(f32), warpStrength(f32), algorithm(i32), enableAlpha(i32)
 export function writeDisplayUniforms(
   device: GPUDevice, buf: GPUBuffer,
   tsx: number, tsy: number,
   refraction: number, specularExp: number,
   wc: [number, number, number], gc: [number, number, number],
-  shine: number, warpStrength: number, algorithm: number
+  shine: number, warpStrength: number, algorithm: number,
+  enableAlpha: boolean
 ): void {
   const d = new Float32Array(16);
   const di = new Int32Array(d.buffer);
@@ -176,8 +182,8 @@ export function writeDisplayUniforms(
   d[4] = wc[0]; d[5] = wc[1]; d[6] = wc[2]; d[7] = 0;
   d[8] = gc[0]; d[9] = gc[1]; d[10] = gc[2]; d[11] = 0;
   d[12] = shine; d[13] = warpStrength;
-  di[14] = algorithm; // offset 56 bytes
-  // d[15] = 0; // padding
+  di[14] = algorithm;   // offset 56 bytes
+  di[15] = enableAlpha ? 1 : 0; // offset 60 bytes
   device.queue.writeBuffer(buf, 0, d);
 }
 

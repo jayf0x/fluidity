@@ -58,6 +58,8 @@ interface FluidBaseProps {
   backgroundSize?: string | number;
   /** enabled greater performance, but not every browser supports it */
   useWebGPU?: boolean;
+  /** Enable transparent canvas (default true). Set false for a minor perf gain when transparency is not needed. */
+  enableAlpha?: boolean;
 }
 
 interface FluidTextProps extends FluidBaseProps {

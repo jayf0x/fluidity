@@ -10,6 +10,7 @@ export class FluidController {
   #sim: FluidSimulation | null = null;
   #useWorker: boolean;
   #useWebGPU: boolean;
+  #enableAlpha: boolean;
   #qualityDpr: number;
   #qualitySim: number;
 
@@ -22,13 +23,15 @@ export class FluidController {
     {
       isWorkerEnabled = true,
       useWebGPU = true,
+      enableAlpha = true,
       quality = {},
       config = {},
-    }: { isWorkerEnabled?: boolean; useWebGPU?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
+    }: { isWorkerEnabled?: boolean; useWebGPU?: boolean; enableAlpha?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
   ) {
     this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
     this.#qualitySim = Math.max(0.1, Math.min(1, quality.sim ?? 0.5));
     this.#useWebGPU = useWebGPU;
+    this.#enableAlpha = enableAlpha;
     this.#useWorker = isWorkerEnabled && WORKER_SUPPORTED;
 
     if (this.#useWorker) {
@@ -167,7 +170,7 @@ export class FluidController {
 
     if (hasGPU) {
       // Async WebGPU-first: source calls arriving before resolve are queued.
-      FluidSimulation.create(canvas, config, quality, true).then((sim) => {
+      FluidSimulation.create(canvas, config, quality, true, this.#enableAlpha).then((sim) => {
         this.#sim = sim;
         if (this.#pendingTextSource) {
           sim.setTextSource(this.#pendingTextSource);
@@ -182,7 +185,7 @@ export class FluidController {
       });
     } else {
       // Sync WebGL fallback — no queuing needed.
-      this.#sim = new FluidSimulation(canvas, config, quality);
+      this.#sim = new FluidSimulation(canvas, config, quality, undefined, this.#enableAlpha);
     }
   }
 
@@ -217,7 +220,7 @@ export class FluidController {
     };
 
     worker.postMessage(
-      { type: 'init', canvas: offscreen, width, height, config, dpr, quality: { dpr: this.#qualityDpr, sim: this.#qualitySim }, useWebGPU: this.#useWebGPU },
+      { type: 'init', canvas: offscreen, width, height, config, dpr, quality: { dpr: this.#qualityDpr, sim: this.#qualitySim }, useWebGPU: this.#useWebGPU, enableAlpha: this.#enableAlpha },
       [offscreen]
     );
   }

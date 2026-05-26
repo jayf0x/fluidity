@@ -279,7 +279,7 @@ struct U {
 //  48  shine       f32
 //  52  warpStrength f32
 //  56  algorithm   i32
-//  60  _pad        f32
+//  60  enableAlpha i32    (1 = premultiplied alpha output, 0 = opaque)
 
 export const displayWGSL = /* wgsl */`
 ${SHARED_VS_STRUCT}
@@ -293,7 +293,7 @@ struct U {
   shine       : f32,
   warpStrength: f32,
   algorithm   : i32,
-  _pad        : f32,
+  enableAlpha : i32,
 }
 @group(0) @binding(0) var<uniform> u    : U;
 @group(0) @binding(1) var          samp : sampler;
@@ -373,6 +373,9 @@ struct U {
   }
 
   let alpha = clamp(max(density * 1.5, cov), 0.0, 1.0);
-  return vec4f(color * alpha, alpha);
+  if (u.enableAlpha == 1) {
+    return vec4f(color * alpha, alpha);
+  }
+  return vec4f(color, 1.0);
 }
 `;

@@ -137,6 +137,7 @@ export class FluidSimulation {
   #rafId: number | null = null;
   #isReady = false;
   #destroyed = false;
+  #enableAlpha = true;
 
   // ── Constructor ─────────────────────────────────────────────────────────────
 
@@ -144,23 +145,25 @@ export class FluidSimulation {
     canvas: HTMLCanvasElement | OffscreenCanvas,
     config: Partial<FluidConfig> = {},
     quality: FluidQuality = {},
-    gpuCtx?: WebGPUContext
+    gpuCtx?: WebGPUContext,
+    enableAlpha = true
   ) {
     this.#canvas = canvas;
     this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
     this.#simScale = Math.max(0.1, Math.min(1, quality.sim ?? 0.5));
     this.#config = mergeConfig(config);
+    this.#enableAlpha = enableAlpha;
 
     if (gpuCtx) {
       this.#gpuCtx = gpuCtx;
       this.#initGPUResources(gpuCtx);
     } else {
-      const { gl, ext } = initGLContext(canvas);
+      const { gl, ext } = initGLContext(canvas, enableAlpha);
       this.#gl = gl;
       this.#glExt = ext;
       this.#glPrograms = createPrograms(gl);
       this.#glBlit = createBlit(gl);
-      gl.clearColor(0, 0, 0, 0);
+      gl.clearColor(0, 0, 0, enableAlpha ? 0 : 1);
     }
   }
 
@@ -172,10 +175,11 @@ export class FluidSimulation {
     canvas: HTMLCanvasElement | OffscreenCanvas,
     config: Partial<FluidConfig> = {},
     quality: FluidQuality = {},
-    useWebGPU = true
+    useWebGPU = true,
+    enableAlpha = true
   ): Promise<FluidSimulation> {
-    const gpuCtx = useWebGPU ? await initWebGPU(canvas) : null;
-    return new FluidSimulation(canvas, config, quality, gpuCtx ?? undefined);
+    const gpuCtx = useWebGPU ? await initWebGPU(canvas, enableAlpha) : null;
+    return new FluidSimulation(canvas, config, quality, gpuCtx ?? undefined, enableAlpha);
   }
 
   // ---------------------------------------------------------------------------
@@ -328,7 +332,7 @@ export class FluidSimulation {
 
   #initGPUResources(gpu: WebGPUContext): void {
     const { device, format } = gpu;
-    this.#gpuPrograms = createGPUPrograms(device, format);
+    this.#gpuPrograms = createGPUPrograms(device, format, this.#enableAlpha);
     this.#gpuQuadBuf  = createGPUQuadBuffer(device);
     this.#gpuSampler  = createGPULinearSampler(device);
     this.#gpuUniAdv      = createUniformBuffer(device, 16);
@@ -529,7 +533,8 @@ export class FluidSimulation {
       parseColor(cfg.waterColor),
       parseColor(cfg.glowColor),
       cfg.shine, cfg.warpStrength ?? 0.015,
-      ALGORITHM_INT[cfg.algorithm] ?? 0
+      ALGORITHM_INT[cfg.algorithm] ?? 0,
+      this.#enableAlpha
     );
 
     const enc = dev.createCommandEncoder();
@@ -909,6 +914,7 @@ export class FluidSimulation {
     gl.uniform1f(display.uniforms.uShine, cfg.shine);
     gl.uniform1f(display.uniforms.uWarpStrength, cfg.warpStrength ?? 0.015);
     gl.uniform1i(display.uniforms.uAlgorithm, ALGORITHM_INT[cfg.algorithm] ?? 0);
+    gl.uniform1i(display.uniforms.uEnableAlpha, this.#enableAlpha ? 1 : 0);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.#glDensity.read.tex);
