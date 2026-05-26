@@ -29,7 +29,7 @@ export function useFluid(
   } = {}
 ): RefObject<FluidController | null> {
   const controllerRef = useRef<FluidController | null>(null);
-  const initOptsRef = useRef({ isWorkerEnabled, enableAlpha, quality, config });
+  const initOptsRef = useRef({ isWorkerEnabled, quality, config });
   const clampedDprRef = useRef(Math.max(0.1, Math.min(1, quality.dpr ?? 1)));
   const prevQualityRef = useRef<{ dpr: number | undefined; sim: number | undefined }>({
     dpr: quality.dpr,
@@ -49,8 +49,8 @@ export function useFluid(
     canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;';
     container.appendChild(canvas);
 
-    // Read stable opts from ref; useWebGPU/enableAlpha come from the closure (they're the deps).
-    const { isWorkerEnabled, enableAlpha: ea, quality: q, config: initConfig } = initOptsRef.current;
+    // Read stable opts from ref; useWebGPU and enableAlpha come from the closure (they are the deps).
+    const { isWorkerEnabled, quality: q, config: initConfig } = initOptsRef.current;
     const dpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
     const rect = container.getBoundingClientRect();
     const initW = Math.round((rect.width || container.clientWidth) * dpr) || 0;
@@ -70,7 +70,7 @@ export function useFluid(
     const controller = new FluidController(canvas, {
       isWorkerEnabled,
       useWebGPU,
-      enableAlpha: ea,
+      enableAlpha,
       quality: q,
       config: initConfig,
     });
