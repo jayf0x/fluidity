@@ -5,10 +5,6 @@ coverage/
 *.local
 .DS_Store
 
-.claude
-
-app/ # test app
-
-
+.claude/settings.local.json
 
 !demo/dist
