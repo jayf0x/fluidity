@@ -96,22 +96,53 @@ Components assemble a `configProps` object from non-undefined flat props via `Ob
 
 The `useFluid` hook accepts `pixelRatio` / `simResolution` and maps them to the internal `FluidQuality = { dpr, sim }` at the `FluidController` boundary. `FluidQuality` is kept as an internal type for controller/simulation APIs — not exposed in component props.
 
-## Config (DEFAULT_CONFIG)
+## Normalized prop API
 
-Raw shader/simulation values used as the default base (applied when a prop is not set):
+Seven simulation props accept a **normalized `0–1` value** instead of raw physics units. `normalizeConfig` maps them to their physics range before the sim receives them. Values outside `[0, 1]` pass through unchanged (raw physics override).
 
 ```ts
-{
-  densityDissipation: 0.992, velocityDissipation: 0.93, pressureIterations: 1,
-  curl: 0.0001, splatRadius: 0.004, splatForce: 0.91,
-  refraction: 0.25, specularExp: 1.01, shine: 0.01,
-  waterColor: '#000000', glowColor: '#b3d9ff',
-  algorithm: 'standard',   // 'standard'|'glass'|'ink'|'aurora'|'ripple'
-  warpStrength: 0.015,
+// PROP_RANGES: physics [min, max] for each normalized field
+PROP_RANGES = {
+  densityDissipation:  [0.94,  1.0  ],
+  velocityDissipation: [0.9,   0.999],
+  splatRadius:         [0.001, 0.04 ],
+  splatForce:          [0.1,   5.0  ],
+  specularExp:         [0.1,   10   ],
+  shine:               [0.0,   0.15 ],
+  warpStrength:        [0.001, 0.1  ],
 }
 ```
 
-`DEFAULT_CONFIG_TEXT` — FluidText-specific simulation defaults (higher pressure, curl, splatForce etc.) used as the base config in `FluidText` instead of `DEFAULT_CONFIG`.
+`normalizeConfig(config)` — maps normalized fields to physics, passes everything else through. Applied to the full `mergeConfig(...)` result in both React components before passing to the simulation. Also applied inside the `updateConfig` ref method.
+
+`mergeConfig` is unchanged — it always operates in the space of whatever config objects it receives. DEFAULT_CONFIG/PRESETS now store normalized values so the merged result is all-normalized before `normalizeConfig` converts it to physics.
+
+## Config (DEFAULT_CONFIG)
+
+Simulation defaults in normalized [0, 1] space for fields with a PROP_RANGES entry. `normalizeConfig` converts these to physics values before the shader sees them.
+
+```ts
+{
+  densityDissipation: 0.83, velocityDissipation: 0.91, pressureIterations: 1,
+  curl: 0.0, splatRadius: 0.1, splatForce: 0.08,
+  refraction: 1.0, specularExp: 0, shine: 0.0,
+  waterColor: '#000000', glowColor: '#b3d9ff',
+  algorithm: 'aurora',   // 'standard'|'glass'|'ink'|'aurora'|'ripple'
+  warpStrength: 0.04,
+}
+```
+
+`DEFAULT_CONFIG_TEXT` — FluidText-specific defaults (higher pressure, curl, splatForce, brand palette):
+
+```ts
+{
+  ...DEFAULT_CONFIG,
+  densityDissipation: 0.9, velocityDissipation: 0.9, pressureIterations: 3,
+  curl: 0.2, splatRadius: 0.2, splatForce: 0.5,
+  refraction: 0.2, specularExp: 0.01, shine: 0.5,
+  waterColor: '#090017', glowColor: '#b04721',
+}
+```
 
 ## Component defaults (config.ts)
 
