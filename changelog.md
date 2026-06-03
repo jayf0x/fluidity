@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.3
+- Fix: pixelated specular highlights — 4-tap cross replaced with 8-tap Sobel normal kernel (GLSL + WGSL)
+- Fix: specular highlights suppressed at low/fading density — eliminates highlight rings on dissipating strokes
+- CI migrated from NPM to Bun
+
 ## v0.2.2
 - Make canvas alpha optional
 - Native string color support for `waterColor` / `glowColor`
