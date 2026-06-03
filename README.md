@@ -103,22 +103,22 @@ export const Interactive = () => {
 
 | Prop                  | Type               | Default      |
 | --------------------- | ------------------ | ------------ |
-| `algorithm`           | `FluidAlgorithm`   | `'standard'` |
+| `algorithm`           | `FluidAlgorithm`   | `'aurora'`   |
 | `preset`              | `PresetKey`        | —            |
 | `pixelRatio`          | `number`           | `1`          |
 | `simResolution`       | `number`           | `0.5`        |
-| `densityDissipation`  | `number`           | `0.992`      |
-| `velocityDissipation` | `number`           | `0.93`       |
+| `densityDissipation`  | `number`           | `0.83`       |
+| `velocityDissipation` | `number`           | `0.91`       |
 | `pressureIterations`  | `number`           | `1`          |
-| `curl`                | `number`           | `0.0001`     |
-| `splatRadius`         | `number`           | `0.004`      |
-| `splatForce`          | `number`           | `0.91`       |
-| `refraction`          | `number`           | `0.25`       |
-| `specularExp`         | `number`           | `1.01`       |
-| `shine`               | `number`           | `0.01`       |
+| `curl`                | `number`           | `0`          |
+| `splatRadius`         | `number`           | `0.1`        |
+| `splatForce`          | `number`           | `0.08`       |
+| `refraction`          | `number`           | `1.0`        |
+| `specularExp`         | `number`           | `0`          |
+| `shine`               | `number`           | `0`          |
 | `waterColor`          | `FluidColor`       | `'#000000'`  |
 | `glowColor`           | `FluidColor`       | `'#b3d9ff'`  |
-| `warpStrength`        | `number`           | `0.015`      |
+| `warpStrength`        | `number`           | `0.04`       |
 | `backgroundColor`     | `string`           | `'#0a0a0a'`  |
 | `backgroundSrc`       | `string`           | —            |
 | `backgroundSize`      | `string \| number` | `'cover'`    |
@@ -135,10 +135,10 @@ export const Interactive = () => {
 
 | Value        | Vibe                                             |
 | ------------ | ------------------------------------------------ |
-| `'standard'` | Colour overlay + gentle refraction (default)     |
+| `'aurora'`   | Liquid metal / lava-lamp (default)               |
+| `'standard'` | Colour overlay + gentle refraction               |
 | `'glass'`    | Bent-glass distortion, no colour                 |
 | `'ink'`      | Dense opaque pigment that accumulates and stains |
-| `'aurora'`   | Liquid metal / lava-lamp                         |
 | `'ripple'`   | Still water surface with Fresnel rim             |
 
 ```tsx
@@ -169,20 +169,22 @@ Control rendering resolution on two independent axes — both reactive at runtim
 
 ## Simulation props reference
 
-| Prop                  | Default  | Description                                     |
-| --------------------- | -------- | ----------------------------------------------- |
-| `densityDissipation`  | `0.992`  | How long ink lingers (0–1)                      |
-| `velocityDissipation` | `0.93`   | How fast fluid slows down (0–1)                 |
-| `pressureIterations`  | `1`      | Quality vs. cost trade-off                      |
-| `curl`                | `0.0001` | Swirl intensity. `0.2`–`0.5` for visible eddies |
-| `splatRadius`         | `0.004`  | Brush radius                                    |
-| `splatForce`          | `0.91`   | Force applied by brush                          |
-| `refraction`          | `0.25`   | Background warp strength                        |
-| `specularExp`         | `1.01`   | Specular highlight sharpness                    |
-| `shine`               | `0.01`   | Highlight intensity                             |
-| `waterColor`          | `#000`   | Base fluid colour (hex or `[R, G, B]` 0–1)      |
-| `glowColor`           | `#b3d9ff`| Glow / specular colour (hex or `[R, G, B]` 0–1) |
-| `warpStrength`        | `0.015`  | UV warp intensity (`aurora` algorithm)          |
+Simulation props that have a physics range accept a **normalized `0–1` value** — no need to know the raw shader units. Values outside `[0, 1]` are passed through as raw physics values for advanced overrides.
+
+| Prop                  | Default | Range   | Physics range   | Description                                     |
+| --------------------- | ------- | ------- | --------------- | ----------------------------------------------- |
+| `densityDissipation`  | `0.83`  | `0–1`   | `0.94–1.0`      | How long ink lingers                            |
+| `velocityDissipation` | `0.91`  | `0–1`   | `0.9–0.999`     | How fast fluid slows down                       |
+| `pressureIterations`  | `1`     | `1–50`  | —               | Pressure solve quality vs. cost                 |
+| `curl`                | `0`     | `0–1`   | —               | Swirl intensity                                 |
+| `splatRadius`         | `0.1`   | `0–1`   | `0.001–0.04`    | Brush radius                                    |
+| `splatForce`          | `0.08`  | `0–1`   | `0.1–5.0`       | Force applied by brush                          |
+| `refraction`          | `1.0`   | `0–1`   | —               | Background warp strength                        |
+| `specularExp`         | `0`     | `0–1`   | `0.1–10`        | Specular highlight sharpness                    |
+| `shine`               | `0`     | `0–1`   | `0–0.15`        | Highlight intensity                             |
+| `warpStrength`        | `0.04`  | `0–1`   | `0.001–0.1`     | UV warp intensity (`aurora` algorithm)          |
+| `waterColor`          | `#000`  | —       | —               | Base fluid colour (hex or `[R, G, B]` 0–1)      |
+| `glowColor`           | `#b3d9ff`| —      | —               | Glow / specular colour (hex or `[R, G, B]` 0–1) |
 
 ---
 

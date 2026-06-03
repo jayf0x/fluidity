@@ -13,7 +13,7 @@ fluidity/
 │   ├── globals.d.ts         # Ambient global types (FluidConfig, FluidHandle, FluidBaseProps, etc.) — no import needed
 │   ├── index.d.ts           # Public module declarations for consumers (re-exports globals.d.ts)
 │   ├── core/
-│   │   ├── config.ts        # DEFAULT_CONFIG, DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_*, DEFAULT_QUALITY, PRESETS, mergeConfig
+│   │   ├── config.ts        # DEFAULT_CONFIG, DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_*, DEFAULT_QUALITY, PRESETS, PROP_RANGES, mergeConfig, normalizeConfig
 │   │   ├── gl-utils.ts      # initGLContext, initWebGPU, initRenderer, Program class, createFBO, createDoubleFBO, createBlit
 │   │   ├── gpu-utils.ts     # WebGPU helpers: createGPUPrograms, createGPUDoubleFBO, uniform writers, gpuRenderToTexture
 │   │   ├── shaders.ts       # All GLSL shader strings (WebGL path)
