@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.5
+- Feat: flatten all `FluidConfig` fields as direct component props — no nested `config` object
+- Feat: simulation props accept normalized `0–1` float ranges (mapped to physics via `PROP_RANGES`)
+- Feat: rename boolean props to cleaner names (`mouseEnabled`, `workerEnabled`, `webGPUEnabled`, `alphaEnabled`)
+- Feat: set `aurora` as default algorithm with polished out-of-the-box simulation defaults
+
 ## v0.2.3
 - Fix: pixelated specular highlights — 4-tap cross replaced with 8-tap Sobel normal kernel (GLSL + WGSL)
 - Fix: specular highlights suppressed at low/fading density — eliminates highlight rings on dissipating strokes
