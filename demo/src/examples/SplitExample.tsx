@@ -4,6 +4,7 @@ import { FluidImage, FluidText } from 'fluidity-js';
 import { useControls, useCreateStore } from 'leva';
 
 import { DemoWrapper } from '../components/DemoWrapper';
+import { useImages } from '../hooks/useImages';
 
 type TextTileDef = FluidTextProps & {
   type: 'text';
@@ -27,7 +28,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=900',
+    src: '',
     backgroundColor: '#000000',
     algorithm: 'glass',
     refraction: 0.45,
@@ -41,12 +42,12 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     backgroundColor: '#00080f',
     algorithm: 'ripple',
     curl: 0.2,
-    shine: 0.40,
+    shine: 0.4,
     glowColor: '#00ccff',
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=900',
+    src: '',
     backgroundColor: '#0a0a0a',
     densityDissipation: 0.75,
     splatForce: 0.24,
@@ -58,13 +59,13 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     color: '#b980ff',
     backgroundColor: '#06000e',
     algorithm: 'ink',
-    densityDissipation: 0.80,
+    densityDissipation: 0.8,
     curl: 0.15,
     glowColor: '#994dff',
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=900',
+    src: '',
     backgroundColor: '#000000',
     algorithm: 'aurora',
     warpStrength: 0.21,
@@ -81,11 +82,11 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900',
+    src: '',
     backgroundColor: '#0a0a0a',
     algorithm: 'standard',
     curl: 0.35,
-    splatRadius: 0.10,
+    splatRadius: 0.1,
   },
   {
     type: 'text',
@@ -98,7 +99,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1439405326854-014607f694d7?w=900',
+    src: '',
     backgroundColor: '#000000',
     algorithm: 'ripple',
     shine: 0.27,
@@ -115,7 +116,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1490750967868-88df5691cc8c?w=900',
+    src: '',
     backgroundColor: '#0a0a0a',
     algorithm: 'ink',
     densityDissipation: 0.87,
@@ -132,7 +133,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=900',
+    src: '',
     backgroundColor: '#000000',
     algorithm: 'aurora',
     warpStrength: 0.29,
@@ -149,7 +150,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
   },
   {
     type: 'image',
-    src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900',
+    src: '',
     backgroundColor: '#000000',
     algorithm: 'glass',
     refraction: 0.55,
@@ -170,6 +171,8 @@ export function SplitExample() {
       step: 1,
     },
   });
+
+  const { urls, updateImages } = useImages(count);
 
   // column count derived from tile count so the grid stays roughly square
   const cols = useMemo(() => Math.max(2, Math.ceil(Math.sqrt(count))), [count]);
@@ -201,6 +204,7 @@ export function SplitExample() {
                 refs.current[i] = el;
               }}
               {...tile}
+              src={urls[i]}
             />
           )
         )}

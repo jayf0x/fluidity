@@ -6,7 +6,7 @@ import { useControls, useCreateStore } from 'leva';
 import { DemoWrapper } from '../components/DemoWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
-const defaultConfig: Partial<FluidConfigLeva> = {
+const defaultConfig: Partial<FluidConfig> = {
   densityDissipation: 0.67,
   velocityDissipation: 0,
   curl: 0.0,

@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useMemo } from 'react';
 import type { RefObject } from 'react';
 
+import { DEFAULT_CONFIG } from 'fluidity-js';
 import { useControls } from 'leva';
 
-type Defaults = Partial<FluidConfigLeva> & {
+type Defaults = Partial<FluidConfig> & {
   pixelRatio?: number;
   simResolution?: number;
   preset?: PresetKey;
   backgroundColor?: string;
+  webGPUEnabled?: boolean;
   alphaEnabled?: boolean;
 };
 
@@ -15,34 +17,32 @@ type Defaults = Partial<FluidConfigLeva> & {
  * Registers the shared "fluid config" Leva panel and syncs values → simulation.
  * Pass the page's isolated `store` (from `useCreateStore()`) for tab isolation.
  * Returns flat props — spread directly onto FluidText / FluidImage.
+ *
+ * customDefaults — pass DEFAULT_CONFIG for image or DEFAULT_CONFIG_TEXT for text
+ * to initialize the Leva panel with the right starting values.
  */
 export function useFluidControls(ref: RefObject<FluidHandle | null>, store: LevaStore, customDefaults: Defaults = {}) {
-  const values = useMemo(
-    () => ({
-      densityDissipation: 0.83,
-      velocityDissipation: 0.91,
-      pressureIterations: 1,
-      curl: 0.0,
-      splatRadius: 0.1,
-      splatForce: 0.08,
-      refraction: 1.0,
-      specularExp: 0,
-      shine: 0.0,
-      warpStrength: 0.04,
-      waterColor: '#000000',
-      glowColor: '#b3d9ff',
-      algorithm: 'aurora' satisfies FluidAlgorithm,
-      preset: undefined satisfies PresetKey | undefined,
+  const values = useMemo(() => {
+    const merged = {
+      // sim defaults from library base config
+      ...DEFAULT_CONFIG,
+      // component prop defaults
+      preset: undefined as PresetKey | undefined,
       webGPUEnabled: true,
       alphaEnabled: true,
       backgroundColor: '#0a0a0a',
       pixelRatio: 1,
       simResolution: 0.5,
+      // caller overrides (e.g. DEFAULT_CONFIG_TEXT for text examples)
       ...customDefaults,
-    }),
+    };
+    return {
+      ...merged,
+      waterColor: merged.waterColor as string,
+      glowColor: merged.glowColor as string,
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  }, []);
 
   const fluidSchema = useCallback(
     () => ({
