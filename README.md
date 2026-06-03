@@ -105,8 +105,8 @@ export const Interactive = () => {
 | --------------------- | ------------------ | ------------ |
 | `algorithm`           | `FluidAlgorithm`   | `'standard'` |
 | `preset`              | `PresetKey`        | —            |
-| `dpr`                 | `number`           | `1`          |
-| `sim`                 | `number`           | `0.5`        |
+| `pixelRatio`          | `number`           | `1`          |
+| `simResolution`       | `number`           | `0.5`        |
 | `densityDissipation`  | `number`           | `0.992`      |
 | `velocityDissipation` | `number`           | `0.93`       |
 | `pressureIterations`  | `number`           | `1`          |
@@ -122,9 +122,10 @@ export const Interactive = () => {
 | `backgroundColor`     | `string`           | `'#0a0a0a'`  |
 | `backgroundSrc`       | `string`           | —            |
 | `backgroundSize`      | `string \| number` | `'cover'`    |
-| `isMouseEnabled`      | `boolean`          | `true`       |
-| `isWorkerEnabled`     | `boolean`          | `true`       |
-| `useWebGPU`           | `boolean`          | `true`       |
+| `mouseEnabled`        | `boolean`          | `true`       |
+| `workerEnabled`       | `boolean`          | `true`       |
+| `webGPUEnabled`       | `boolean`          | `true`       |
+| `alphaEnabled`        | `boolean`          | `true`       |
 | `className`           | `string`           | —            |
 | `style`               | `CSSProperties`    | —            |
 
@@ -151,17 +152,17 @@ export const Interactive = () => {
 
 Control rendering resolution on two independent axes — both reactive at runtime.
 
-| Prop  | Range | Default | What it does                                                                              |
-| ----- | ----- | ------- | ----------------------------------------------------------------------------------------- |
-| `dpr` | 0.1–1 | `1`     | Canvas resolution as fraction of screen pixel ratio. `0.5` on Retina saves ~75% GPU fill. |
-| `sim` | 0.1–1 | `0.5`   | Simulation resolution. Lower = cheaper, less detail.                                      |
+| Prop            | Range | Default | What it does                                                                              |
+| --------------- | ----- | ------- | ----------------------------------------------------------------------------------------- |
+| `pixelRatio`    | 0.1–1 | `1`     | Canvas resolution as fraction of devicePixelRatio. `0.5` on Retina saves ~75% GPU fill.  |
+| `simResolution` | 0.1–1 | `0.5`   | Simulation FBO size. Lower = cheaper, less detail.                                        |
 
 ```tsx
 // Sharp canvas, cheap simulation
-<FluidImage src="/hero.jpg" dpr={1} sim={0.2} />
+<FluidImage src="/hero.jpg" pixelRatio={1} simResolution={0.2} />
 
 // Lower canvas res, full simulation quality
-<FluidImage src="/hero.jpg" dpr={0.5} sim={1} />
+<FluidImage src="/hero.jpg" pixelRatio={0.5} simResolution={1} />
 ```
 
 ---

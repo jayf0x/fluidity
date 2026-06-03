@@ -66,7 +66,7 @@ PATH=/Users/me/.nvm/versions/node/v20.19.6/bin:$PATH bun deploy  # → gh-pages
 
 ```tsx
 <FluidText text="Hello" fontSize={120} color="#fff" algorithm="glass" preset="neon" />
-<FluidImage src="/hero.jpg" algorithm="aurora" dpr={1} sim={0.5} />
+<FluidImage src="/hero.jpg" algorithm="aurora" pixelRatio={1} simResolution={0.5} />
 ```
 
 ### FluidHandle ref

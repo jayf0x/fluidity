@@ -4,11 +4,11 @@ import type { RefObject } from 'react';
 import { useControls } from 'leva';
 
 type Defaults = Partial<FluidConfigLeva> & {
-  dpr?: number;
-  sim?: number;
+  pixelRatio?: number;
+  simResolution?: number;
   preset?: PresetKey;
   backgroundColor?: string;
-  enableAlpha?: boolean;
+  alphaEnabled?: boolean;
 };
 
 /**
@@ -33,11 +33,11 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
       glowColor: '#b3d9ff',
       algorithm: 'standard' satisfies FluidAlgorithm,
       preset: undefined satisfies PresetKey | undefined,
-      useWebGPU: true,
-      enableAlpha: true,
+      webGPUEnabled: true,
+      alphaEnabled: true,
       backgroundColor: '#0a0a0a',
-      dpr: 1,
-      sim: 0.5,
+      pixelRatio: 1,
+      simResolution: 0.5,
       ...customDefaults,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -68,17 +68,17 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
         value: values.preset ?? ('none' as PresetKey | 'none'),
         options: ['none', 'calm', 'sand', 'wave', 'neon', 'smoke'] satisfies (PresetKey | 'none')[],
       },
-      dpr: { value: values.dpr, min: 0.01, max: 1, step: 0.01 },
-      sim: { value: values.sim, min: 0.01, max: 1, step: 0.01 },
-      useWebGPU: values.useWebGPU,
-      enableAlpha: values.enableAlpha,
+      pixelRatio: { value: values.pixelRatio, min: 0.01, max: 1, step: 0.01 },
+      simResolution: { value: values.simResolution, min: 0.01, max: 1, step: 0.01 },
+      webGPUEnabled: values.webGPUEnabled,
+      alphaEnabled: values.alphaEnabled,
       backgroundColor: values.backgroundColor,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  const [{ waterColor, glowColor, preset: presetRaw, backgroundColor, useWebGPU, enableAlpha, dpr, sim, ...simConfig }, set] =
+  const [{ waterColor, glowColor, preset: presetRaw, backgroundColor, webGPUEnabled, alphaEnabled, pixelRatio, simResolution, ...simConfig }, set] =
     useControls('fluid config', fluidSchema, { store });
 
   // Resolve 'none' sentinel back to undefined so callers can pass it straight to preset prop
@@ -94,5 +94,5 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
     } satisfies Partial<FluidConfig>);
   }, [ref, simConfig, waterColor, glowColor]);
 
-  return { set, preset, backgroundColor, dpr, sim, useWebGPU, enableAlpha };
+  return { set, preset, backgroundColor, pixelRatio, simResolution, webGPUEnabled, alphaEnabled };
 }

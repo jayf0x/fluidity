@@ -15,32 +15,32 @@ import { FluidController } from '../fluid-controller';
 export function useFluid(
   containerRef: RefObject<HTMLElement | null>,
   {
-    isWorkerEnabled = true,
-    useWebGPU = true,
-    enableAlpha = true,
-    dpr,
-    sim,
+    workerEnabled = true,
+    webGPUEnabled = true,
+    alphaEnabled = true,
+    pixelRatio,
+    simResolution,
     config = {},
   }: {
-    isWorkerEnabled?: boolean;
-    useWebGPU?: boolean;
-    enableAlpha?: boolean;
-    dpr?: number;
-    sim?: number;
+    workerEnabled?: boolean;
+    webGPUEnabled?: boolean;
+    alphaEnabled?: boolean;
+    pixelRatio?: number;
+    simResolution?: number;
     config?: Partial<FluidConfig>;
   } = {}
 ): RefObject<FluidController | null> {
-  const quality: FluidQuality = { dpr, sim };
+  const quality: FluidQuality = { dpr: pixelRatio, sim: simResolution };
   const controllerRef = useRef<FluidController | null>(null);
-  const initOptsRef = useRef({ isWorkerEnabled, quality, config });
-  const clampedDprRef = useRef(Math.max(0.1, Math.min(1, dpr ?? 1)));
-  const prevQualityRef = useRef<{ dpr: number | undefined; sim: number | undefined }>({
-    dpr,
-    sim,
+  const initOptsRef = useRef({ workerEnabled, quality, config });
+  const clampedDprRef = useRef(Math.max(0.1, Math.min(1, pixelRatio ?? 1)));
+  const prevQualityRef = useRef<{ pixelRatio: number | undefined; simResolution: number | undefined }>({
+    pixelRatio,
+    simResolution,
   });
 
-  // Re-runs when useWebGPU changes (full teardown + reinit). Other init opts
-  // are stable refs — they don't need to trigger reinit.
+  // Re-runs when webGPUEnabled/alphaEnabled changes (full teardown + reinit).
+  // Other init opts are stable refs — they don't need to trigger reinit.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -52,8 +52,8 @@ export function useFluid(
     canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;display:block;';
     container.appendChild(canvas);
 
-    // Read stable opts from ref; useWebGPU and enableAlpha come from the closure (they are the deps).
-    const { isWorkerEnabled, quality: q, config: initConfig } = initOptsRef.current;
+    // Read stable opts from ref; webGPUEnabled and alphaEnabled come from the closure (they are the deps).
+    const { workerEnabled: we, quality: q, config: initConfig } = initOptsRef.current;
     const dpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
     const rect = container.getBoundingClientRect();
     const initW = Math.round((rect.width || container.clientWidth) * dpr) || 0;
@@ -71,15 +71,15 @@ export function useFluid(
     }
 
     const controller = new FluidController(canvas, {
-      isWorkerEnabled,
-      useWebGPU,
-      enableAlpha,
+      workerEnabled: we,
+      webGPUEnabled,
+      alphaEnabled,
       quality: q,
       config: initConfig,
     });
     controllerRef.current = controller;
 
-    // Forward container resizes to the simulation — reads clampedDprRef so DPR quality changes are picked up
+    // Forward container resizes to the simulation — reads clampedDprRef so pixelRatio changes are picked up
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const resizeDpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
@@ -96,23 +96,23 @@ export function useFluid(
       controllerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useWebGPU, enableAlpha]);
+  }, [webGPUEnabled, alphaEnabled]);
 
   // Propagate quality changes after mount
   useEffect(() => {
-    clampedDprRef.current = Math.max(0.1, Math.min(1, dpr ?? 1));
+    clampedDprRef.current = Math.max(0.1, Math.min(1, pixelRatio ?? 1));
     const prev = prevQualityRef.current;
-    prevQualityRef.current = { dpr, sim };
+    prevQualityRef.current = { pixelRatio, simResolution };
     const controller = controllerRef.current;
     const container = containerRef.current;
-    if (!controller || !container || (prev.dpr === dpr && prev.sim === sim)) return;
-    controller.updateQuality({ dpr, sim });
+    if (!controller || !container || (prev.pixelRatio === pixelRatio && prev.simResolution === simResolution)) return;
+    controller.updateQuality({ dpr: pixelRatio, sim: simResolution });
     const resizeDpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
     const w = container.clientWidth;
     const h = container.clientHeight;
     if (w > 0 && h > 0) controller.resize(Math.round(w * resizeDpr), Math.round(h * resizeDpr));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dpr, sim, useWebGPU, enableAlpha]);
+  }, [pixelRatio, simResolution, webGPUEnabled, alphaEnabled]);
 
   return controllerRef;
 }

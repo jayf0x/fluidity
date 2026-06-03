@@ -106,8 +106,8 @@ DEFAULT_QUALITY = { dpr: 1, sim: 0.5 };
 DEFAULT_PROPS_SHARED = {
   backgroundColor: '#0a0a0a',
   backgroundSize: 'cover',
-  isMouseEnabled: true,
-  isWorkerEnabled: true,
+  mouseEnabled: true,
+  workerEnabled: true,
 };
 DEFAULT_PROPS_IMAGE = { ...DEFAULT_PROPS_SHARED, effect: 0, imageSize: 'cover' };
 DEFAULT_PROPS_TEXT = {
@@ -121,7 +121,7 @@ DEFAULT_PROPS_TEXT = {
 
 `DEFAULT_CONFIG_TEXT` — FluidText-specific simulation defaults (higher pressure, curl, splatForce etc.) used as the base config in `FluidText` instead of `DEFAULT_CONFIG`.
 
-All `FluidConfig` fields and quality (`dpr`, `sim`) are **flat props** on both components. No `config` object or `quality` object — every knob is a top-level prop.
+All `FluidConfig` fields and quality (`pixelRatio`, `simResolution`) are **flat props** on both components. No `config` object or `quality` object — every knob is a top-level prop. Boolean props use `mouseEnabled`, `workerEnabled`, `webGPUEnabled`, `alphaEnabled`. `FluidBaseProps extends Partial<FluidConfig>` — no duplicate field declarations.
 
 ## Simulation pipeline (per frame, simulation.ts #step)
 
@@ -179,12 +179,12 @@ All canvas sizing is DPR-aware. `useFluid` multiplies `clientWidth/clientHeight`
 
 ### Quality reactivity
 
-`useFluid` has a `useEffect([dpr, sim])` that propagates quality changes after mount. It:
+`useFluid` has a `useEffect([pixelRatio, simResolution])` that propagates quality changes after mount. It:
 1. Updates `clampedDprRef.current` so future ResizeObserver callbacks use the new DPR factor.
-2. Calls `controller.updateQuality({ dpr, sim })` — updates `#qualityDpr` / `#qualitySim` in the controller and posts an `updateQuality` message to the worker (or updates the sim directly on main thread).
+2. Calls `controller.updateQuality({ dpr: pixelRatio, sim: simResolution })` — updates `#qualityDpr` / `#qualitySim` in the controller and posts an `updateQuality` message to the worker (or updates the sim directly on main thread).
 3. Calls `controller.resize(w * newDpr, h * newDpr)` to resize the canvas and rebuild FBOs with the new `simScale`.
 
-The effect compares against `prevQualityRef` to skip on first mount (initial quality is already applied by the constructor) and to avoid redundant resizes when values are unchanged. `useFluid` accepts `dpr` and `sim` as flat params (no `quality` object).
+The effect compares against `prevQualityRef` to skip on first mount and to avoid redundant resizes when values are unchanged. `useFluid` accepts `pixelRatio` and `simResolution` as flat params; maps to internal `FluidQuality = { dpr, sim }` at the controller boundary.
 
 Worker message added: `updateQuality { quality: { dpr, sim } }` — worker calls `sim.updateQuality(quality)` which updates `#qualityDpr` and `#simScale`. FBO rebuild happens on the subsequent `resize` message.
 

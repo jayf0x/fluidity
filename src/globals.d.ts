@@ -5,15 +5,9 @@ type FluidAlgorithm = 'standard' | 'glass' | 'ink' | 'aurora' | 'ripple';
 /** RGB tuple (values 0–1) or a CSS hex string (#RGB, #RRGGBB, #RRGGBBAA — alpha stripped). */
 type FluidColor = [number, number, number] | `#${string}`;
 
-/**
- * Granular performance/quality controls. Both axes are independent — you can
- * run a sharp display at a coarser simulation, or vice versa.
- * Reactive: changes after mount are applied on the next animation frame.
- */
+/** Internal quality object used by FluidController and FluidSimulation. */
 interface FluidQuality {
-  /** devicePixelRatio multiplier for canvas backing resolution. Range [0.1, 1]. Default 1 (native). On Retina, 0.5 → 1× pixels (75% less fill). */
   dpr?: number;
-  /** Simulation FBO size as a fraction of canvas size. Range [0.1, 1]. Default 0.5 (current behavior). Higher = more fluid detail, more GPU. */
   sim?: number;
 }
 
@@ -42,40 +36,31 @@ interface FluidHandle {
   updateConfig(config: Partial<FluidConfig>): void;
 }
 
-interface FluidBaseProps {
-  /** Will apply to canvas container */
+/**
+ * All FluidConfig fields are inherited as optional props.
+ * Set any simulation knob directly on the component — no config object needed.
+ */
+interface FluidBaseProps extends Partial<FluidConfig> {
+  /** Applied to the canvas container element. */
   className?: string;
-  /** Will apply to canvas container */
+  /** Applied to the canvas container element. */
   style?: React.CSSProperties;
-  // FluidConfig fields — all optional, override the base config or preset
-  densityDissipation?: number;
-  velocityDissipation?: number;
-  pressureIterations?: number;
-  curl?: number;
-  splatRadius?: number;
-  splatForce?: number;
-  refraction?: number;
-  specularExp?: number;
-  shine?: number;
-  waterColor?: FluidColor;
-  glowColor?: FluidColor;
-  algorithm?: FluidAlgorithm;
-  warpStrength?: number;
-  // Quality — canvas resolution (dpr) and simulation resolution (sim)
-  /** devicePixelRatio multiplier for canvas backing resolution. Range [0.1, 1]. Default 1. */
-  dpr?: number;
-  /** Simulation FBO size as fraction of canvas size. Range [0.1, 1]. Default 0.5. */
-  sim?: number;
-  isMouseEnabled?: boolean;
-  isWorkerEnabled?: boolean;
+  /** Canvas backing resolution as a fraction of devicePixelRatio. Range [0.1, 1]. Default 1 (native DPR). */
+  pixelRatio?: number;
+  /** Simulation FBO size as a fraction of canvas size. Range [0.1, 1]. Default 0.5. */
+  simResolution?: number;
   preset?: PresetKey;
   backgroundColor?: string;
   backgroundSrc?: string;
   backgroundSize?: string | number;
-  /** Enable WebGPU renderer (default true, falls back to WebGL). */
-  useWebGPU?: boolean;
-  /** Enable transparent canvas (default true). Set false for a minor perf gain when transparency is not needed. */
-  enableAlpha?: boolean;
+  /** Forward pointer events to the simulation. Default true. */
+  mouseEnabled?: boolean;
+  /** Run simulation in a Web Worker via OffscreenCanvas. Default true. */
+  workerEnabled?: boolean;
+  /** Prefer WebGPU renderer; falls back to WebGL. Default true. */
+  webGPUEnabled?: boolean;
+  /** Enable transparent canvas. Default true. Set false for a minor perf gain when transparency is not needed. */
+  alphaEnabled?: boolean;
 }
 
 interface FluidTextProps extends FluidBaseProps {

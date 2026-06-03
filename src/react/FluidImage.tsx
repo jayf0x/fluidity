@@ -17,12 +17,12 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     backgroundColor = DEFAULT_PROPS_IMAGE.backgroundColor,
     backgroundSrc,
     backgroundSize = DEFAULT_PROPS_IMAGE.backgroundSize,
-    isMouseEnabled = DEFAULT_PROPS_IMAGE.isMouseEnabled,
-    isWorkerEnabled = DEFAULT_PROPS_IMAGE.isWorkerEnabled,
-    useWebGPU = true,
-    enableAlpha = true,
-    dpr = DEFAULT_QUALITY.dpr,
-    sim = DEFAULT_QUALITY.sim,
+    mouseEnabled = DEFAULT_PROPS_IMAGE.mouseEnabled,
+    workerEnabled = DEFAULT_PROPS_IMAGE.workerEnabled,
+    webGPUEnabled = true,
+    alphaEnabled = true,
+    pixelRatio = DEFAULT_QUALITY.dpr,
+    simResolution = DEFAULT_QUALITY.sim,
     // FluidConfig flat props
     densityDissipation,
     velocityDissipation,
@@ -47,11 +47,11 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
   ) as Partial<FluidConfig>;
 
   const controllerRef = useFluid(containerRef, {
-    isWorkerEnabled,
-    useWebGPU,
-    enableAlpha,
-    dpr,
-    sim,
+    workerEnabled,
+    webGPUEnabled,
+    alphaEnabled,
+    pixelRatio,
+    simResolution,
     config: mergeConfig(configProps, preset),
   });
 
@@ -74,20 +74,20 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     [src, effect, imageSize]
   );
 
-  // Reload whenever src, effect, or imageSize changes (useWebGPU triggers reinit → re-set source)
+  // Reload whenever src, effect, or imageSize changes (webGPUEnabled triggers reinit → re-set source)
   useEffect(() => {
     if (!src) return;
     controllerRef.current?.setImageSource(src, effect, imageSize);
-  }, [src, effect, imageSize, useWebGPU, enableAlpha]);
+  }, [src, effect, imageSize, webGPUEnabled, alphaEnabled]);
 
-  // Sync config/preset/algorithm → updateConfig for reactive changes
+  // Sync config/preset → updateConfig for reactive changes
   const configKey = JSON.stringify(configProps);
   useEffect(() => {
     controllerRef.current?.updateConfig(
       mergeConfig(configProps, preset)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, configKey, useWebGPU, enableAlpha]);
+  }, [preset, configKey, webGPUEnabled, alphaEnabled]);
 
   // Load + forward background image to the simulation
   useEffect(() => {
@@ -108,11 +108,11 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     return () => {
       cancelled = true;
     };
-  }, [backgroundSrc, backgroundSize, useWebGPU, enableAlpha]);
+  }, [backgroundSrc, backgroundSize, webGPUEnabled, alphaEnabled]);
 
   // Built-in pointer tracking
   useEffect(() => {
-    if (!isMouseEnabled) return;
+    if (!mouseEnabled) return;
     const el = containerRef.current;
     if (!el) return;
     const onMouseMove = (e: MouseEvent) => {
@@ -133,7 +133,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
       el.removeEventListener('mousemove', onMouseMove);
       el.removeEventListener('touchmove', onTouchMove);
     };
-  }, [isMouseEnabled]);
+  }, [mouseEnabled]);
 
   return (
     <div

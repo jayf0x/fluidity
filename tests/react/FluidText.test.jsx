@@ -109,8 +109,8 @@ describe('FluidText', () => {
     expect(container.querySelector('canvas')).toBeNull();
   });
 
-  it('does not fire handleMove when isMouseEnabled=false', () => {
-    const { container } = render(<FluidText text="X" isMouseEnabled={false} />);
+  it('does not fire handleMove when mouseEnabled=false', () => {
+    const { container } = render(<FluidText text="X" mouseEnabled={false} />);
     const div = container.querySelector('div');
     div.dispatchEvent(new MouseEvent('mousemove', { clientX: 10, clientY: 10, bubbles: true }));
     expect(mockController.handleMove).not.toHaveBeenCalled();
@@ -128,13 +128,13 @@ describe('FluidText', () => {
     ).resolves.not.toThrow();
   });
 
-  it('cleans up event listeners when isMouseEnabled toggles', async () => {
-    const { container, rerender } = render(<FluidText text="X" isMouseEnabled={true} />);
+  it('cleans up event listeners when mouseEnabled toggles', async () => {
+    const { container, rerender } = render(<FluidText text="X" mouseEnabled={true} />);
     const div = container.querySelector('div');
     const removeSpy = vi.spyOn(div, 'removeEventListener');
 
     await act(async () => {
-      rerender(<FluidText text="X" isMouseEnabled={false} />);
+      rerender(<FluidText text="X" mouseEnabled={false} />);
     });
 
     expect(removeSpy).toHaveBeenCalledWith('mousemove', expect.any(Function));

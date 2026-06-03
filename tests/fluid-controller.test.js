@@ -51,7 +51,7 @@ describe('FluidController — worker mode', () => {
   });
 
   it('creates a worker and transfers the canvas', () => {
-    new FluidController(canvas, { isWorkerEnabled: true });
+    new FluidController(canvas, { workerEnabled: true });
     expect(canvas.transferControlToOffscreen).toHaveBeenCalledOnce();
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'init' }),
@@ -60,13 +60,13 @@ describe('FluidController — worker mode', () => {
   });
 
   it('forwards setTextSource to worker', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.setTextSource({ text: 'Hi', fontSize: 40, color: '#fff' });
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(expect.objectContaining({ type: 'setTextSource' }));
   });
 
   it('forwards setImageSource to worker', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.setImageSource('https://example.com/img.jpg', 0.5);
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'setImageSource', src: 'https://example.com/img.jpg', effect: 0.5 })
@@ -74,7 +74,7 @@ describe('FluidController — worker mode', () => {
   });
 
   it('resolves relative image paths to absolute URLs before sending to worker', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.setImageSource('preview.png');
     const call = mockWorkerInstance.postMessage.mock.calls.find(([m]) => m?.type === 'setImageSource');
     expect(call).toBeDefined();
@@ -84,7 +84,7 @@ describe('FluidController — worker mode', () => {
   });
 
   it('resolves root-relative paths to absolute URLs before sending to worker', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.setImageSource('/assets/photo.png');
     const call = mockWorkerInstance.postMessage.mock.calls.find(([m]) => m?.type === 'setImageSource');
     expect(call[0].src).toMatch(/^https?:\/\//);
@@ -92,7 +92,7 @@ describe('FluidController — worker mode', () => {
   });
 
   it('passes dpr in resize message', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.resize(1280, 720);
     const call = mockWorkerInstance.postMessage.mock.calls.find(([m]) => m?.type === 'resize');
     expect(call[0]).toMatchObject({ type: 'resize', width: 1280, height: 720 });
@@ -100,7 +100,7 @@ describe('FluidController — worker mode', () => {
   });
 
   it('forwards handleMove to worker', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.handleMove(100, 200, 3);
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'move', x: 100, y: 200, strength: 3 })
@@ -108,7 +108,7 @@ describe('FluidController — worker mode', () => {
   });
 
   it('forwards updateConfig to worker', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.updateConfig({ shine: 0.9 });
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'updateConfig', config: { shine: 0.9 } })
@@ -116,7 +116,7 @@ describe('FluidController — worker mode', () => {
   });
 
   it('forwards resize to worker', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.resize(1280, 720);
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'resize', width: 1280, height: 720 })
@@ -124,7 +124,7 @@ describe('FluidController — worker mode', () => {
   });
 
   it('forwards setBackground (with bitmap) to worker as transferable', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     const bitmap = { close: vi.fn() }; // minimal ImageBitmap mock
     ctrl.setBackground(bitmap, 'cover');
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
@@ -134,7 +134,7 @@ describe('FluidController — worker mode', () => {
   });
 
   it('forwards setBackground (null) to worker without transferable', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.setBackground(null);
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'setBackground', bitmap: null }),
@@ -143,7 +143,7 @@ describe('FluidController — worker mode', () => {
   });
 
   it('forwards splat to worker', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.splat(100, 200, 3, -5, 0.5);
     expect(mockWorkerInstance.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'splat', x: 100, y: 200, vx: 3, vy: -5, strength: 0.5 })
@@ -152,7 +152,7 @@ describe('FluidController — worker mode', () => {
 
   it('sends destroy message then terminates the worker after a tick', () => {
     vi.useFakeTimers();
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
 
     ctrl.destroy();
 
@@ -167,7 +167,7 @@ describe('FluidController — worker mode', () => {
   });
 });
 
-describe('FluidController — main-thread mode (isWorkerEnabled=false)', () => {
+describe('FluidController — main-thread mode (workerEnabled=false)', () => {
   let canvas;
 
   beforeEach(() => {
@@ -176,13 +176,13 @@ describe('FluidController — main-thread mode (isWorkerEnabled=false)', () => {
   });
 
   it('does not transfer canvas control', () => {
-    new FluidController(canvas, { isWorkerEnabled: false });
+    new FluidController(canvas, { workerEnabled: false });
     expect(canvas.transferControlToOffscreen).not.toHaveBeenCalled();
     expect(FluidSimulation).toHaveBeenCalledOnce();
   });
 
   it('forwards all calls to FluidSimulation', () => {
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: false });
+    const ctrl = new FluidController(canvas, { workerEnabled: false });
     const sim = FluidSimulation.mock.results[0].value;
 
     ctrl.setTextSource({ text: 'X', fontSize: 50, color: '#f00' });
@@ -214,7 +214,7 @@ describe('FluidController — StrictMode / double-transfer fallback', () => {
     });
 
     // Must not throw
-    const ctrl = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
 
     // Should have created a FluidSimulation instead
     expect(FluidSimulation).toHaveBeenCalledOnce();
@@ -235,14 +235,14 @@ describe('FluidController — StrictMode / double-transfer fallback', () => {
 
     // First mount — transfer succeeds
     const canvas = createCanvasMock();
-    const ctrl1 = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl1 = new FluidController(canvas, { workerEnabled: true });
     ctrl1.destroy();
 
     // Second mount — transfer throws (canvas neutered)
     canvas.transferControlToOffscreen.mockImplementationOnce(() => {
       throw new DOMException('Already transferred', 'InvalidStateError');
     });
-    const ctrl2 = new FluidController(canvas, { isWorkerEnabled: true });
+    const ctrl2 = new FluidController(canvas, { workerEnabled: true });
 
     // Should have silently fallen back — not thrown
     expect(FluidSimulation).toHaveBeenCalledOnce();

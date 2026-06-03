@@ -21,18 +21,18 @@ export class FluidController {
   constructor(
     canvas: HTMLCanvasElement,
     {
-      isWorkerEnabled = true,
-      useWebGPU = true,
-      enableAlpha = true,
+      workerEnabled = true,
+      webGPUEnabled = true,
+      alphaEnabled = true,
       quality = {},
       config = {},
-    }: { isWorkerEnabled?: boolean; useWebGPU?: boolean; enableAlpha?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
+    }: { workerEnabled?: boolean; webGPUEnabled?: boolean; alphaEnabled?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
   ) {
     this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
     this.#qualitySim = Math.max(0.1, Math.min(1, quality.sim ?? 0.5));
-    this.#useWebGPU = useWebGPU;
-    this.#enableAlpha = enableAlpha;
-    this.#useWorker = isWorkerEnabled && WORKER_SUPPORTED;
+    this.#useWebGPU = webGPUEnabled;
+    this.#enableAlpha = alphaEnabled;
+    this.#useWorker = workerEnabled && WORKER_SUPPORTED;
 
     if (this.#useWorker) {
       this.#initWorker(canvas, config);

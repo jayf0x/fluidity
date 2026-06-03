@@ -7,4 +7,4 @@ coverage/
 
 .claude/settings.local.json
 
-!demo/dist
+# !demo/dist

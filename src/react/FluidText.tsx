@@ -19,12 +19,12 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     backgroundColor = DEFAULT_PROPS_TEXT.backgroundColor,
     backgroundSrc,
     backgroundSize = DEFAULT_PROPS_TEXT.backgroundSize,
-    isMouseEnabled = DEFAULT_PROPS_TEXT.isMouseEnabled,
-    isWorkerEnabled = DEFAULT_PROPS_TEXT.isWorkerEnabled,
-    useWebGPU = true,
-    enableAlpha = true,
-    dpr = DEFAULT_QUALITY.dpr,
-    sim = DEFAULT_QUALITY.sim,
+    mouseEnabled = DEFAULT_PROPS_TEXT.mouseEnabled,
+    workerEnabled = DEFAULT_PROPS_TEXT.workerEnabled,
+    webGPUEnabled = true,
+    alphaEnabled = true,
+    pixelRatio = DEFAULT_QUALITY.dpr,
+    simResolution = DEFAULT_QUALITY.sim,
     // FluidConfig flat props
     densityDissipation,
     velocityDissipation,
@@ -49,11 +49,11 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
   ) as Partial<FluidConfig>;
 
   const controllerRef = useFluid(containerRef, {
-    isWorkerEnabled,
-    useWebGPU,
-    enableAlpha,
-    dpr,
-    sim,
+    workerEnabled,
+    webGPUEnabled,
+    alphaEnabled,
+    pixelRatio,
+    simResolution,
     config: mergeConfig(configProps, preset, DEFAULT_CONFIG_TEXT),
   });
 
@@ -76,19 +76,19 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     [text, fontSize, color, fontFamily, fontWeight]
   );
 
-  // Sync text source whenever relevant props change (useWebGPU/enableAlpha trigger reinit → re-set source)
+  // Sync text source whenever relevant props change (webGPUEnabled/alphaEnabled trigger reinit → re-set source)
   useEffect(() => {
     controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight });
-  }, [text, fontSize, color, fontFamily, fontWeight, useWebGPU, enableAlpha]);
+  }, [text, fontSize, color, fontFamily, fontWeight, webGPUEnabled, alphaEnabled]);
 
-  // Sync config/preset/algorithm → updateConfig for reactive changes
+  // Sync config/preset → updateConfig for reactive changes
   const configKey = JSON.stringify(configProps);
   useEffect(() => {
     controllerRef.current?.updateConfig(
       mergeConfig(configProps, preset, DEFAULT_CONFIG_TEXT)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, configKey, useWebGPU, enableAlpha]);
+  }, [preset, configKey, webGPUEnabled, alphaEnabled]);
 
   // Load + forward background image to the simulation
   useEffect(() => {
@@ -109,11 +109,11 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     return () => {
       cancelled = true;
     };
-  }, [backgroundSrc, backgroundSize, useWebGPU, enableAlpha]);
+  }, [backgroundSrc, backgroundSize, webGPUEnabled, alphaEnabled]);
 
   // Built-in pointer tracking
   useEffect(() => {
-    if (!isMouseEnabled) return;
+    if (!mouseEnabled) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -135,7 +135,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
       el.removeEventListener('mousemove', onMouseMove);
       el.removeEventListener('touchmove', onTouchMove);
     };
-  }, [isMouseEnabled]);
+  }, [mouseEnabled]);
 
   return (
     <div
