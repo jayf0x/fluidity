@@ -86,3 +86,39 @@ git push origin "$TAG"
 
 echo ""
 echo "✓ $NEW published to npm.js + GitHub Packages (tag: $TAG)"
+
+# ── update changelog.md via Claude Code CLI ───────────────────────────────────
+
+PREV_TAG=$(git tag --sort=-version:refname | grep "^v" | grep -v "^$TAG$" | head -1)
+COMMIT_LOG=$(git log --oneline "$PREV_TAG".."$TAG" 2>/dev/null || git log --oneline "$TAG" | head -20)
+
+echo ""
+echo "Updating changelog.md (Claude Code)..."
+
+claude -p "Update changelog.md for a new NPM release of @jayf0x/fluidity-js.
+
+New version: $NEW
+Previous tag: $PREV_TAG
+
+Commits since $PREV_TAG:
+$COMMIT_LOG
+
+Instructions:
+- Read changelog.md first
+- Add a new '## v$NEW' section at the very top (directly below the '# Changelog' heading)
+- Only include meaningful changes: features, bug fixes, breaking changes, perf improvements
+- Skip any commit that is only: chore, deploy, dist, demo, docs, README, backlog, format, prettier, gif, preview, CI internals
+- Each bullet: concise, imperative tense, 1 line (e.g. 'Fix: specular rings on dissipating strokes')
+- If zero meaningful commits exist, write '- Internal/infrastructure changes only'
+- Do NOT modify any existing changelog entries" \
+  --allowedTools "Read,Edit,Write" 2>&1
+
+# commit changelog if changed
+if ! git diff --quiet changelog.md; then
+  git add changelog.md
+  git commit -m "docs: update changelog for $NEW"
+  git push origin HEAD
+  echo "✓ changelog.md committed and pushed"
+else
+  echo "  (no changelog changes)"
+fi
