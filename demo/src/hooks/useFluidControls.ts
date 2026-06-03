@@ -4,6 +4,8 @@ import type { RefObject } from 'react';
 import { useControls } from 'leva';
 
 type Defaults = Partial<FluidConfigLeva> & {
+  dpr?: number;
+  sim?: number;
   preset?: PresetKey;
   backgroundColor?: string;
   enableAlpha?: boolean;
@@ -12,8 +14,7 @@ type Defaults = Partial<FluidConfigLeva> & {
 /**
  * Registers the shared "fluid config" Leva panel and syncs values → simulation.
  * Pass the page's isolated `store` (from `useCreateStore()`) for tab isolation.
- * Returns `{ set, preset, backgroundColor }` — apply preset and backgroundColor
- * as React props on the component since they can't go through updateConfig.
+ * Returns flat props — spread directly onto FluidText / FluidImage.
  */
 export function useFluidControls(ref: RefObject<FluidHandle | null>, store: LevaStore, customDefaults: Defaults = {}) {
   const values = useMemo(
@@ -35,10 +36,8 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
       useWebGPU: true,
       enableAlpha: true,
       backgroundColor: '#0a0a0a',
-      quality: {
-        dpr: 1,
-        sim: 0.5,
-      } satisfies FluidQuality,
+      dpr: 1,
+      sim: 0.5,
       ...customDefaults,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,11 +47,11 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
   const fluidSchema = useCallback(
     () => ({
       // ── Simulation ──────────────────────────────────────────────────────────
-      densityDissipation: { value: values.densityDissipation, min: 0.9, max: 1.0, step: 0.001 },
-      velocityDissipation: { value: values.velocityDissipation, min: 0.7, max: 1.0, step: 0.001 },
+      densityDissipation: { value: values.densityDissipation, min: 0.94, max: 1.0, step: 0.001 },
+      velocityDissipation: { value: values.velocityDissipation, min: 0.9, max: 0.999, step: 0.001 },
       pressureIterations: { value: values.pressureIterations, min: 1, max: 50, step: 1 },
       curl: { value: values.curl, min: 0, max: 1, step: 0.01 },
-      splatRadius: { value: values.splatRadius, min: 0.001, max: 0.03, step: 0.001 },
+      splatRadius: { value: values.splatRadius, min: 0.001, max: 0.04, step: 0.001 },
       splatForce: { value: values.splatForce, min: 0.1, max: 5.0, step: 0.01 },
       refraction: { value: values.refraction, min: 0, max: 1.0, step: 0.01 },
       specularExp: { value: values.specularExp, min: 0.1, max: 10, step: 0.1 },
@@ -69,8 +68,8 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
         value: values.preset ?? ('none' as PresetKey | 'none'),
         options: ['none', 'calm', 'sand', 'wave', 'neon', 'smoke'] satisfies (PresetKey | 'none')[],
       },
-      qualityDpr: { value: values.quality.dpr, min: 0.01, max: 1, step: 0.01 },
-      qualitySim: { value: values.quality.sim, min: 0.01, max: 1, step: 0.01 },
+      dpr: { value: values.dpr, min: 0.01, max: 1, step: 0.01 },
+      sim: { value: values.sim, min: 0.01, max: 1, step: 0.01 },
       useWebGPU: values.useWebGPU,
       enableAlpha: values.enableAlpha,
       backgroundColor: values.backgroundColor,
@@ -79,7 +78,7 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
     []
   );
 
-  const [{ waterColor, glowColor, preset: presetRaw, backgroundColor, useWebGPU, enableAlpha, ...simConfig }, set] =
+  const [{ waterColor, glowColor, preset: presetRaw, backgroundColor, useWebGPU, enableAlpha, dpr, sim, ...simConfig }, set] =
     useControls('fluid config', fluidSchema, { store });
 
   // Resolve 'none' sentinel back to undefined so callers can pass it straight to preset prop
@@ -95,10 +94,5 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
     } satisfies Partial<FluidConfig>);
   }, [ref, simConfig, waterColor, glowColor]);
 
-  const quality: FluidQuality = {
-    sim: simConfig.qualitySim,
-    dpr: simConfig.qualityDpr,
-  };
-
-  return { set, preset, backgroundColor, quality, useWebGPU, enableAlpha };
+  return { set, preset, backgroundColor, dpr, sim, useWebGPU, enableAlpha };
 }

@@ -101,20 +101,32 @@ export const Interactive = () => {
 
 ### Shared props
 
-| Prop              | Type                   | Default                |
-| ----------------- | ---------------------- | ---------------------- |
-| `config`          | `Partial<FluidConfig>` | —                      |
-| `preset`          | `PresetKey`            | —                      |
-| `algorithm`       | `FluidAlgorithm`       | `'standard'`           |
-| `quality`         | `FluidQuality`         | `{ dpr: 1, sim: 0.5 }` |
-| `backgroundColor` | `string`               | `'#0a0a0a'`            |
-| `backgroundSrc`   | `string`               | —                      |
-| `backgroundSize`  | `string \| number`     | `'cover'`              |
-| `isMouseEnabled`  | `boolean`              | `true`                 |
-| `isWorkerEnabled` | `boolean`              | `true`                 |
-| `useWebGPU`       | `boolean`              | `true`                 |
-| `className`       | `string`               | —                      |
-| `style`           | `CSSProperties`        | —                      |
+| Prop                  | Type               | Default      |
+| --------------------- | ------------------ | ------------ |
+| `algorithm`           | `FluidAlgorithm`   | `'standard'` |
+| `preset`              | `PresetKey`        | —            |
+| `dpr`                 | `number`           | `1`          |
+| `sim`                 | `number`           | `0.5`        |
+| `densityDissipation`  | `number`           | `0.992`      |
+| `velocityDissipation` | `number`           | `0.93`       |
+| `pressureIterations`  | `number`           | `1`          |
+| `curl`                | `number`           | `0.0001`     |
+| `splatRadius`         | `number`           | `0.004`      |
+| `splatForce`          | `number`           | `0.91`       |
+| `refraction`          | `number`           | `0.25`       |
+| `specularExp`         | `number`           | `1.01`       |
+| `shine`               | `number`           | `0.01`       |
+| `waterColor`          | `FluidColor`       | `'#000000'`  |
+| `glowColor`           | `FluidColor`       | `'#b3d9ff'`  |
+| `warpStrength`        | `number`           | `0.015`      |
+| `backgroundColor`     | `string`           | `'#0a0a0a'`  |
+| `backgroundSrc`       | `string`           | —            |
+| `backgroundSize`      | `string \| number` | `'cover'`    |
+| `isMouseEnabled`      | `boolean`          | `true`       |
+| `isWorkerEnabled`     | `boolean`          | `true`       |
+| `useWebGPU`           | `boolean`          | `true`       |
+| `className`           | `string`           | —            |
+| `style`               | `CSSProperties`    | —            |
 
 ---
 
@@ -130,7 +142,7 @@ export const Interactive = () => {
 
 ```tsx
 <FluidImage src="/photo.jpg" algorithm="aurora" />
-<FluidText text="fluid" algorithm="ripple" config={{ warpStrength: 0.03 }} />
+<FluidText text="fluid" algorithm="ripple" warpStrength={0.03} />
 ```
 
 ---
@@ -139,37 +151,37 @@ export const Interactive = () => {
 
 Control rendering resolution on two independent axes — both reactive at runtime.
 
-| Field | Range | Default | What it does                                                                              |
+| Prop  | Range | Default | What it does                                                                              |
 | ----- | ----- | ------- | ----------------------------------------------------------------------------------------- |
 | `dpr` | 0.1–1 | `1`     | Canvas resolution as fraction of screen pixel ratio. `0.5` on Retina saves ~75% GPU fill. |
 | `sim` | 0.1–1 | `0.5`   | Simulation resolution. Lower = cheaper, less detail.                                      |
 
 ```tsx
 // Sharp canvas, cheap simulation
-<FluidImage src="/hero.jpg" quality={{ dpr: 1, sim: 0.2 }} />
+<FluidImage src="/hero.jpg" dpr={1} sim={0.2} />
 
 // Lower canvas res, full simulation quality
-<FluidImage src="/hero.jpg" quality={{ dpr: 0.5, sim: 1 }} />
+<FluidImage src="/hero.jpg" dpr={0.5} sim={1} />
 ```
 
 ---
 
-## FluidConfig reference
+## Simulation props reference
 
-| Key                   | Default            | Description                                     |
-| --------------------- | ------------------ | ----------------------------------------------- |
-| `densityDissipation`  | `0.992`            | How long ink lingers (0–1)                      |
-| `velocityDissipation` | `0.93`             | How fast fluid slows down (0–1)                 |
-| `pressureIterations`  | `1`                | Quality vs. cost trade-off                      |
-| `curl`                | `0.0001`           | Swirl intensity. `0.2`–`0.5` for visible eddies |
-| `splatRadius`         | `0.004`            | Brush radius                                    |
-| `splatForce`          | `0.91`             | Force applied by brush                          |
-| `refraction`          | `0.25`             | Background warp strength                        |
-| `specularExp`         | `1.01`             | Specular highlight sharpness                    |
-| `shine`               | `0.01`             | Highlight intensity                             |
-| `waterColor`          | `[0, 0, 0]`        | Base fluid colour `[R, G, B]` (0–1)             |
-| `glowColor`           | `[0.7, 0.85, 1.0]` | Glow / specular colour `[R, G, B]` (0–1)        |
-| `warpStrength`        | `0.015`            | UV warp intensity (`aurora` algorithm)          |
+| Prop                  | Default  | Description                                     |
+| --------------------- | -------- | ----------------------------------------------- |
+| `densityDissipation`  | `0.992`  | How long ink lingers (0–1)                      |
+| `velocityDissipation` | `0.93`   | How fast fluid slows down (0–1)                 |
+| `pressureIterations`  | `1`      | Quality vs. cost trade-off                      |
+| `curl`                | `0.0001` | Swirl intensity. `0.2`–`0.5` for visible eddies |
+| `splatRadius`         | `0.004`  | Brush radius                                    |
+| `splatForce`          | `0.91`   | Force applied by brush                          |
+| `refraction`          | `0.25`   | Background warp strength                        |
+| `specularExp`         | `1.01`   | Specular highlight sharpness                    |
+| `shine`               | `0.01`   | Highlight intensity                             |
+| `waterColor`          | `#000`   | Base fluid colour (hex or `[R, G, B]` 0–1)      |
+| `glowColor`           | `#b3d9ff`| Glow / specular colour (hex or `[R, G, B]` 0–1) |
+| `warpStrength`        | `0.015`  | UV warp intensity (`aurora` algorithm)          |
 
 ---
 

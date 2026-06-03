@@ -47,16 +47,32 @@ interface FluidBaseProps {
   className?: string;
   /** Will apply to canvas container */
   style?: React.CSSProperties;
-  config?: Partial<FluidConfig>;
+  // FluidConfig fields — all optional, override the base config or preset
+  densityDissipation?: number;
+  velocityDissipation?: number;
+  pressureIterations?: number;
+  curl?: number;
+  splatRadius?: number;
+  splatForce?: number;
+  refraction?: number;
+  specularExp?: number;
+  shine?: number;
+  waterColor?: FluidColor;
+  glowColor?: FluidColor;
+  algorithm?: FluidAlgorithm;
+  warpStrength?: number;
+  // Quality — canvas resolution (dpr) and simulation resolution (sim)
+  /** devicePixelRatio multiplier for canvas backing resolution. Range [0.1, 1]. Default 1. */
+  dpr?: number;
+  /** Simulation FBO size as fraction of canvas size. Range [0.1, 1]. Default 0.5. */
+  sim?: number;
   isMouseEnabled?: boolean;
   isWorkerEnabled?: boolean;
-  quality?: FluidQuality;
   preset?: PresetKey;
-  algorithm?: FluidAlgorithm;
   backgroundColor?: string;
   backgroundSrc?: string;
   backgroundSize?: string | number;
-  /** enabled greater performance, but not every browser supports it */
+  /** Enable WebGPU renderer (default true, falls back to WebGL). */
   useWebGPU?: boolean;
   /** Enable transparent canvas (default true). Set false for a minor perf gain when transparency is not needed. */
   enableAlpha?: boolean;

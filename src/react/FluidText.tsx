@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import { DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_SHARED, DEFAULT_PROPS_TEXT, mergeConfig } from '../core/config';
+import { DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_TEXT, DEFAULT_QUALITY, mergeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
 import { useFluid } from './useFluid';
 
@@ -14,7 +14,6 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     fontWeight = DEFAULT_PROPS_TEXT.fontWeight,
     className,
     style,
-    config,
     preset,
     algorithm,
     backgroundColor = DEFAULT_PROPS_TEXT.backgroundColor,
@@ -24,17 +23,38 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     isWorkerEnabled = DEFAULT_PROPS_TEXT.isWorkerEnabled,
     useWebGPU = true,
     enableAlpha = true,
-    quality = DEFAULT_PROPS_SHARED.quality,
+    dpr = DEFAULT_QUALITY.dpr,
+    sim = DEFAULT_QUALITY.sim,
+    // FluidConfig flat props
+    densityDissipation,
+    velocityDissipation,
+    pressureIterations,
+    curl,
+    splatRadius,
+    splatForce,
+    refraction,
+    specularExp,
+    shine,
+    waterColor,
+    glowColor,
+    warpStrength,
   },
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const configProps = Object.fromEntries(
+    Object.entries({ densityDissipation, velocityDissipation, pressureIterations, curl, splatRadius, splatForce, refraction, specularExp, shine, waterColor, glowColor, algorithm, warpStrength })
+      .filter(([, v]) => v !== undefined)
+  ) as Partial<FluidConfig>;
+
   const controllerRef = useFluid(containerRef, {
     isWorkerEnabled,
     useWebGPU,
     enableAlpha,
-    quality,
-    config: mergeConfig({ ...config, ...(algorithm ? { algorithm } : {}) }, preset, DEFAULT_CONFIG_TEXT),
+    dpr,
+    sim,
+    config: mergeConfig(configProps, preset, DEFAULT_CONFIG_TEXT),
   });
 
   useImperativeHandle(
@@ -62,13 +82,13 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
   }, [text, fontSize, color, fontFamily, fontWeight, useWebGPU, enableAlpha]);
 
   // Sync config/preset/algorithm → updateConfig for reactive changes
-  const configKey = JSON.stringify(config);
+  const configKey = JSON.stringify(configProps);
   useEffect(() => {
     controllerRef.current?.updateConfig(
-      mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset, DEFAULT_CONFIG_TEXT)
+      mergeConfig(configProps, preset, DEFAULT_CONFIG_TEXT)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, algorithm, configKey, useWebGPU, enableAlpha]);
+  }, [preset, configKey, useWebGPU, enableAlpha]);
 
   // Load + forward background image to the simulation
   useEffect(() => {

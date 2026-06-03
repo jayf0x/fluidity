@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import { DEFAULT_PROPS_IMAGE, DEFAULT_PROPS_SHARED, mergeConfig } from '../core/config';
+import { DEFAULT_PROPS_IMAGE, DEFAULT_QUALITY, mergeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
 import { useFluid } from './useFluid';
 
@@ -12,7 +12,6 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     imageSize = DEFAULT_PROPS_IMAGE.imageSize,
     className,
     style,
-    config,
     preset,
     algorithm,
     backgroundColor = DEFAULT_PROPS_IMAGE.backgroundColor,
@@ -22,17 +21,38 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     isWorkerEnabled = DEFAULT_PROPS_IMAGE.isWorkerEnabled,
     useWebGPU = true,
     enableAlpha = true,
-    quality = DEFAULT_PROPS_SHARED.quality,
+    dpr = DEFAULT_QUALITY.dpr,
+    sim = DEFAULT_QUALITY.sim,
+    // FluidConfig flat props
+    densityDissipation,
+    velocityDissipation,
+    pressureIterations,
+    curl,
+    splatRadius,
+    splatForce,
+    refraction,
+    specularExp,
+    shine,
+    waterColor,
+    glowColor,
+    warpStrength,
   },
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const configProps = Object.fromEntries(
+    Object.entries({ densityDissipation, velocityDissipation, pressureIterations, curl, splatRadius, splatForce, refraction, specularExp, shine, waterColor, glowColor, algorithm, warpStrength })
+      .filter(([, v]) => v !== undefined)
+  ) as Partial<FluidConfig>;
+
   const controllerRef = useFluid(containerRef, {
     isWorkerEnabled,
     useWebGPU,
     enableAlpha,
-    quality,
-    config: mergeConfig({ ...config, ...(algorithm ? { algorithm } : {}) }, preset),
+    dpr,
+    sim,
+    config: mergeConfig(configProps, preset),
   });
 
   useImperativeHandle(
@@ -61,13 +81,13 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
   }, [src, effect, imageSize, useWebGPU, enableAlpha]);
 
   // Sync config/preset/algorithm → updateConfig for reactive changes
-  const configKey = JSON.stringify(config);
+  const configKey = JSON.stringify(configProps);
   useEffect(() => {
     controllerRef.current?.updateConfig(
-      mergeConfig({ ...config, ...(algorithm !== undefined ? { algorithm } : {}) }, preset)
+      mergeConfig(configProps, preset)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, algorithm, configKey, useWebGPU, enableAlpha]);
+  }, [preset, configKey, useWebGPU, enableAlpha]);
 
   // Load + forward background image to the simulation
   useEffect(() => {
@@ -95,10 +115,6 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     if (!isMouseEnabled) return;
     const el = containerRef.current;
     if (!el) return;
-    // TODO: const rect = el.getBoundingClientRect(); is called on every move, this should be outside fn
-    // but then we do need to update on resize
-    // possibly add a ref to keep track of width and update this useEffect when width changes
-    // possibly add a watcher on the `containerRef` and add a prop to optionally disable
     const onMouseMove = (e: MouseEvent) => {
       const rect = el.getBoundingClientRect();
       controllerRef.current?.handleMove(e.clientX - rect.left, e.clientY - rect.top, 2);

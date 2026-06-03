@@ -35,7 +35,6 @@ export const DEFAULT_PROPS_SHARED = {
   backgroundSize: 'cover' as string | number,
   isMouseEnabled: true,
   isWorkerEnabled: true,
-  quality: DEFAULT_QUALITY,
 } as const;
 
 export const DEFAULT_PROPS_IMAGE = {

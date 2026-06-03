@@ -1,11 +1,9 @@
-## CORE/FEATURE - separate packages
+## CORE/FEATURE + DEMO/FEATURE: flatten all props
 
-Move react hook to seprate module to optimize three-shaking.
+expected output:
 
-expected:
-
-```tsx
-import { FluidImage, FluidText } from '@jayf0x/fluidity-js/react';
+```jsx
+<FluidText text="hello" algorithm="aurora" shine={0.05} curl={0.15} dpr={1} sim={0.5} waterColor="#000" />
 ```
 
 ## CORE/FEATURE + DEMO/FEATURE: better value ranges
@@ -26,6 +24,16 @@ Expected:
 
 Important:
 Do not resolve this feature if you have no idea what the values should be! Then simply ask the user to figure this otu and provide them (or some). You can either way already setup some functionality using "densityDissipation".
+
+## CORE/FEATURE - separate packages
+
+Move react hook to seprate module to optimize three-shaking.
+
+expected:
+
+```tsx
+import { FluidImage, FluidText } from '@jayf0x/fluidity-js/react';
+```
 
 ## CORE/FEATURE: merge props config into main
 

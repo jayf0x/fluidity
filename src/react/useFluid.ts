@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 
 import { FluidController } from '../fluid-controller';
@@ -18,22 +18,25 @@ export function useFluid(
     isWorkerEnabled = true,
     useWebGPU = true,
     enableAlpha = true,
-    quality = {},
+    dpr,
+    sim,
     config = {},
   }: {
     isWorkerEnabled?: boolean;
     useWebGPU?: boolean;
     enableAlpha?: boolean;
-    quality?: FluidQuality;
+    dpr?: number;
+    sim?: number;
     config?: Partial<FluidConfig>;
   } = {}
 ): RefObject<FluidController | null> {
+  const quality: FluidQuality = { dpr, sim };
   const controllerRef = useRef<FluidController | null>(null);
   const initOptsRef = useRef({ isWorkerEnabled, quality, config });
-  const clampedDprRef = useRef(Math.max(0.1, Math.min(1, quality.dpr ?? 1)));
+  const clampedDprRef = useRef(Math.max(0.1, Math.min(1, dpr ?? 1)));
   const prevQualityRef = useRef<{ dpr: number | undefined; sim: number | undefined }>({
-    dpr: quality.dpr,
-    sim: quality.sim,
+    dpr,
+    sim,
   });
 
   // Re-runs when useWebGPU changes (full teardown + reinit). Other init opts
@@ -97,19 +100,19 @@ export function useFluid(
 
   // Propagate quality changes after mount
   useEffect(() => {
-    clampedDprRef.current = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
+    clampedDprRef.current = Math.max(0.1, Math.min(1, dpr ?? 1));
     const prev = prevQualityRef.current;
-    prevQualityRef.current = { dpr: quality.dpr, sim: quality.sim };
+    prevQualityRef.current = { dpr, sim };
     const controller = controllerRef.current;
     const container = containerRef.current;
-    if (!controller || !container || (prev.dpr === quality.dpr && prev.sim === quality.sim)) return;
-    controller.updateQuality(quality);
+    if (!controller || !container || (prev.dpr === dpr && prev.sim === sim)) return;
+    controller.updateQuality({ dpr, sim });
     const resizeDpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
     const w = container.clientWidth;
     const h = container.clientHeight;
     if (w > 0 && h > 0) controller.resize(Math.round(w * resizeDpr), Math.round(h * resizeDpr));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quality.dpr, quality.sim, useWebGPU, enableAlpha]);
+  }, [dpr, sim, useWebGPU, enableAlpha]);
 
   return controllerRef;
 }
