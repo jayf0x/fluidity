@@ -50,13 +50,11 @@ struct U {
 }
 
 @fragment fn fs(i: VSOut) -> @location(0) vec4f {
-  // Sample all textures before branching — textureSample requires uniform control flow
   let obs   = textureSample(uObs, samp, i.uv).r;
   let vel   = textureSample(uVel, samp, i.uv).xy;
   let coord = i.uv - u.dt * vel * u.texelSize;
   let src   = textureSample(uSrc, samp, coord);
-  if (obs > 0.5) { return vec4f(0.0); }
-  return u.dissipation * src;
+  return u.dissipation * src * (1.0 - obs);
 }
 `;
 
@@ -83,10 +81,10 @@ struct U { texelSize: vec2f, _pad: vec2f }
 }
 
 @fragment fn fs(i: VSOut) -> @location(0) vec4f {
-  let L = select(textureSample(uVel, samp, i.vL).x, 0.0, textureSample(uObs, samp, i.vL).r > 0.5);
-  let R = select(textureSample(uVel, samp, i.vR).x, 0.0, textureSample(uObs, samp, i.vR).r > 0.5);
-  let T = select(textureSample(uVel, samp, i.vT).y, 0.0, textureSample(uObs, samp, i.vT).r > 0.5);
-  let B = select(textureSample(uVel, samp, i.vB).y, 0.0, textureSample(uObs, samp, i.vB).r > 0.5);
+  let L = textureSample(uVel, samp, i.vL).x * (1.0 - textureSample(uObs, samp, i.vL).r);
+  let R = textureSample(uVel, samp, i.vR).x * (1.0 - textureSample(uObs, samp, i.vR).r);
+  let T = textureSample(uVel, samp, i.vT).y * (1.0 - textureSample(uObs, samp, i.vT).r);
+  let B = textureSample(uVel, samp, i.vB).y * (1.0 - textureSample(uObs, samp, i.vB).r);
   return vec4f(0.5 * (R - L + T - B), 0.0, 0.0, 1.0);
 }
 `;
@@ -116,10 +114,10 @@ struct U { texelSize: vec2f, _pad: vec2f }
 
 @fragment fn fs(i: VSOut) -> @location(0) vec4f {
   let C  = textureSample(uPres, samp, i.uv).x;
-  let L  = select(textureSample(uPres, samp, i.vL).x, C, textureSample(uObs, samp, i.vL).r > 0.5);
-  let R  = select(textureSample(uPres, samp, i.vR).x, C, textureSample(uObs, samp, i.vR).r > 0.5);
-  let T  = select(textureSample(uPres, samp, i.vT).x, C, textureSample(uObs, samp, i.vT).r > 0.5);
-  let B  = select(textureSample(uPres, samp, i.vB).x, C, textureSample(uObs, samp, i.vB).r > 0.5);
+  let L  = mix(textureSample(uPres, samp, i.vL).x, C, textureSample(uObs, samp, i.vL).r);
+  let R  = mix(textureSample(uPres, samp, i.vR).x, C, textureSample(uObs, samp, i.vR).r);
+  let T  = mix(textureSample(uPres, samp, i.vT).x, C, textureSample(uObs, samp, i.vT).r);
+  let B  = mix(textureSample(uPres, samp, i.vB).x, C, textureSample(uObs, samp, i.vB).r);
   let dv = textureSample(uDiv, samp, i.uv).x;
   return vec4f((L + R + B + T - dv) * 0.25, 0.0, 0.0, 1.0);
 }
@@ -149,14 +147,13 @@ struct U { texelSize: vec2f, _pad: vec2f }
 }
 
 @fragment fn fs(i: VSOut) -> @location(0) vec4f {
-  // Sample all textures before branching — textureSample requires uniform control flow
   let obs = textureSample(uObs, samp, i.uv).r;
-  let L   = textureSample(uPres, samp, i.vL).x;
-  let R   = textureSample(uPres, samp, i.vR).x;
-  let T   = textureSample(uPres, samp, i.vT).x;
-  let B   = textureSample(uPres, samp, i.vB).x;
-  let vel = textureSample(uVel, samp, i.uv).xy - vec2f(R - L, T - B);
-  if (obs > 0.5) { return vec4f(0.0); }
+  let C   = textureSample(uPres, samp, i.uv).x;
+  let L   = mix(textureSample(uPres, samp, i.vL).x, C, textureSample(uObs, samp, i.vL).r);
+  let R   = mix(textureSample(uPres, samp, i.vR).x, C, textureSample(uObs, samp, i.vR).r);
+  let T   = mix(textureSample(uPres, samp, i.vT).x, C, textureSample(uObs, samp, i.vT).r);
+  let B   = mix(textureSample(uPres, samp, i.vB).x, C, textureSample(uObs, samp, i.vB).r);
+  let vel = (textureSample(uVel, samp, i.uv).xy - vec2f(R - L, T - B)) * (1.0 - obs);
   return vec4f(vel, 0.0, 1.0);
 }
 `;
@@ -316,14 +313,14 @@ struct U {
 
 @fragment fn fs(i: VSOut) -> @location(0) vec4f {
   let obs     = textureSample(uObs, samp, i.uv).r;
-  let density = max(textureSample(uTex, samp, i.uv).r, 0.0) * (1.0 - step(0.5, obs));
+  let density = max(textureSample(uTex, samp, i.uv).r, 0.0) * (1.0 - obs);
   let cov     = textureSample(uCov, samp, i.uv).r;
 
-  let ts2 = u.texelSize * 2.0;
-  let dL  = max(textureSample(uTex, samp, i.uv - vec2f(ts2.x, 0.0)).r, 0.0);
-  let dR  = max(textureSample(uTex, samp, i.uv + vec2f(ts2.x, 0.0)).r, 0.0);
-  let dT  = max(textureSample(uTex, samp, i.uv + vec2f(0.0, ts2.y)).r, 0.0);
-  let dB  = max(textureSample(uTex, samp, i.uv - vec2f(0.0, ts2.y)).r, 0.0);
+  let tsN = u.texelSize * 12.0;
+  let dL  = max(textureSample(uTex, samp, i.uv - vec2f(tsN.x, 0.0)).r, 0.0);
+  let dR  = max(textureSample(uTex, samp, i.uv + vec2f(tsN.x, 0.0)).r, 0.0);
+  let dT  = max(textureSample(uTex, samp, i.uv + vec2f(0.0, tsN.y)).r, 0.0);
+  let dB  = max(textureSample(uTex, samp, i.uv - vec2f(0.0, tsN.y)).r, 0.0);
 
   let norm  = normalize(vec3f(dL - dR, dB - dT, 0.2));
   let ldir  = normalize(vec3f(0.5, 1.0, 0.5));

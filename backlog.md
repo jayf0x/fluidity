@@ -1,3 +1,13 @@
+## CORE/FEATURE - separate packages
+
+Move react hook to seprate module to optimize three-shaking.
+
+expected:
+
+```tsx
+import { FluidImage, FluidText } from '@jayf0x/fluidity-js/react';
+```
+
 ## CORE/FEATURE + DEMO/FEATURE: better value ranges
 
 Currently values are not correctly reflected. This also needs to be visible in the DEMO os that the DEMO is a reflection of the ideal/basic use case.

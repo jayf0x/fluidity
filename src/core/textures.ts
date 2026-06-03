@@ -106,8 +106,8 @@ export function createTextTextures(
   draw(color);
   const backgroundTex = uploadTextureGL(gl, tCanvas);
 
-  // Obstacle: white text on black only — background bitmap must NOT bleed in,
-  // or bright background pixels become false obstacles that zero velocity.
+  // Obstacle / coverage: sharp white text on black.
+  // coverageTex and obstacleTex share the same WebGLTexture — caller must NOT double-delete.
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = 'white';
@@ -239,6 +239,7 @@ export function createTextTexturesGPU(
   draw(color);
   const backgroundTex = uploadTextureGPU(device, tCanvas, width, height);
 
+  // Obstacle / coverage: sharp text — shared texture, sharedCoverage=true.
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, width, height);
   ctx.fillStyle = 'white';

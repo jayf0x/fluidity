@@ -24,9 +24,12 @@ export const advectionShader = /* glsl */ `
   uniform float dt;
   uniform float dissipation;
   void main () {
-    if (texture2D(uObstacle, vUv).r > 0.5) { gl_FragColor = vec4(0.0); return; }
+    float obs  = texture2D(uObstacle, vUv).r;
     vec2 coord = vUv - dt * texture2D(uVelocity, vUv).xy * texelSize;
-    gl_FragColor = dissipation * texture2D(uSource, coord);
+    // Smooth damping: obs=0 outside (full flow), obs=1 inside (full stop), blurred
+    // boundary in between.  No branching — multiplying by (1-obs) is equivalent to the
+    // hard zero-inside check but with a continuous gradient that avoids grid artefacts.
+    gl_FragColor = dissipation * texture2D(uSource, coord) * (1.0 - obs);
   }
 `;
 
@@ -36,10 +39,10 @@ export const divergenceShader = /* glsl */ `
   uniform sampler2D uVelocity;
   uniform sampler2D uObstacle;
   void main () {
-    float L = texture2D(uObstacle, vL).r > 0.5 ? 0.0 : texture2D(uVelocity, vL).x;
-    float R = texture2D(uObstacle, vR).r > 0.5 ? 0.0 : texture2D(uVelocity, vR).x;
-    float T = texture2D(uObstacle, vT).r > 0.5 ? 0.0 : texture2D(uVelocity, vT).y;
-    float B = texture2D(uObstacle, vB).r > 0.5 ? 0.0 : texture2D(uVelocity, vB).y;
+    float L = texture2D(uVelocity, vL).x * (1.0 - texture2D(uObstacle, vL).r);
+    float R = texture2D(uVelocity, vR).x * (1.0 - texture2D(uObstacle, vR).r);
+    float T = texture2D(uVelocity, vT).y * (1.0 - texture2D(uObstacle, vT).r);
+    float B = texture2D(uVelocity, vB).y * (1.0 - texture2D(uObstacle, vB).r);
     gl_FragColor = vec4(0.5 * (R - L + T - B), 0.0, 0.0, 1.0);
   }
 `;
@@ -52,10 +55,10 @@ export const pressureShader = /* glsl */ `
   uniform sampler2D uObstacle;
   void main () {
     float C = texture2D(uPressure, vUv).x;
-    float L = texture2D(uObstacle, vL).r > 0.5 ? C : texture2D(uPressure, vL).x;
-    float R = texture2D(uObstacle, vR).r > 0.5 ? C : texture2D(uPressure, vR).x;
-    float T = texture2D(uObstacle, vT).r > 0.5 ? C : texture2D(uPressure, vT).x;
-    float B = texture2D(uObstacle, vB).r > 0.5 ? C : texture2D(uPressure, vB).x;
+    float L = mix(texture2D(uPressure, vL).x, C, texture2D(uObstacle, vL).r);
+    float R = mix(texture2D(uPressure, vR).x, C, texture2D(uObstacle, vR).r);
+    float T = mix(texture2D(uPressure, vT).x, C, texture2D(uObstacle, vT).r);
+    float B = mix(texture2D(uPressure, vB).x, C, texture2D(uObstacle, vB).r);
     float div = texture2D(uDivergence, vUv).x;
     gl_FragColor = vec4((L + R + B + T - div) * 0.25, 0.0, 0.0, 1.0);
   }
@@ -68,12 +71,13 @@ export const gradientSubtractShader = /* glsl */ `
   uniform sampler2D uVelocity;
   uniform sampler2D uObstacle;
   void main () {
-    if (texture2D(uObstacle, vUv).r > 0.5) { gl_FragColor = vec4(0.0); return; }
-    float L = texture2D(uPressure, vL).x;
-    float R = texture2D(uPressure, vR).x;
-    float T = texture2D(uPressure, vT).x;
-    float B = texture2D(uPressure, vB).x;
-    vec2 vel = texture2D(uVelocity, vUv).xy - vec2(R - L, T - B);
+    float obs = texture2D(uObstacle, vUv).r;
+    float C   = texture2D(uPressure, vUv).x;
+    float L   = mix(texture2D(uPressure, vL).x, C, texture2D(uObstacle, vL).r);
+    float R   = mix(texture2D(uPressure, vR).x, C, texture2D(uObstacle, vR).r);
+    float T   = mix(texture2D(uPressure, vT).x, C, texture2D(uObstacle, vT).r);
+    float B   = mix(texture2D(uPressure, vB).x, C, texture2D(uObstacle, vB).r);
+    vec2 vel  = (texture2D(uVelocity, vUv).xy - vec2(R - L, T - B)) * (1.0 - obs);
     gl_FragColor = vec4(vel, 0.0, 1.0);
   }
 `;
@@ -166,14 +170,22 @@ export const displayShader = /* glsl */ `
 
   void main () {
     float obs      = texture2D(uObstacle,  vUv).r;
-    // Mask density inside obstacles so splats don't flicker the text/image content.
-    float density  = max(texture2D(uTexture, vUv).r, 0.0) * (1.0 - step(0.5, obs));
+    // Smooth fade: density falls off over the blurred obstacle boundary zone
+    // rather than cutting off at a hard step, eliminating the jagged fringe.
+    float density  = max(texture2D(uTexture, vUv).r, 0.0) * (1.0 - obs);
     float coverage = texture2D(uCoverage,  vUv).r;
 
-    float dL = max(texture2D(uTexture, vUv - vec2(texelSize.x * 2.0, 0.0)).r, 0.0);
-    float dR = max(texture2D(uTexture, vUv + vec2(texelSize.x * 2.0, 0.0)).r, 0.0);
-    float dT = max(texture2D(uTexture, vUv + vec2(0.0, texelSize.y * 2.0)).r, 0.0);
-    float dB = max(texture2D(uTexture, vUv - vec2(0.0, texelSize.y * 2.0)).r, 0.0);
+    // Normal via a wide-spread Sobel-style gradient.
+    // texelSize is in display pixels; density FBO is at simScale (0.5x), so
+    // a 2-display-pixel offset = 1 sim texel — a 1-texel finite difference
+    // produces harsh, quantized normals that the specular term amplifies into
+    // visible pixelated rings.  Using a 12-display-pixel (≈6 sim texel) spread
+    // averages over multiple sim texels, giving a smooth normal field.
+    float nSpread = 12.0;
+    float dL = max(texture2D(uTexture, vUv - vec2(texelSize.x * nSpread, 0.0)).r, 0.0);
+    float dR = max(texture2D(uTexture, vUv + vec2(texelSize.x * nSpread, 0.0)).r, 0.0);
+    float dT = max(texture2D(uTexture, vUv + vec2(0.0, texelSize.y * nSpread)).r, 0.0);
+    float dB = max(texture2D(uTexture, vUv - vec2(0.0, texelSize.y * nSpread)).r, 0.0);
 
     vec3  normal   = normalize(vec3(dL - dR, dB - dT, 0.2));
     vec3  lightDir = normalize(vec3(0.5, 1.0, 0.5));
