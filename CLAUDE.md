@@ -10,10 +10,10 @@ WebGPU-first fluid simulation React library (falls back to WebGL2 → WebGL1). N
 fluidity/
 ├── src/                     # Library source (.ts/.tsx — fully typed)
 │   ├── index.ts             # Exports
-│   ├── globals.d.ts         # Ambient global types (FluidConfig, FluidHandle, etc.) — no import needed
+│   ├── globals.d.ts         # Ambient global types (FluidConfig, FluidHandle, FluidBaseProps, etc.) — no import needed
 │   ├── index.d.ts           # Public module declarations for consumers (re-exports globals.d.ts)
 │   ├── core/
-│   │   ├── config.ts        # DEFAULT_CONFIG, DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_*, mergeConfig
+│   │   ├── config.ts        # DEFAULT_CONFIG, DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_*, DEFAULT_QUALITY, PRESETS, mergeConfig
 │   │   ├── gl-utils.ts      # initGLContext, initWebGPU, initRenderer, Program class, createFBO, createDoubleFBO, createBlit
 │   │   ├── gpu-utils.ts     # WebGPU helpers: createGPUPrograms, createGPUDoubleFBO, uniform writers, gpuRenderToTexture
 │   │   ├── shaders.ts       # All GLSL shader strings (WebGL path)
@@ -39,8 +39,8 @@ fluidity/
 │   ├── src/
 │   │   ├── App.tsx          # Nav + example switcher (5 tabs)
 │   │   ├── examples/        # TextExample, ImageExample, SplashExample, SplitExample, PresetsExample
-│   │   ├── hooks/useFluidControls.ts  # Shared Leva controls hook
-│   │   └── components/ExampleWrapper.tsx  # Leva panel + layout wrapper
+│   │   ├── hooks/useFluidControls.ts  # Shared Leva controls hook — defines canonical slider ranges
+│   │   └── components/DemoWrapper.tsx  # Leva panel + layout wrapper
 │   ├── vite.config.ts       # base: './', alias fluidity-js → ../src/index.ts
 │   └── package.json         # leva, gh-pages
 ├── vite.config.js           # Library build (Vite 4, Node 16 compat), entry: src/index.ts
@@ -61,11 +61,14 @@ A special command `bun test:claude` is added for you to run tests ("test:claude"
 > **Only runs tests if you changed actual logic** (not just a comment or markdown files).
 
 ```bash
-# Demo (from /demo)
+# Library root
+bun test:claude  # run tests
+bun build        # build library → dist/
+
+# Demo (from /demo, Node 20)
 bun dev
 bun build
-bun deploy   # gh-pages branch → https://jayf0x.github.io/fluidity
-bun test:claude # runs tests
+bun deploy       # gh-pages branch → https://jayf0x.github.io/fluidity
 ```
 
 ## Public API (FluidHandle ref)
@@ -73,8 +76,8 @@ bun test:claude # runs tests
 ```ts
 interface FluidHandle {
   reset(): void;
-  move(opts: { x: number; y: number; strength?: number }): void;
-  splat(x: number, y: number, vx: number, vy: number, strength?: number): void;
+  move(x: number, y: number, strength?: number): void;
+  splat(x: number, y: number, velocityX: number, velocityY: number, strength?: number): void;
   updateConfig(config: Partial<FluidConfig>): void;
 }
 ```
@@ -83,25 +86,37 @@ interface FluidHandle {
 
 `FluidHandle` is a plain interface (no `extends Element`). `useImperativeHandle` returns the 4 methods above; extending a DOM type would make the factory un-satisfiable.
 
+## Component prop architecture
+
+All `FluidConfig` fields are flat optional props on both components — no nested `config` object. `FluidBaseProps extends Partial<FluidConfig>` to avoid duplicate field declarations in the type.
+
+Quality (`pixelRatio`, `simResolution`) and booleans (`mouseEnabled`, `workerEnabled`, `webGPUEnabled`, `alphaEnabled`) are also flat top-level props.
+
+Components assemble a `configProps` object from non-undefined flat props via `Object.fromEntries` + filter, then call `mergeConfig(configProps, preset, base)`. `configKey = JSON.stringify(configProps)` is the effect dep for reactive config sync.
+
+The `useFluid` hook accepts `pixelRatio` / `simResolution` and maps them to the internal `FluidQuality = { dpr, sim }` at the `FluidController` boundary. `FluidQuality` is kept as an internal type for controller/simulation APIs — not exposed in component props.
+
 ## Config (DEFAULT_CONFIG)
+
+Raw shader/simulation values used as the default base (applied when a prop is not set):
 
 ```ts
 {
   densityDissipation: 0.992, velocityDissipation: 0.93, pressureIterations: 1,
   curl: 0.0001, splatRadius: 0.004, splatForce: 0.91,
   refraction: 0.25, specularExp: 1.01, shine: 0.01,
-  waterColor: [0,0,0], glowColor: [0.7,0.85,1.0],
+  waterColor: '#000000', glowColor: '#b3d9ff',
   algorithm: 'standard',   // 'standard'|'glass'|'ink'|'aurora'|'ripple'
   warpStrength: 0.015,
 }
 ```
 
+`DEFAULT_CONFIG_TEXT` — FluidText-specific simulation defaults (higher pressure, curl, splatForce etc.) used as the base config in `FluidText` instead of `DEFAULT_CONFIG`.
+
 ## Component defaults (config.ts)
 
-Split into three typed constants in `src/core/config.ts`, re-exported from `src/index.ts`.
-
 ```ts
-DEFAULT_QUALITY = { dpr: 1, sim: 0.5 };
+DEFAULT_QUALITY = { dpr: 1, sim: 0.5 };   // internal only — maps to pixelRatio/simResolution props
 
 DEFAULT_PROPS_SHARED = {
   backgroundColor: '#0a0a0a',
@@ -119,9 +134,7 @@ DEFAULT_PROPS_TEXT = {
 };
 ```
 
-`DEFAULT_CONFIG_TEXT` — FluidText-specific simulation defaults (higher pressure, curl, splatForce etc.) used as the base config in `FluidText` instead of `DEFAULT_CONFIG`.
-
-All `FluidConfig` fields and quality (`pixelRatio`, `simResolution`) are **flat props** on both components. No `config` object or `quality` object — every knob is a top-level prop. Boolean props use `mouseEnabled`, `workerEnabled`, `webGPUEnabled`, `alphaEnabled`. `FluidBaseProps extends Partial<FluidConfig>` — no duplicate field declarations.
+`DEFAULT_QUALITY` is used internally in components as the default for `pixelRatio` / `simResolution` props (`dpr: 1` → `pixelRatio` default, `sim: 0.5` → `simResolution` default).
 
 ## Simulation pipeline (per frame, simulation.ts #step)
 
@@ -171,7 +184,7 @@ WebGL context: `alpha: true`. `gl.clearColor(0,0,0,0)`. Display shader outputs p
 
 ### DPR-aware canvas sizing
 
-All canvas sizing is DPR-aware. `useFluid` multiplies `clientWidth/clientHeight` by `window.devicePixelRatio * quality.dpr` when setting initial canvas dimensions. The ResizeObserver reads `clampedDprRef` (a ref, not a closure) so it always uses the current DPR quality factor. `FluidController.#initWorker` computes `width = clientWidth * effectiveDpr` before transferring the canvas. The simulation stores `#dpr` (set from `window.devicePixelRatio` or passed via the `resize(w, h, dpr)` call for the worker path). Mouse/splat coordinates (CSS pixels) are multiplied by `#dpr` before normalising to [0,1] UV space so cursor alignment is correct on HiDPI screens.
+All canvas sizing is DPR-aware. `useFluid` multiplies `clientWidth/clientHeight` by `window.devicePixelRatio * clampedDprRef.current` (clamped `pixelRatio` prop) when setting initial canvas dimensions. The ResizeObserver reads `clampedDprRef` (a ref, not a closure) so it always uses the current pixelRatio. `FluidController.#initWorker` computes `width = clientWidth * effectiveDpr` before transferring the canvas. The simulation stores `#dpr` (set from `window.devicePixelRatio` or passed via the `resize(w, h, dpr)` call for the worker path). Mouse/splat coordinates (CSS pixels) are multiplied by `#dpr` before normalising to [0,1] UV space so cursor alignment is correct on HiDPI screens.
 
 ### Preset reactivity
 
@@ -180,13 +193,13 @@ All canvas sizing is DPR-aware. `useFluid` multiplies `clientWidth/clientHeight`
 ### Quality reactivity
 
 `useFluid` has a `useEffect([pixelRatio, simResolution])` that propagates quality changes after mount. It:
-1. Updates `clampedDprRef.current` so future ResizeObserver callbacks use the new DPR factor.
+1. Updates `clampedDprRef.current` so future ResizeObserver callbacks use the new pixelRatio.
 2. Calls `controller.updateQuality({ dpr: pixelRatio, sim: simResolution })` — updates `#qualityDpr` / `#qualitySim` in the controller and posts an `updateQuality` message to the worker (or updates the sim directly on main thread).
 3. Calls `controller.resize(w * newDpr, h * newDpr)` to resize the canvas and rebuild FBOs with the new `simScale`.
 
 The effect compares against `prevQualityRef` to skip on first mount and to avoid redundant resizes when values are unchanged. `useFluid` accepts `pixelRatio` and `simResolution` as flat params; maps to internal `FluidQuality = { dpr, sim }` at the controller boundary.
 
-Worker message added: `updateQuality { quality: { dpr, sim } }` — worker calls `sim.updateQuality(quality)` which updates `#qualityDpr` and `#simScale`. FBO rebuild happens on the subsequent `resize` message.
+Worker message: `updateQuality { quality: { dpr, sim } }` — worker calls `sim.updateQuality(quality)` which updates `#qualityDpr` and `#simScale`. FBO rebuild happens on the subsequent `resize` message.
 
 ### backgroundSrc bitmap lifecycle
 

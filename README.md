@@ -74,7 +74,7 @@ export const Interactive = () => {
 | -------------------------------- | --------------------------------------------------------- |
 | `reset()`                        | Restart the simulation                                    |
 | `updateConfig(patch)`            | Change any config value live                              |
-| `move({ x, y, strength? })`      | Simulate a pointer move                                   |
+| `move(x, y, strength?)`           | Simulate a pointer move                                   |
 | `splat(x, y, vx, vy, strength?)` | Inject fluid directly — safe to call many times per frame |
 
 ---
