@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import { DEFAULT_PROPS_IMAGE, DEFAULT_QUALITY, mergeConfig } from '../core/config';
+import { DEFAULT_PROPS_IMAGE, DEFAULT_QUALITY, mergeConfig, normalizeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
 import { useFluid } from './useFluid';
 
@@ -52,7 +52,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     alphaEnabled,
     pixelRatio,
     simResolution,
-    config: mergeConfig(configProps, preset),
+    config: normalizeConfig(mergeConfig(configProps, preset)) as FluidConfig,
   });
 
   useImperativeHandle(
@@ -68,7 +68,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
         controllerRef.current?.splat(x, y, velocityX, velocityY, strength);
       },
       updateConfig(cfg) {
-        controllerRef.current?.updateConfig(cfg);
+        controllerRef.current?.updateConfig(normalizeConfig(cfg));
       },
     }),
     [src, effect, imageSize]
@@ -84,7 +84,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
   const configKey = JSON.stringify(configProps);
   useEffect(() => {
     controllerRef.current?.updateConfig(
-      mergeConfig(configProps, preset)
+      normalizeConfig(mergeConfig(configProps, preset)) as FluidConfig
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preset, configKey, webGPUEnabled, alphaEnabled]);

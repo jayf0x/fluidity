@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import { DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_TEXT, DEFAULT_QUALITY, mergeConfig } from '../core/config';
+import { DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_TEXT, DEFAULT_QUALITY, mergeConfig, normalizeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
 import { useFluid } from './useFluid';
 
@@ -54,7 +54,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     alphaEnabled,
     pixelRatio,
     simResolution,
-    config: mergeConfig(configProps, preset, DEFAULT_CONFIG_TEXT),
+    config: normalizeConfig(mergeConfig(configProps, preset, DEFAULT_CONFIG_TEXT)) as FluidConfig,
   });
 
   useImperativeHandle(
@@ -70,7 +70,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
         controllerRef.current?.splat(x, y, velocityX, velocityY, strength);
       },
       updateConfig(cfg) {
-        controllerRef.current?.updateConfig(cfg);
+        controllerRef.current?.updateConfig(normalizeConfig(cfg));
       },
     }),
     [text, fontSize, color, fontFamily, fontWeight]
@@ -85,7 +85,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
   const configKey = JSON.stringify(configProps);
   useEffect(() => {
     controllerRef.current?.updateConfig(
-      mergeConfig(configProps, preset, DEFAULT_CONFIG_TEXT)
+      normalizeConfig(mergeConfig(configProps, preset, DEFAULT_CONFIG_TEXT)) as FluidConfig
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preset, configKey, webGPUEnabled, alphaEnabled]);

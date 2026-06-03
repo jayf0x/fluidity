@@ -7,15 +7,15 @@ import { DemoWrapper } from '../components/DemoWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaultProps: Partial<FluidConfigLeva> = {
-  densityDissipation: 0.99,
-  velocityDissipation: 0.99,
+  densityDissipation: 0.83,
+  velocityDissipation: 0.91,
   curl: 0.0,
-  splatRadius: 0.005,
-  splatForce: 0.5,
+  splatRadius: 0.1,
+  splatForce: 0.08,
   refraction: 1.0,
-  specularExp: 0.1,
+  specularExp: 0,
   shine: 0.0,
-  warpStrength: 0.005,
+  warpStrength: 0.04,
   algorithm: 'aurora',
 };
 

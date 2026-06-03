@@ -89,7 +89,8 @@ describe('FluidText', () => {
       render(<FluidText ref={ref} text="X" />);
     });
     ref.current.updateConfig({ shine: 0.5 });
-    expect(mockController.updateConfig).toHaveBeenCalledWith({ shine: 0.5 });
+    // shine: 0.5 normalized → physics: 0.0 + 0.15 * 0.5 = 0.075
+    expect(mockController.updateConfig).toHaveBeenCalledWith({ shine: 0.075 });
   });
 
   it('destroys the controller on unmount', async () => {

@@ -22,7 +22,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     backgroundColor: '#08000f',
     algorithm: 'aurora',
     curl: 0.4,
-    warpStrength: 0.025,
+    warpStrength: 0.24,
     glowColor: '#ff1a73',
   },
   {
@@ -31,7 +31,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     backgroundColor: '#000000',
     algorithm: 'glass',
     refraction: 0.45,
-    splatRadius: 0.006,
+    splatRadius: 0.13,
   },
   {
     type: 'text',
@@ -41,15 +41,15 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     backgroundColor: '#00080f',
     algorithm: 'ripple',
     curl: 0.2,
-    shine: 0.06,
+    shine: 0.40,
     glowColor: '#00ccff',
   },
   {
     type: 'image',
     src: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=900',
     backgroundColor: '#0a0a0a',
-    densityDissipation: 0.985,
-    splatForce: 1.3,
+    densityDissipation: 0.75,
+    splatForce: 0.24,
   },
   {
     type: 'text',
@@ -58,7 +58,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     color: '#b980ff',
     backgroundColor: '#06000e',
     algorithm: 'ink',
-    densityDissipation: 0.988,
+    densityDissipation: 0.80,
     curl: 0.15,
     glowColor: '#994dff',
   },
@@ -67,7 +67,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     src: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=900',
     backgroundColor: '#000000',
     algorithm: 'aurora',
-    warpStrength: 0.022,
+    warpStrength: 0.21,
     curl: 0.35,
   },
   {
@@ -85,7 +85,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     backgroundColor: '#0a0a0a',
     algorithm: 'standard',
     curl: 0.35,
-    splatRadius: 0.005,
+    splatRadius: 0.10,
   },
   {
     type: 'text',
@@ -101,7 +101,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     src: 'https://images.unsplash.com/photo-1439405326854-014607f694d7?w=900',
     backgroundColor: '#000000',
     algorithm: 'ripple',
-    shine: 0.04,
+    shine: 0.27,
     refraction: 0.35,
   },
   {
@@ -118,8 +118,8 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     src: 'https://images.unsplash.com/photo-1490750967868-88df5691cc8c?w=900',
     backgroundColor: '#0a0a0a',
     algorithm: 'ink',
-    densityDissipation: 0.992,
-    splatForce: 1.5,
+    densityDissipation: 0.87,
+    splatForce: 0.29,
   },
   {
     type: 'text',
@@ -135,7 +135,7 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     src: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=900',
     backgroundColor: '#000000',
     algorithm: 'aurora',
-    warpStrength: 0.03,
+    warpStrength: 0.29,
     curl: 0.45,
   },
   {

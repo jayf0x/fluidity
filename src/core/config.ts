@@ -1,30 +1,61 @@
+/** Physics [min, max] for each prop that accepts a normalized [0, 1] user value. */
+export const PROP_RANGES: Partial<Record<keyof FluidConfig, [number, number]>> = {
+  densityDissipation:  [0.94,  1.0  ],
+  velocityDissipation: [0.9,   0.999],
+  splatRadius:         [0.001, 0.04 ],
+  splatForce:          [0.1,   5.0  ],
+  specularExp:         [0.1,   10   ],
+  shine:               [0.0,   0.15 ],
+  warpStrength:        [0.001, 0.1  ],
+};
+
+/**
+ * Converts normalized [0, 1] prop values to physics values using PROP_RANGES.
+ * Values outside [0, 1] pass through unchanged — raw physics override for power users.
+ * Props without a PROP_RANGES entry are returned as-is.
+ */
+export function normalizeConfig(config: Partial<FluidConfig>): Partial<FluidConfig> {
+  const out: Partial<FluidConfig> = { ...config };
+  for (const [key, [min, max]] of Object.entries(PROP_RANGES) as [keyof FluidConfig, [number, number]][]) {
+    const val = config[key] as number | undefined;
+    if (val === undefined) continue;
+    if (val >= 0 && val <= 1) {
+      (out as Record<string, number>)[key] = min + (max - min) * val;
+    }
+  }
+  return out;
+}
+
+// All simulation defaults below are stored in normalized [0, 1] space for the
+// fields listed in PROP_RANGES. normalizeConfig converts them to physics values
+// before the simulation receives them.
 export const DEFAULT_CONFIG: FluidConfig = {
-  densityDissipation: 0.992,
-  velocityDissipation: 0.93,
+  densityDissipation: 0.87,
+  velocityDissipation: 0.30,
   pressureIterations: 1,
   curl: 0.0001,
-  splatRadius: 0.004,
-  splatForce: 0.91,
+  splatRadius: 0.08,
+  splatForce: 0.17,
   refraction: 0.25,
-  specularExp: 1.01,
-  shine: 0.01,
+  specularExp: 0.09,
+  shine: 0.07,
   waterColor: '#000000',
   glowColor: '#b3d9ff',
   algorithm: 'standard' as FluidAlgorithm,
-  warpStrength: 0.015,
+  warpStrength: 0.14,
 };
 
 export const DEFAULT_CONFIG_TEXT: FluidConfig = {
   ...DEFAULT_CONFIG,
-  densityDissipation: 0.99,
-  velocityDissipation: 0.98,
+  densityDissipation: 0.83,
+  velocityDissipation: 0.81,
   pressureIterations: 3,
   curl: 0.15,
-  splatRadius: 0.01,
-  splatForce: 3,
+  splatRadius: 0.23,
+  splatForce: 0.59,
   refraction: 0.25,
-  specularExp: 1,
-  shine: 0.1,
+  specularExp: 0.09,
+  shine: 0.67,
   glowColor: '#0080ff',
 };
 
@@ -53,57 +84,57 @@ export const DEFAULT_PROPS_TEXT = {
 
 export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
   calm: {
-    densityDissipation: 0.999,
-    velocityDissipation: 0.98,
+    densityDissipation: 0.98,
+    velocityDissipation: 0.81,
     curl: 0.0001,
-    splatRadius: 0.003,
-    splatForce: 0.5,
+    splatRadius: 0.05,
+    splatForce: 0.08,
     refraction: 0.15,
-    shine: 0.005,
+    shine: 0.03,
     glowColor: '#99d9ff',
     waterColor: '#00050d',
   },
   sand: {
-    densityDissipation: 0.997,
-    velocityDissipation: 0.98,
+    densityDissipation: 0.95,
+    velocityDissipation: 0.81,
     curl: 1,
-    splatRadius: 0.01,
-    splatForce: 0.9,
+    splatRadius: 0.23,
+    splatForce: 0.16,
     refraction: 0.8,
-    specularExp: 0.1,
-    shine: 0.05,
+    specularExp: 0,
+    shine: 0.33,
     glowColor: '#070707',
     waterColor: '#735420',
   },
   wave: {
-    densityDissipation: 0.994,
-    velocityDissipation: 0.92,
+    densityDissipation: 0.90,
+    velocityDissipation: 0.20,
     curl: 0.2,
-    splatRadius: 0.005,
-    splatForce: 1.2,
+    splatRadius: 0.10,
+    splatForce: 0.22,
     refraction: 0.35,
-    shine: 0.03,
+    shine: 0.20,
     glowColor: '#80ccff',
     waterColor: '#000308',
   },
   neon: {
-    densityDissipation: 0.985,
-    velocityDissipation: 0.93,
+    densityDissipation: 0.75,
+    velocityDissipation: 0.30,
     curl: 0.05,
-    splatRadius: 0.008,
-    splatForce: 1.5,
+    splatRadius: 0.18,
+    splatForce: 0.29,
     refraction: 0.25,
-    specularExp: 0.5,
-    shine: 0.14,
+    specularExp: 0.04,
+    shine: 0.93,
     glowColor: '#ff33cc',
     waterColor: '#0d0014',
   },
   smoke: {
-    densityDissipation: 0.996,
-    velocityDissipation: 0.97,
+    densityDissipation: 0.93,
+    velocityDissipation: 0.71,
     curl: 0.04,
-    splatRadius: 0.009,
-    splatForce: 0.8,
+    splatRadius: 0.21,
+    splatForce: 0.14,
     refraction: 0.08,
     shine: 0,
     glowColor: '#808080',

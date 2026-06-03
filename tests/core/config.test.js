@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_CONFIG, mergeConfig } from '../../src/core/config.ts';
+import { DEFAULT_CONFIG, PROP_RANGES, mergeConfig, normalizeConfig } from '../../src/core/config.ts';
 
 describe('DEFAULT_CONFIG', () => {
   it('has all required keys', () => {
@@ -31,6 +31,49 @@ describe('DEFAULT_CONFIG', () => {
     const isFluidColor = (v) => Array.isArray(v) || (typeof v === 'string' && v.startsWith('#'));
     expect(isFluidColor(DEFAULT_CONFIG.waterColor)).toBe(true);
     expect(isFluidColor(DEFAULT_CONFIG.glowColor)).toBe(true);
+  });
+});
+
+describe('normalizeConfig', () => {
+  it('maps densityDissipation: 0 to physics min (0.94)', () => {
+    expect(normalizeConfig({ densityDissipation: 0 }).densityDissipation).toBeCloseTo(0.94);
+  });
+
+  it('maps densityDissipation: 1 to physics max (1.0)', () => {
+    expect(normalizeConfig({ densityDissipation: 1 }).densityDissipation).toBeCloseTo(1.0);
+  });
+
+  it('maps densityDissipation: 0.5 to physics midpoint (0.97)', () => {
+    expect(normalizeConfig({ densityDissipation: 0.5 }).densityDissipation).toBeCloseTo(0.97);
+  });
+
+  it('passes through values > 1 unchanged (raw physics override)', () => {
+    expect(normalizeConfig({ densityDissipation: 1.5 }).densityDissipation).toBe(1.5);
+  });
+
+  it('passes through values < 0 unchanged (raw physics override)', () => {
+    expect(normalizeConfig({ velocityDissipation: -0.5 }).velocityDissipation).toBe(-0.5);
+  });
+
+  it('maps shine: 0.5 to physics 0.075', () => {
+    expect(normalizeConfig({ shine: 0.5 }).shine).toBeCloseTo(0.075);
+  });
+
+  it('leaves fields without a range entry unchanged', () => {
+    const result = normalizeConfig({ curl: 0.5, waterColor: '#ff0000' });
+    expect(result.curl).toBe(0.5);
+    expect(result.waterColor).toBe('#ff0000');
+  });
+
+  it('does not mutate the input object', () => {
+    const input = { shine: 0.5 };
+    normalizeConfig(input);
+    expect(input.shine).toBe(0.5);
+  });
+
+  it('exports PROP_RANGES with expected keys', () => {
+    const keys = ['densityDissipation', 'velocityDissipation', 'splatRadius', 'splatForce', 'specularExp', 'shine', 'warpStrength'];
+    for (const key of keys) expect(PROP_RANGES).toHaveProperty(key);
   });
 });
 

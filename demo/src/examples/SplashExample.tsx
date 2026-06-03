@@ -7,15 +7,15 @@ import { DemoWrapper } from '../components/DemoWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaultConfig: Partial<FluidConfigLeva> = {
-  densityDissipation: 0.98,
-  velocityDissipation: 0.84,
+  densityDissipation: 0.67,
+  velocityDissipation: 0,
   curl: 0.0,
-  splatRadius: 0.001,
-  splatForce: 4.86,
+  splatRadius: 0,
+  splatForce: 0.97,
   refraction: 0.57,
-  specularExp: 0.5,
-  shine: 0.001,
-  warpStrength: 0.01,
+  specularExp: 0.04,
+  shine: 0.01,
+  warpStrength: 0.09,
   algorithm: 'ripple',
   waterColor: '#002d2e',
   glowColor: '#642df7',

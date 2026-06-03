@@ -87,7 +87,9 @@ describe('package exports', () => {
       'DEFAULT_PROPS_IMAGE',
       'DEFAULT_PROPS_TEXT',
       'PRESETS',
+      'PROP_RANGES',
       'mergeConfig',
+      'normalizeConfig',
       'parseColor',
       'loadImageBitmap',
     ]);
