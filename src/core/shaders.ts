@@ -175,22 +175,29 @@ export const displayShader = /* glsl */ `
     float density  = max(texture2D(uTexture, vUv).r, 0.0) * (1.0 - obs);
     float coverage = texture2D(uCoverage,  vUv).r;
 
-    // Normal via a wide-spread Sobel-style gradient.
-    // texelSize is in display pixels; density FBO is at simScale (0.5x), so
-    // a 2-display-pixel offset = 1 sim texel — a 1-texel finite difference
-    // produces harsh, quantized normals that the specular term amplifies into
-    // visible pixelated rings.  Using a 12-display-pixel (≈6 sim texel) spread
-    // averages over multiple sim texels, giving a smooth normal field.
-    float nSpread = 12.0;
-    float dL = max(texture2D(uTexture, vUv - vec2(texelSize.x * nSpread, 0.0)).r, 0.0);
-    float dR = max(texture2D(uTexture, vUv + vec2(texelSize.x * nSpread, 0.0)).r, 0.0);
-    float dT = max(texture2D(uTexture, vUv + vec2(0.0, texelSize.y * nSpread)).r, 0.0);
-    float dB = max(texture2D(uTexture, vUv - vec2(0.0, texelSize.y * nSpread)).r, 0.0);
+    // 8-tap Sobel normal — computes gradient via 3×3 kernel (no centre sample needed).
+    // texelSize = 1/displayRes; density FBO is at simScale (0.5×), so s=6 display px
+    // ≈ 3 sim texels per axis.  The Sobel kernel properly averages the gradient in
+    // every direction — no 4-tap cross bias that creates 45° circuit-board artefacts.
+    float sx = texelSize.x * 6.0, sy = texelSize.y * 6.0;
+    float d00 = max(texture2D(uTexture, vUv + vec2(-sx, -sy)).r, 0.0);
+    float d10 = max(texture2D(uTexture, vUv + vec2(0.0, -sy)).r, 0.0);
+    float d20 = max(texture2D(uTexture, vUv + vec2( sx, -sy)).r, 0.0);
+    float d01 = max(texture2D(uTexture, vUv + vec2(-sx, 0.0)).r, 0.0);
+    float d21 = max(texture2D(uTexture, vUv + vec2( sx, 0.0)).r, 0.0);
+    float d02 = max(texture2D(uTexture, vUv + vec2(-sx,  sy)).r, 0.0);
+    float d12 = max(texture2D(uTexture, vUv + vec2(0.0,  sy)).r, 0.0);
+    float d22 = max(texture2D(uTexture, vUv + vec2( sx,  sy)).r, 0.0);
+    float gx  = (d20 + 2.0*d21 + d22) - (d00 + 2.0*d01 + d02);
+    float gy  = (d02 + 2.0*d12 + d22) - (d00 + 2.0*d10 + d20);
 
-    vec3  normal   = normalize(vec3(dL - dR, dB - dT, 0.2));
+    vec3  normal   = normalize(vec3(gx, gy, 1.2));
     vec3  lightDir = normalize(vec3(0.5, 1.0, 0.5));
     vec3  halfV    = normalize(lightDir + vec3(0.0, 0.0, 1.0));
-    float spec     = pow(max(dot(normal, halfV), 0.0), uSpecularExp) * uShine * density;
+    // Suppress specular at low / fading density — prevents highlight rings from
+    // appearing at the dissipating edge of a stroke as its density approaches zero.
+    float specDen  = density * min(density * 5.0, 1.0);
+    float spec     = pow(max(dot(normal, halfV), 0.0), uSpecularExp) * uShine * specDen;
 
     // In transparent (non-coverage) areas the background texture is empty black canvas.
     // Replace it with uWaterColor so fluid colour is not contaminated by that black,

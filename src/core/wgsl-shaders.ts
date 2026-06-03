@@ -316,16 +316,24 @@ struct U {
   let density = max(textureSample(uTex, samp, i.uv).r, 0.0) * (1.0 - obs);
   let cov     = textureSample(uCov, samp, i.uv).r;
 
-  let tsN = u.texelSize * 12.0;
-  let dL  = max(textureSample(uTex, samp, i.uv - vec2f(tsN.x, 0.0)).r, 0.0);
-  let dR  = max(textureSample(uTex, samp, i.uv + vec2f(tsN.x, 0.0)).r, 0.0);
-  let dT  = max(textureSample(uTex, samp, i.uv + vec2f(0.0, tsN.y)).r, 0.0);
-  let dB  = max(textureSample(uTex, samp, i.uv - vec2f(0.0, tsN.y)).r, 0.0);
+  let sx  = u.texelSize.x * 6.0;
+  let sy  = u.texelSize.y * 6.0;
+  let d00 = max(textureSample(uTex, samp, i.uv + vec2f(-sx, -sy)).r, 0.0);
+  let d10 = max(textureSample(uTex, samp, i.uv + vec2f(0.0, -sy)).r, 0.0);
+  let d20 = max(textureSample(uTex, samp, i.uv + vec2f( sx, -sy)).r, 0.0);
+  let d01 = max(textureSample(uTex, samp, i.uv + vec2f(-sx, 0.0)).r, 0.0);
+  let d21 = max(textureSample(uTex, samp, i.uv + vec2f( sx, 0.0)).r, 0.0);
+  let d02 = max(textureSample(uTex, samp, i.uv + vec2f(-sx,  sy)).r, 0.0);
+  let d12 = max(textureSample(uTex, samp, i.uv + vec2f(0.0,  sy)).r, 0.0);
+  let d22 = max(textureSample(uTex, samp, i.uv + vec2f( sx,  sy)).r, 0.0);
+  let gx  = (d20 + 2.0*d21 + d22) - (d00 + 2.0*d01 + d02);
+  let gy  = (d02 + 2.0*d12 + d22) - (d00 + 2.0*d10 + d20);
 
-  let norm  = normalize(vec3f(dL - dR, dB - dT, 0.2));
-  let ldir  = normalize(vec3f(0.5, 1.0, 0.5));
-  let halfV = normalize(ldir + vec3f(0.0, 0.0, 1.0));
-  let spec  = pow(max(dot(norm, halfV), 0.0), u.specularExp) * u.shine * density;
+  let norm    = normalize(vec3f(gx, gy, 1.2));
+  let ldir    = normalize(vec3f(0.5, 1.0, 0.5));
+  let halfV   = normalize(ldir + vec3f(0.0, 0.0, 1.0));
+  let specDen = density * min(density * 5.0, 1.0);
+  let spec    = pow(max(dot(norm, halfV), 0.0), u.specularExp) * u.shine * specDen;
 
   let bgRaw = textureSample(uBg, samp, i.uv).rgb;
   let wc    = u.waterColor.rgb;
