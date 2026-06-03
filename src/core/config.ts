@@ -30,33 +30,34 @@ export function normalizeConfig(config: Partial<FluidConfig>): Partial<FluidConf
 // fields listed in PROP_RANGES. normalizeConfig converts them to physics values
 // before the simulation receives them.
 export const DEFAULT_CONFIG: FluidConfig = {
-  densityDissipation: 0.87,
-  velocityDissipation: 0.30,
+  densityDissipation: 0.83,
+  velocityDissipation: 0.91,
   pressureIterations: 1,
-  curl: 0.0001,
-  splatRadius: 0.08,
-  splatForce: 0.17,
-  refraction: 0.25,
-  specularExp: 0.09,
-  shine: 0.07,
+  curl: 0.0,
+  splatRadius: 0.1,
+  splatForce: 0.08,
+  refraction: 1.0,
+  specularExp: 0,
+  shine: 0.0,
   waterColor: '#000000',
   glowColor: '#b3d9ff',
-  algorithm: 'standard' as FluidAlgorithm,
-  warpStrength: 0.14,
+  algorithm: 'aurora' as FluidAlgorithm,
+  warpStrength: 0.04,
 };
 
 export const DEFAULT_CONFIG_TEXT: FluidConfig = {
   ...DEFAULT_CONFIG,
-  densityDissipation: 0.83,
-  velocityDissipation: 0.81,
+  densityDissipation: 0.9,
+  velocityDissipation: 0.9,
   pressureIterations: 3,
-  curl: 0.15,
-  splatRadius: 0.23,
-  splatForce: 0.59,
-  refraction: 0.25,
-  specularExp: 0.09,
-  shine: 0.67,
-  glowColor: '#0080ff',
+  curl: 0.2,
+  splatRadius: 0.2,
+  splatForce: 0.5,
+  refraction: 0.2,
+  specularExp: 0.01,
+  shine: 0.5,
+  waterColor: '#090017',
+  glowColor: '#b04721',
 };
 
 export const DEFAULT_QUALITY: FluidQuality = { dpr: 1, sim: 0.5 };
