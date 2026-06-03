@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 import Terminal from 'vite-plugin-terminal';
 
 export default defineConfig(({ command }) => ({
-  base: './',
+  base: command === 'serve' ? '/' : '/fluidity/',
   plugins: [
     react(),
     // Terminal plugin only works in dev mode (virtual module not available in builds)
