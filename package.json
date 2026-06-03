@@ -1,7 +1,7 @@
 {
   "name": "@jayf0x/fluidity-js",
   "version": "0.2.2",
-  "description": "High-performance WebGPU fluid simulation for React — text and image effects",
+  "description": "WebGPU-first real-time Navier-Stokes fluid simulation for React — interactive water, ink, glass, aurora, and ripple effects on text and images. Falls back to WebGL2/WebGL1. Runs in a Web Worker.",
   "type": "module",
   "module": "./dist/index.js",
   "exports": {
@@ -13,7 +13,10 @@
   "types": "./src/index.d.ts",
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "AGENTS.md",
+    "llms.txt",
+    "CONTRIBUTING.md"
   ],
   "sideEffects": false,
   "scripts": {
@@ -30,12 +33,37 @@
     "publish:npm": "bash ./scripts/publish-npm.sh"
   },
   "keywords": [
+    "webgpu",
     "webgl",
+    "webgl2",
     "fluid",
-    "simulation",
+    "fluid-simulation",
+    "fluid-dynamics",
+    "navier-stokes",
     "react",
     "animation",
-    "canvas"
+    "canvas",
+    "water-effect",
+    "ink-effect",
+    "glass-effect",
+    "aurora-effect",
+    "ripple-effect",
+    "interactive-animation",
+    "canvas-animation",
+    "hover-effect",
+    "text-animation",
+    "image-effect",
+    "offscreencanvas",
+    "web-worker",
+    "typescript",
+    "react-component",
+    "vorticity",
+    "gpu",
+    "shader",
+    "glsl",
+    "wgsl",
+    "visual-effect",
+    "creative-coding"
   ],
   "author": "https://github.com/jayf0x",
   "license": "MIT",
@@ -46,7 +74,7 @@
   "bugs": {
     "url": "https://github.com/jayf0x/fluidity/issues"
   },
-  "homepage": "https://github.com/jayf0x/fluidity#readme",
+  "homepage": "https://jayf0x.github.io/fluidity",
   "peerDependencies": {
     "react": ">=17.0.0",
     "react-dom": ">=17.0.0"

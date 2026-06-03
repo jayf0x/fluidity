@@ -1,0 +1,156 @@
+# fluidity-js
+
+> WebGPU-first fluid simulation library for React. Real-time Navier-Stokes solver — text and image effects with hardware-accelerated fluid dynamics.
+
+- npm: https://www.npmjs.com/package/@jayf0x/fluidity-js
+- GitHub: https://github.com/jayf0x/fluidity
+- Live demo: https://jayf0x.github.io/fluidity
+- License: MIT
+- Version: 0.2.2
+
+## Install
+
+```bash
+npm install @jayf0x/fluidity-js
+# bun add / yarn add / pnpm add also work
+```
+
+Peer deps: react >=17, react-dom >=17
+
+## Core concepts
+
+- **WebGPU-first** with automatic fallback to WebGL2 → WebGL1
+- Runs simulation in a **Web Worker** via OffscreenCanvas (configurable)
+- Two render modes: `FluidText` (text as obstacle) and `FluidImage` (bitmap as obstacle)
+- Navier-Stokes pipeline: advect velocity → advect density → curl/vorticity → splat → divergence → pressure solve → gradient subtract → display
+
+## Quick start
+
+```tsx
+import { FluidText, FluidImage } from '@jayf0x/fluidity-js';
+
+// Fluid text that reacts to cursor
+<FluidText text="Hello World" fontSize={140} color="#ffffff" />
+
+// Fluid image with aurora algorithm
+<FluidImage src="/hero.jpg" algorithm="aurora" />
+
+// With preset and custom config
+<FluidText text="Wicked" preset="neon" algorithm="glass" config={{ curl: 0.4 }} />
+```
+
+## FluidText props
+
+| Prop | Type | Default |
+|------|------|---------|
+| text | string | required |
+| fontSize | number | 100 |
+| color | string | '#ffffff' |
+| fontFamily | string | 'sans-serif' |
+| fontWeight | string\|number | 900 |
+
+## FluidImage props
+
+| Prop | Type | Default |
+|------|------|---------|
+| src | string | required |
+| imageSize | string\|number | 'cover' |
+| effect | number | 0 |
+
+## Shared props (both components)
+
+| Prop | Type | Default |
+|------|------|---------|
+| config | Partial<FluidConfig> | — |
+| preset | PresetKey | — |
+| algorithm | FluidAlgorithm | 'standard' |
+| quality | FluidQuality | { dpr: 1, sim: 0.5 } |
+| backgroundColor | string | '#0a0a0a' |
+| backgroundSrc | string | — |
+| backgroundSize | string\|number | 'cover' |
+| isMouseEnabled | boolean | true |
+| isWorkerEnabled | boolean | true |
+| useWebGPU | boolean | true |
+| className | string | — |
+| style | CSSProperties | — |
+
+## FluidHandle ref API
+
+Access via `useRef<FluidHandle>()` and `ref` prop:
+
+```tsx
+const fluid = useRef<FluidHandle>(null);
+<FluidText ref={fluid} text="Touch me" />
+fluid.current?.splat(200, 200, 8, -4);
+fluid.current?.updateConfig({ curl: 0.5 });
+fluid.current?.reset();
+fluid.current?.move({ x: 100, y: 100, strength: 2 });
+```
+
+## Algorithms
+
+| Value | Effect |
+|-------|--------|
+| standard | Colour overlay + gentle refraction |
+| glass | UV distortion only — bent glass |
+| ink | Dense opaque pigment that accumulates |
+| aurora | Velocity-field UV warp — liquid metal |
+| ripple | Exaggerated normals + Fresnel rim |
+
+## Presets
+
+`calm` · `sand` · `wave` · `neon` · `smoke`
+
+## FluidConfig options
+
+| Key | Default | Description |
+|-----|---------|-------------|
+| densityDissipation | 0.992 | Ink persistence (0–1) |
+| velocityDissipation | 0.93 | Velocity decay (0–1) |
+| pressureIterations | 1 | Jacobi iterations |
+| curl | 0.0001 | Vorticity / swirl strength |
+| splatRadius | 0.004 | Brush radius |
+| splatForce | 0.91 | Brush force |
+| refraction | 0.25 | Background warp strength |
+| specularExp | 1.01 | Specular sharpness |
+| shine | 0.01 | Highlight intensity |
+| waterColor | [0,0,0] | Base fluid RGB (0–1 each) |
+| glowColor | [0.7,0.85,1.0] | Specular/glow RGB (0–1 each) |
+| warpStrength | 0.015 | UV warp (aurora algorithm) |
+
+## Quality control
+
+```tsx
+// dpr: canvas backing resolution fraction (0.1–1)
+// sim: simulation FBO size fraction (0.1–1)
+<FluidText text="hello" quality={{ dpr: 0.75, sim: 0.25 }} />
+```
+
+Both axes are independent and reactive at runtime.
+
+## TypeScript types
+
+All types are globally ambient — no import needed:
+
+```ts
+// Available globally after installing the package:
+FluidConfig
+FluidHandle
+FluidAlgorithm    // 'standard'|'glass'|'ink'|'aurora'|'ripple'
+FluidQuality      // { dpr: number; sim: number }
+PresetKey         // 'calm'|'sand'|'wave'|'neon'|'smoke'
+```
+
+## Architecture summary
+
+```
+React component (FluidText / FluidImage)
+  └── useFluid hook
+        └── FluidController
+              ├── [worker mode]  Web Worker → FluidSimulation (OffscreenCanvas)
+              └── [main mode]    FluidSimulation directly
+                    └── WebGPU path (FluidSimulation.create())
+                    └── WebGL2 / WebGL1 fallback
+```
+
+Worker transfer: zero-copy OffscreenCanvas transfer. Background images transferred as ImageBitmap (zero-copy). Safe to destroy/recreate under React StrictMode.
