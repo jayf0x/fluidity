@@ -9,6 +9,7 @@ import { useImages } from '../hooks/useImages';
 
 const defaults: Partial<FluidConfig> = {
   splatForce: 0.9,
+  splatRadius: 0.01,
 };
 
 export function ImageExample() {
@@ -16,7 +17,15 @@ export function ImageExample() {
   const store = useCreateStore();
   const args = useFluidControls(ref, store, defaults);
 
-  const { urls, updateImages } = useImages();
+  const { imageQuality } = useControls(
+    'settings',
+    {
+      imageQuality: { value: 1, min: 0.1, max: 3, step: 0.1 },
+    },
+    { store }
+  );
+
+  const { urls, updateImages } = useImages(1, imageQuality);
   const { imageSize } = useControls(
     'settings',
     {

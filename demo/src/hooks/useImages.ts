@@ -15,17 +15,15 @@ export const ALL_IMAGES = [
   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d',
 ];
 
-export const useImages = (count = 1) => {
+export const useImages = (count = 1, quality = 1) => {
   const [startIndex, setStartIndex] = useState(0);
 
-  const updateImages = () => {
-    setStartIndex((prev) => (prev + 1) % ALL_IMAGES.length);
-  };
+  const updateImages = () => setStartIndex((prev) => (prev + 1) % ALL_IMAGES.length);
 
   const viewportWidth = typeof window === 'undefined' ? 1200 : window.innerWidth * window.devicePixelRatio;
 
   // Each image only needs a fraction of the viewport width.
-  const width = Math.ceil(Math.min(viewportWidth / 2, 2000));
+  const width = Math.ceil(Math.min(viewportWidth / 2, 2000)) * quality;
 
   const urls = Array.from({ length: count }, (_, i) => {
     const index = (startIndex + i) % ALL_IMAGES.length;
