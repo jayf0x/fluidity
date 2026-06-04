@@ -3,7 +3,7 @@
 type FluidAlgorithm = 'standard' | 'glass' | 'ink' | 'aurora' | 'ripple';
 
 /** RGB tuple (values 0–1) or a CSS hex string (#RGB, #RRGGBB, #RRGGBBAA — alpha stripped). */
-type FluidColor = [number, number, number] | `#${string}`;
+type FluidColor = [number, number, number] | `#${string}` | string;
 
 /** Internal quality object used by FluidController and FluidSimulation. */
 interface FluidQuality {
