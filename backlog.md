@@ -1,181 +1,17 @@
-## CORE/FEATURE + DEMO/FEATURE: better value ranges
+## DOCS/BUG: README inline code examples use stale prop values
 
-Prop values for simulation fields are currently raw shader/physics values (e.g. `densityDissipation={0.992}`). These are non-intuitive — a user has no way to guess that `0.992` means "fairly persistent" or that the useful range is only `0.94–1.0`. The goal is to normalize all simulation props to a `0–1` float scale so users think in percentages, while the simulation receives the correct internal value.
+The algorithm section shows:
 
-### Affected fields and their physics ranges
-
-These ranges come from the Leva schema in `demo/src/hooks/useFluidControls.ts` and represent the full visual range of each param:
-
-| Prop | Physics min | Physics max | Current default | Normalized default (approx) |
-|------|-------------|-------------|-----------------|------------------------------|
-| `densityDissipation` | 0.94 | 1.0 | 0.992 | 0.87 |
-| `velocityDissipation` | 0.9 | 0.999 | 0.93 | 0.30 |
-| `splatRadius` | 0.001 | 0.04 | 0.004 | 0.08 |
-| `splatForce` | 0.1 | 5.0 | 0.91 | 0.17 |
-| `specularExp` | 0.1 | 10 | 1.01 | 0.09 |
-| `shine` | 0.0 | 0.15 | 0.01 | 0.07 |
-| `warpStrength` | 0.001 | 0.1 | 0.015 | 0.14 |
-
-**Already 0–1 (no change needed):** `curl`, `refraction`, `pixelRatio`, `simResolution`
-
-**Integer, not float:** `pressureIterations` (range 1–50) — normalize as `Math.round(1 + 49 * t)` or keep as-is (acceptable to leave for this ticket).
-
-### Normalization formula
-
-```ts
-// Linear lerp: t ∈ [0, 1] → [physicsMin, physicsMax]
-function toPhysics(t: number, min: number, max: number): number {
-  return min + (max - min) * t;
-}
-
-// Inverse: physics value → normalized [0, 1]
-function toNormalized(v: number, min: number, max: number): number {
-  return (v - min) / (max - min);
-}
+```tsx
+<FluidText text="fluid" algorithm="ripple" warpStrength={0.03} />
 ```
 
-Values outside `[0, 1]` should pass through unchanged (no clamping) — this lets power users still pass raw physics values.
+Two problems post-normalization:
 
-### Implementation plan
+1. `warpStrength` is aurora-specific — it has no effect on the ripple algorithm. The example misleads readers about what `warpStrength` does.
+2. `warpStrength={0.03}` is now a normalized value → physics `≈ 0.004` (near-minimum, invisible). The old physics intent was `0.03`. A visible normalized value would be `≈ 0.3`.
 
-#### 1. `src/core/config.ts` — add `PROP_RANGES` and `normalizeConfig`
-
-```ts
-export const PROP_RANGES: Partial<Record<keyof FluidConfig, [number, number]>> = {
-  densityDissipation:  [0.94,  1.0 ],
-  velocityDissipation: [0.9,   0.999],
-  splatRadius:         [0.001, 0.04 ],
-  splatForce:          [0.1,   5.0  ],
-  specularExp:         [0.1,   10   ],
-  shine:               [0.0,   0.15 ],
-  warpStrength:        [0.001, 0.1  ],
-};
-
-/**
- * Maps any prop with a defined range from normalized [0,1] → physics value.
- * Values outside [0,1] are passed through unchanged (power-user raw override).
- * Props without a range entry are returned unchanged.
- */
-export function normalizeConfig(config: Partial<FluidConfig>): Partial<FluidConfig> {
-  const out: Partial<FluidConfig> = { ...config };
-  for (const [key, range] of Object.entries(PROP_RANGES) as [keyof FluidConfig, [number, number]][]) {
-    const val = config[key] as number | undefined;
-    if (val === undefined) continue;
-    if (val >= 0 && val <= 1) {
-      (out as Record<string, number>)[key] = range[0] + (range[1] - range[0]) * val;
-    }
-    // values outside [0,1] → unchanged
-  }
-  return out;
-}
-```
-
-#### 2. `src/react/FluidText.tsx` and `src/react/FluidImage.tsx`
-
-Apply `normalizeConfig` before passing to `mergeConfig` and `updateConfig`:
-
-```ts
-// In the component, replace:
-const configProps = Object.fromEntries(...) as Partial<FluidConfig>;
-
-// With:
-const configProps = normalizeConfig(Object.fromEntries(...) as Partial<FluidConfig>);
-```
-
-Apply in both:
-- The initial `useFluid(containerRef, { config: mergeConfig(configProps, ...) })` call
-- The reactive `useEffect` that calls `updateConfig(mergeConfig(configProps, ...))`
-
-#### 3. Update `DEFAULT_CONFIG` and `DEFAULT_CONFIG_TEXT` in `src/core/config.ts`
-
-Change raw physics defaults to normalized equivalents so `<FluidText />` with no props gives the same visual result as before:
-
-```ts
-// Example: densityDissipation 0.992 → ~0.87 in normalized space
-DEFAULT_CONFIG = {
-  densityDissipation: 0.87,   // was 0.992
-  velocityDissipation: 0.30,  // was 0.93
-  splatRadius: 0.08,          // was 0.004
-  splatForce: 0.17,           // was 0.91
-  specularExp: 0.09,          // was 1.01
-  shine: 0.07,                // was 0.01
-  warpStrength: 0.14,         // was 0.015
-  // unchanged:
-  pressureIterations: 1,
-  curl: 0.0001,
-  refraction: 0.25,
-  waterColor: '#000000',
-  glowColor: '#b3d9ff',
-  algorithm: 'standard',
-};
-```
-
-Do the same for `DEFAULT_CONFIG_TEXT`.
-
-#### 4. Update `PRESETS` in `src/core/config.ts`
-
-All preset values that have a range entry need to be converted to normalized space. Example:
-
-```ts
-calm: {
-  densityDissipation: toNormalized(0.999, 0.94, 1.0),  // ≈ 0.983
-  velocityDissipation: toNormalized(0.98, 0.9, 0.999), // ≈ 0.909
-  // ...
-}
-```
-
-Run `toNormalized(v, min, max)` for every field in every preset that appears in `PROP_RANGES`.
-
-#### 5. Update `demo/src/hooks/useFluidControls.ts`
-
-Leva slider ranges stay as `[0, 1]` for all normalized fields. Defaults become the new normalized values. Example:
-
-```ts
-densityDissipation: { value: 0.87, min: 0, max: 1, step: 0.01 },
-velocityDissipation: { value: 0.30, min: 0, max: 1, step: 0.01 },
-splatRadius:         { value: 0.08, min: 0, max: 1, step: 0.01 },
-splatForce:          { value: 0.17, min: 0, max: 1, step: 0.01 },
-specularExp:         { value: 0.09, min: 0, max: 1, step: 0.01 },
-shine:               { value: 0.07, min: 0, max: 1, step: 0.01 },
-warpStrength:        { value: 0.14, min: 0, max: 1, step: 0.01 },
-```
-
-Also update `customDefaults` entries in all example files (`TextExample`, `ImageExample`, `SplashExample`, `SplitExample`) to use normalized values.
-
-#### 6. Update `README.md` and `CLAUDE.md`
-
-- Document `PROP_RANGES` and `normalizeConfig` in CLAUDE.md
-- Update the FluidConfig reference table in README.md to show `0–1` ranges for normalized fields and note the internal physics range in the description
-
-### Constraints
-
-- **No clamping.** Values outside `[0, 1]` pass through as raw physics values (advanced override).
-- **`pressureIterations`** is an integer — decide: either keep raw (1–50) or normalize with `Math.round`. If normalized, the step in the Leva schema should become `0.02` (≈ 1/50). Can defer.
-- **`mergeConfig` is not changed** — normalization happens before it, in the component layer only. `mergeConfig` always works in physics-value space.
-- **`updateConfig(patch)` on `FluidHandle`** — this is a ref method called by users post-mount. It currently passes raw values directly to the sim. After this change, `updateConfig` should also normalize (apply `normalizeConfig` inside the component's `updateConfig` implementation). Update `useImperativeHandle` in both components.
-
-### Tests to add / update
-
-1. `tests/core/config.test.js` — test `normalizeConfig`:
-   - `densityDissipation: 0` → `0.94`
-   - `densityDissipation: 1` → `1.0`
-   - `densityDissipation: 0.5` → `0.97`
-   - `densityDissipation: 1.5` → `1.5` (raw passthrough)
-   - Fields without range entry unchanged
-2. Update any test that uses raw physics defaults in assertions
-3. Check `tests/react/FluidText.test.jsx` — `updateConfig({ shine: 0.5 })` should hit the mock with the physics value `0.075` (normalized)
-
-### Files to change
-
-- `src/core/config.ts` — add `PROP_RANGES`, `normalizeConfig`; update `DEFAULT_CONFIG`, `DEFAULT_CONFIG_TEXT`, `PRESETS`
-- `src/react/FluidText.tsx` — apply `normalizeConfig` to `configProps`; apply in `updateConfig` ref method
-- `src/react/FluidImage.tsx` — same
-- `src/index.ts` — export `PROP_RANGES`, `normalizeConfig`
-- `demo/src/hooks/useFluidControls.ts` — update slider defaults/ranges
-- `demo/src/examples/*.tsx` — update all numeric config defaults to normalized values
-- `README.md` — update FluidConfig reference table
-- `CLAUDE.md` — document `PROP_RANGES` / `normalizeConfig`
-- `tests/core/config.test.js` — add normalizeConfig tests
+Fix: replace the example with something accurate — e.g. show `warpStrength` with `algorithm="aurora"` at a visible normalized value, and show `ripple` with a prop that actually affects it (e.g. `refraction`).
 
 ---
 
@@ -214,5 +50,61 @@ Or maybe make the text itself just 1px larger or the backdrop text 1px smaller?
 ## CORE/BUG backgroundSrc not working for text
 
 tbd.
+
+---
+
+## RENDER/BUG: density accumulation glow when densityDissipation=1
+
+When `densityDissipation` is exactly 1.0 (no fade), density accumulates unbounded across frames. Values exceed 1.0 in the FBO, which causes the specular and color calculations to saturate and produce a halo/glow "colour shadow" that doesn't correspond to actual fluid.
+
+Scope: clamp the density FBO output or add a soft saturation curve so density is always in a predictable range regardless of dissipation setting. Could be a `clamp` in the advection output or a `tanh`/`smoothstep` saturation in the display shader before the normal/specular calculation.
+
+## RENDER/BUG: residual crunchy lines in specular highlights
+
+The Sobel normal kernel at 6-display-px spread reduced aliasing significantly but didn't fully eliminate jagged specular highlights when a stroke settles. Root cause: the density FBO at `simScale=0.5` still has a relatively low sample count, and the Sobel kernel at a fixed pixel spread becomes too small relative to the splat size at high resolution or too large at low resolution.
+
+Scope: consider making the normal-sample spread proportional to the sim texel size rather than the display texel size — i.e. `spread = N / simWidth` rather than `N / displayWidth`. This keeps the kernel consistently ≈N sim-texels wide regardless of DPR or simResolution. Alternatively, add a single-pass separable Gaussian blur of the density FBO before the display pass to produce a smooth "height field" for normal computation.
+
+## RENDER/IMPROVEMENT: pre-blur density FBO for normal computation
+
+The in-shader Sobel kernel (8 taps) is a reasonable approximation but a separable Gaussian blur of the density FBO (2 passes, ~5 taps each) would produce a mathematically smooth height field, eliminating all specular aliasing at any resolution. The blurred FBO would only be used for normal/specular — the raw density FBO still drives color and alpha.
+
+Scope: add a `blurDensity` FBO (same dimensions as density), run two separable blur passes (horizontal + vertical) once per frame before the display pass, bind the blurred texture as the source for normal computation only. Cost: 2 extra render passes per frame, ~10 texture taps total.
+
+## RENDER/IMPROVEMENT: density-aware specular radius
+
+Currently normals are computed at a fixed spread. A large spread creates smooth normals but loses fine detail; a small spread preserves detail but aliases. The ideal spread depends on local density: in high-density regions use a finer kernel, in low-density regions use a wider one (or suppress specular entirely, which the `specDen` term partially does).
+
+Scope: weight the Sobel spread or kernel size by a function of local density. Could be as simple as scaling the kernel spread by `1.0 + (1.0 - density) * k` so the kernel expands as density fades — matching less specular detail where the fluid is thin.
+
+## PHYSICS/IMPROVEMENT: velocity boundary layer at obstacle edges
+
+With the current branchless `(1-obs)` weight, velocity drops to zero inside the obstacle but there is no explicit tangential (slip) condition at the boundary. This can leave a thin layer of incorrect velocity just outside the text that slightly distorts the flow path.
+
+Scope: after the gradient-subtract pass, add a "boundary condition" step that projects the velocity at each boundary-adjacent cell to be tangential to the obstacle gradient. The obstacle gradient `∇obs` (computed via a 2-tap finite difference of the obstacle texture) gives the surface normal; subtract the normal component from velocity at cells where `obs > 0 && obs < 0.5`.
+
+## PHYSICS/IMPROVEMENT: pressure initialisation warm-start
+
+Each frame the pressure FBO is solved from whatever pressure was left over from the previous frame. With `pressureIterations=1` (default), the solver barely moves from whatever garbage was there. Warm-starting from the previous frame's converged pressure would mean even 1 iteration produces a much better result.
+
+Scope: rather than clearing the pressure FBO each frame, keep it as-is and only run the Jacobi iterations. The dissipation of the velocity field each frame means the divergence changes slowly, so the previous pressure is a good initial guess. No new FBOs needed — just remove any explicit pressure-clear before the solve loop.
+
+## CORE/FEATURE: configurable simResolution per-axis
+
+Currently `simResolution` is a single scalar applied to both width and height. Widescreen canvases waste sim budget on the height axis. Allowing separate X/Y scale (or automatically capping the sim to a max pixel count) would let the simulation stay responsive at extreme aspect ratios.
+
+Scope: add `simResolutionX` / `simResolutionY` props (or a `simMaxPixels` cap) to `FluidBaseProps`. Internal `#simWidth` / `#simHeight` computation in `simulation.ts` would respect these independently.
+
+## CORE/FEATURE: implement textQuality prop
+
+`TextSourceOpts.textQuality` exists in the interface with docs ("Oversample factor for the text canvas before upload. Default: 2") but is not used anywhere in `createTextTextures` or `createTextTexturesGPU`. High-density text at small font sizes becomes blurry obstacle/coverage textures.
+
+Scope: use `textQuality` in both `createTextTextures` and `createTextTexturesGPU` — draw text onto a `width*textQuality × height*textQuality` canvas, then downsample to `width × height` before upload. This anti-aliases the obstacle/coverage texture.
+
+## CORE/FEATURE: image mode obstacle from luminance
+
+The image obstacle texture is created as `brightness(effect) blur(8px)` where `effect` defaults to `0`, making `brightness(0)` = solid black = no obstacle at all. Most image-mode users never see obstacle behaviour because the default is off.
+
+Scope: reconsider the `effect` prop semantics, or add a separate `obstacleStrength` prop (0–1) that controls how much the image luminance contributes to the physics obstacle. A value of 0.5 would let bright image regions mildly deflect fluid, creating natural interaction between the image content and the simulation.
 
 ---
