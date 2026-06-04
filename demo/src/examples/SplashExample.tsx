@@ -10,7 +10,7 @@ const defaultConfig: Partial<FluidConfig> = {
   densityDissipation: 0.67,
   velocityDissipation: 0,
   curl: 0.0,
-  splatRadius: 0,
+  splatRadius: 0.1,
   splatForce: 0.97,
   refraction: 0.57,
   specularExp: 0.04,
@@ -18,7 +18,7 @@ const defaultConfig: Partial<FluidConfig> = {
   warpStrength: 0.09,
   algorithm: 'ripple',
   waterColor: '#002d2e',
-  glowColor: '#642df7',
+  glowColor: '#ff4c00',
 };
 
 interface State {
@@ -89,6 +89,30 @@ const allEffects: Record<
   },
 };
 
+let hue = 0;
+
+function hslToHex(h: number, s = 100, l = 50) {
+  s /= 100;
+  l /= 100;
+
+  const a = s * Math.min(l, 1 - l);
+
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, '0');
+  };
+
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function rotateColor() {
+  hue = (hue + 0.1) % 360;
+  return hslToHex(hue);
+}
+
 const effectNames = Object.keys(allEffects);
 
 export function SplashExample() {
@@ -117,6 +141,7 @@ export function SplashExample() {
     stateRef.current = engine.step(stateRef.current);
     const { sx, sy, svx, svy } = engine.project(stateRef.current, w, h);
 
+    // ref.current?.updateConfig({ glowColor: rotateColor() });
     ref.current?.splat(sx, sy, svx, svy, 1);
   }, [effect]);
 
