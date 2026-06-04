@@ -23,7 +23,7 @@ export function TextExample() {
     'settings',
     {
       text: { value: 'Fluidity' },
-      fontSize: { value: 400, min: 100, max: 1200, step: 10 },
+      fontSize: { value: 100 * window.devicePixelRatio, min: 100, max: 1200, step: 10 },
       reset: button(() => ref.current?.reset()),
     },
     { store }
