@@ -1,28 +1,38 @@
 ---
-name: Bug report
+name: Bug
 about: Something broken in fluidity-js
-title: '[bug] '
-labels: bug
+title: 'bug: <short description>'
+labels: 'type:bug'
 assignees: ''
 ---
 
-**Component**
-`FluidText` / `FluidImage` / `FluidController` / other
+## What's broken
 
-**Renderer**
-WebGPU / WebGL2 / WebGL1 (check DevTools → chrome://gpu or `navigator.gpu`)
+<!-- One sentence. What fails? -->
 
-**Version**
-`@jayf0x/fluidity-js` version:
+## Domain
 
-**Minimal repro**
+<!-- tick one -->
+- [ ] `domain:core` — props / config / API
+- [ ] `domain:render` — shaders / display pass
+- [ ] `domain:physics` — fluid solver
+- [ ] `domain:react` — React component / hook
+
+## Reproduce
 
 ```tsx
-// paste the smallest snippet that shows the bug
+// minimal snippet
 ```
 
-**Expected behaviour**
+## Expected vs actual
 
-**Actual behaviour**
+| | |
+|---|---|
+| Expected | |
+| Actual | |
 
-**Browser + OS**
+## Context
+
+- Version: `@jayf0x/fluidity-js@`
+- Renderer: WebGPU / WebGL2 / WebGL1
+- Browser + OS:

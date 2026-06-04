@@ -1,21 +1,26 @@
 ---
-name: Feature request
-about: Propose a new algorithm, prop, or API change
-title: '[feat] '
-labels: enhancement
+name: Feature
+about: New prop, algorithm, or API
+title: 'feat: <short description>'
+labels: 'type:feature'
 assignees: ''
 ---
 
-**Problem / motivation**
-What are you trying to do that's currently impossible or awkward?
+## Goal
 
-**Proposed API**
+<!-- One sentence: what should be possible that isn't now? -->
+
+## Proposed API
 
 ```tsx
-// What would the usage look like?
+// usage example
 ```
 
-**Alternatives considered**
+## Acceptance criteria
 
-**Are you willing to open a PR?**
-Yes / No / Maybe
+- [ ] 
+- [ ] 
+
+## Files likely touched
+
+<!-- optional — helps agents scope the work -->

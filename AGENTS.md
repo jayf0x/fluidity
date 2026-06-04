@@ -207,6 +207,20 @@ Tests run under jsdom with a WebGL mock (`tests/setup.js`). `navigator.gpu` is a
 
 ---
 
+## GitHub issue labels
+
+Every issue carries three label groups. Use all three when filing or picking up work.
+
+**`type:*`** — `type:bug` · `type:feature` · `type:improvement` · `type:docs` · `type:refactor`
+
+**`domain:*`** — `domain:core` · `domain:render` · `domain:physics` · `domain:react` · `domain:dx`
+
+**`effort:*`** — `effort:1` (trivial, <30 min) · `effort:2` (few hours) · `effort:3` (half–full day) · `effort:4` (multi-day) · `effort:5` (architectural)
+
+Full label reference: [CONTRIBUTING.md § Labels](./CONTRIBUTING.md#labels)
+
+---
+
 ## Where to find more
 
 | Resource | Path / URL |
