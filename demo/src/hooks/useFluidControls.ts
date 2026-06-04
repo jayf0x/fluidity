@@ -31,7 +31,7 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
       webGPUEnabled: true,
       alphaEnabled: true,
       backgroundColor: '#0a0a0a',
-      pixelRatio: 1,
+      pixelRatio: 1 / (window.devicePixelRatio || 1),
       simResolution: 0.5,
       // caller overrides (e.g. DEFAULT_CONFIG_TEXT for text examples)
       ...customDefaults,
@@ -78,8 +78,20 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
     []
   );
 
-  const [{ waterColor, glowColor, preset: presetRaw, backgroundColor, webGPUEnabled, alphaEnabled, pixelRatio, simResolution, ...simConfig }, set] =
-    useControls('fluid config', fluidSchema, { store });
+  const [
+    {
+      waterColor,
+      glowColor,
+      preset: presetRaw,
+      backgroundColor,
+      webGPUEnabled,
+      alphaEnabled,
+      pixelRatio,
+      simResolution,
+      ...simConfig
+    },
+    set,
+  ] = useControls('fluid config', fluidSchema, { store });
 
   // Resolve 'none' sentinel back to undefined so callers can pass it straight to preset prop
   const preset = presetRaw === 'none' ? undefined : (presetRaw as PresetKey);
