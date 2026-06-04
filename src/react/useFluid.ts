@@ -34,7 +34,7 @@ export function useFluid(
   const quality: FluidQuality = { dpr: pixelRatio, sim: simResolution };
   const controllerRef = useRef<FluidController | null>(null);
   const initOptsRef = useRef({ workerEnabled, quality, config });
-  const clampedDprRef = useRef(Math.max(0.1, Math.min(1, pixelRatio ?? DEFAULT_QUALITY.dpr)));
+  const clampedDprRef = useRef(Math.max(0.1, Math.min(1, pixelRatio ?? DEFAULT_QUALITY.dpr ?? 1)));
   const prevQualityRef = useRef<{ pixelRatio: number | undefined; simResolution: number | undefined }>({
     pixelRatio,
     simResolution,
@@ -101,7 +101,7 @@ export function useFluid(
 
   // Propagate quality changes after mount
   useEffect(() => {
-    clampedDprRef.current = Math.max(0.1, Math.min(1, pixelRatio ?? DEFAULT_QUALITY.dpr));
+    clampedDprRef.current = Math.max(0.1, Math.min(1, pixelRatio ?? DEFAULT_QUALITY.dpr ?? 1));
     const prev = prevQualityRef.current;
     prevQualityRef.current = { pixelRatio, simResolution };
     const controller = controllerRef.current;
