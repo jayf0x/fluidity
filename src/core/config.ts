@@ -60,7 +60,10 @@ export const DEFAULT_CONFIG_TEXT: FluidConfig = {
   glowColor: '#b04721',
 };
 
-export const DEFAULT_QUALITY: FluidQuality = { dpr: 1, sim: 0.5 };
+export const DEFAULT_QUALITY: FluidQuality = {
+  dpr: typeof window !== 'undefined' ? 1 / (window.devicePixelRatio || 1) : 1,
+  sim: 0.5,
+};
 
 export const DEFAULT_PROPS_SHARED = {
   backgroundColor: '#0a0a0a',
