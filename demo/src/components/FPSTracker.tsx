@@ -2,20 +2,35 @@ import { useEffect, useRef, useState } from 'react';
 
 export const FPSTracker = () => {
   const rafRef = useRef<number | null>(null);
-  const frameCountRef = useRef(0);
-  const lastFpsUpdateRef = useRef(performance.now());
-  const lastFrameRef = useRef(performance.now());
-  const smoothedFpsRef = useRef(60);
+  const lastFpsUpdateRef = useRef(0);
+  const lastFrameRef = useRef(0);
+  const smoothedFpsRef = useRef<number | null>(null);
 
   const [stats, setStats] = useState({ fps: 60, ms: 16.6 });
 
   useEffect(() => {
+    lastFrameRef.current = 0;
+    lastFpsUpdateRef.current = 0;
+    smoothedFpsRef.current = null;
+
     function frame(now: number) {
+      if (lastFrameRef.current === 0) {
+        lastFrameRef.current = now;
+        rafRef.current = requestAnimationFrame(frame);
+        return;
+      }
       const dt = now - lastFrameRef.current;
       lastFrameRef.current = now;
-      smoothedFpsRef.current = smoothedFpsRef.current * 0.9 + (1000 / dt) * 0.1;
-      frameCountRef.current++;
-      if (now - lastFpsUpdateRef.current > 250) {
+      if (dt <= 0) {
+        rafRef.current = requestAnimationFrame(frame);
+        return;
+      }
+      const instantFps = 1000 / dt;
+      smoothedFpsRef.current =
+        smoothedFpsRef.current === null
+          ? instantFps
+          : smoothedFpsRef.current * 0.85 + instantFps * 0.15;
+      if (lastFpsUpdateRef.current === 0 || now - lastFpsUpdateRef.current > 250) {
         setStats({ fps: Math.round(smoothedFpsRef.current), ms: Number(dt.toFixed(2)) });
         lastFpsUpdateRef.current = now;
       }
