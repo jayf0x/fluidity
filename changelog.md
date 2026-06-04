@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.7
+- Fix: DPR defaults to retina resolution
+- Feat: improve TypeScript typing for `fluidColor`
+
 ## v0.2.5
 - Feat: flatten all `FluidConfig` fields as direct component props — no nested `config` object
 - Feat: simulation props accept normalized `0–1` float ranges (mapped to physics via `PROP_RANGES`)
