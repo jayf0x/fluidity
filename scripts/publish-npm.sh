@@ -95,7 +95,10 @@ COMMIT_LOG=$(git log --oneline "$PREV_TAG".."$TAG" 2>/dev/null || git log --onel
 echo ""
 echo "Updating changelog.md (Claude Code)..."
 
-claude -p "Update changelog.md for a new NPM release of @jayf0x/fluidity-js.
+claude \
+  --model haiku \
+  --no-session-persistence \
+  -p "Update changelog.md for a new NPM release of @jayf0x/fluidity-js.
 
 New version: $NEW
 Previous tag: $PREV_TAG
