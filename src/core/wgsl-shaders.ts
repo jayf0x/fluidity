@@ -12,7 +12,7 @@
 // render-to-texture round-trips consistent (no Y flip in simulation FBOs).
 // Source textures are uploaded WITHOUT flipY so their row 0 (visual top)
 // also lands at uv.y=0.
-const SHARED_VS_STRUCT = /* wgsl */`
+const SHARED_VS_STRUCT = /* wgsl */ `
 struct VSOut {
   @builtin(position) pos : vec4f,
   @location(0)       uv  : vec2f,
@@ -24,7 +24,7 @@ struct VSOut {
 
 // ─── Advection ───────────────────────────────────────────────────────────────
 
-export const advectionWGSL = /* wgsl */`
+export const advectionWGSL = /* wgsl */ `
 ${SHARED_VS_STRUCT}
 
 struct U {
@@ -60,7 +60,7 @@ struct U {
 
 // ─── Divergence ──────────────────────────────────────────────────────────────
 
-export const divergenceWGSL = /* wgsl */`
+export const divergenceWGSL = /* wgsl */ `
 ${SHARED_VS_STRUCT}
 
 struct U { texelSize: vec2f, _pad: vec2f }
@@ -91,7 +91,7 @@ struct U { texelSize: vec2f, _pad: vec2f }
 
 // ─── Pressure ────────────────────────────────────────────────────────────────
 
-export const pressureWGSL = /* wgsl */`
+export const pressureWGSL = /* wgsl */ `
 ${SHARED_VS_STRUCT}
 
 struct U { texelSize: vec2f, _pad: vec2f }
@@ -125,7 +125,7 @@ struct U { texelSize: vec2f, _pad: vec2f }
 
 // ─── Gradient subtract ───────────────────────────────────────────────────────
 
-export const gradientSubtractWGSL = /* wgsl */`
+export const gradientSubtractWGSL = /* wgsl */ `
 ${SHARED_VS_STRUCT}
 
 struct U { texelSize: vec2f, _pad: vec2f }
@@ -160,7 +160,7 @@ struct U { texelSize: vec2f, _pad: vec2f }
 
 // ─── Splat ───────────────────────────────────────────────────────────────────
 
-export const splatWGSL = /* wgsl */`
+export const splatWGSL = /* wgsl */ `
 ${SHARED_VS_STRUCT}
 
 // texelSize occupies bytes 0-7 for the shared vertex stage; aspectRatio/radius fill the rest.
@@ -197,7 +197,7 @@ struct U {
 
 // ─── Curl ────────────────────────────────────────────────────────────────────
 
-export const curlWGSL = /* wgsl */`
+export const curlWGSL = /* wgsl */ `
 ${SHARED_VS_STRUCT}
 
 struct U { texelSize: vec2f, _pad: vec2f }
@@ -227,7 +227,7 @@ struct U { texelSize: vec2f, _pad: vec2f }
 
 // ─── Vorticity ───────────────────────────────────────────────────────────────
 
-export const vorticityWGSL = /* wgsl */`
+export const vorticityWGSL = /* wgsl */ `
 ${SHARED_VS_STRUCT}
 
 struct U {
@@ -278,7 +278,7 @@ struct U {
 //  56  algorithm   i32
 //  60  enableAlpha i32    (1 = premultiplied alpha output, 0 = opaque)
 
-export const displayWGSL = /* wgsl */`
+export const displayWGSL = /* wgsl */ `
 ${SHARED_VS_STRUCT}
 
 struct U {
@@ -300,6 +300,11 @@ struct U {
 @group(0) @binding(5) var          uCov : texture_2d<f32>;
 @group(0) @binding(6) var          uVel : texture_2d<f32>;
 
+fn getDensity(uv: vec2f) -> f32 {
+  let raw = max(textureSample(uTex, samp, uv).r, 0.0);
+  return tanh(raw);
+}
+
 @vertex fn vs(@location(0) a: vec2f) -> VSOut {
   var o: VSOut;
   o.uv = vec2f(a.x * 0.5 + 0.5, 0.5 - a.y * 0.5);
@@ -313,19 +318,19 @@ struct U {
 
 @fragment fn fs(i: VSOut) -> @location(0) vec4f {
   let obs     = textureSample(uObs, samp, i.uv).r;
-  let density = max(textureSample(uTex, samp, i.uv).r, 0.0) * (1.0 - obs);
+  let density = getDensity(i.uv) * (1.0 - obs);
   let cov     = textureSample(uCov, samp, i.uv).r;
 
   let sx  = u.texelSize.x * 6.0;
   let sy  = u.texelSize.y * 6.0;
-  let d00 = max(textureSample(uTex, samp, i.uv + vec2f(-sx, -sy)).r, 0.0);
-  let d10 = max(textureSample(uTex, samp, i.uv + vec2f(0.0, -sy)).r, 0.0);
-  let d20 = max(textureSample(uTex, samp, i.uv + vec2f( sx, -sy)).r, 0.0);
-  let d01 = max(textureSample(uTex, samp, i.uv + vec2f(-sx, 0.0)).r, 0.0);
-  let d21 = max(textureSample(uTex, samp, i.uv + vec2f( sx, 0.0)).r, 0.0);
-  let d02 = max(textureSample(uTex, samp, i.uv + vec2f(-sx,  sy)).r, 0.0);
-  let d12 = max(textureSample(uTex, samp, i.uv + vec2f(0.0,  sy)).r, 0.0);
-  let d22 = max(textureSample(uTex, samp, i.uv + vec2f( sx,  sy)).r, 0.0);
+  let d00 = getDensity(i.uv + vec2f(-sx, -sy));
+  let d10 = getDensity(i.uv + vec2f(0.0, -sy));
+  let d20 = getDensity(i.uv + vec2f( sx, -sy));
+  let d01 = getDensity(i.uv + vec2f(-sx, 0.0));
+  let d21 = getDensity(i.uv + vec2f( sx, 0.0));
+  let d02 = getDensity(i.uv + vec2f(-sx,  sy));
+  let d12 = getDensity(i.uv + vec2f(0.0,  sy));
+  let d22 = getDensity(i.uv + vec2f( sx,  sy));
   let gx  = (d20 + 2.0*d21 + d22) - (d00 + 2.0*d01 + d02);
   let gy  = (d02 + 2.0*d12 + d22) - (d00 + 2.0*d10 + d20);
 
