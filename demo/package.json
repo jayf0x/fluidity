@@ -8,8 +8,9 @@
     "dd": "rm -rf ./node_modules/.vite && vite",
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:gh": "GH_PAGES=1 tsc && GH_PAGES=1 vite build",
     "preview": "vite preview",
-    "deploy": "bun build && gh-pages -d dist",
+    "deploy": "bun run build:gh && gh-pages -d dist",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
