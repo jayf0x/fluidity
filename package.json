@@ -22,6 +22,7 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite build --watch",
+    "dev:demo": "bun run --cwd ./demo dev",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",

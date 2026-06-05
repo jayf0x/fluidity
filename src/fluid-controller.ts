@@ -134,7 +134,7 @@ export class FluidController {
     if (this.#worker) {
       this.#worker.postMessage({ type: 'resize', width, height, dpr: effectiveDpr });
     } else {
-      this.#sim!.resize(width, height, effectiveDpr);
+      this.#sim?.resize(width, height, effectiveDpr);
     }
   }
 
