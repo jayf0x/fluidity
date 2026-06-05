@@ -1,6 +1,4 @@
-export const log = (...args: any[]) => {
-  const isDevelopment = false; // import.meta.env.PROD
-  if (isDevelopment) {
-    console.info('[lib: Fluidity-js]', ...args);
-  }
-};
+// @ts-expect-error
+export const log: (...args: any[]) => void = import.meta.env.DEV
+  ? (...args) => console.info('[lib: Fluidity-js]', ...args)
+  : () => {};
