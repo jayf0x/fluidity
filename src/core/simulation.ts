@@ -131,6 +131,7 @@ export class FluidSimulation {
 
   #config: FluidConfig;
   #mouse: MouseState = { x: 0, y: 0, dx: 0, dy: 0, targetX: 0, targetY: 0, moved: false };
+  #mouseSeeded = false;
 
   #source: Source | null = null;
 
@@ -219,6 +220,13 @@ export class FluidSimulation {
   }
 
   handleMove(x: number, y: number, strength = 1): void {
+    if (!this.#mouseSeeded) {
+      // Seed position on first call so the initial delta isn't measured from (0,0).
+      this.#mouse.x = this.#mouse.targetX = x;
+      this.#mouse.y = this.#mouse.targetY = y;
+      this.#mouseSeeded = true;
+      return;
+    }
     this.#mouse.moved = true;
     this.#mouse.dx = (x - this.#mouse.targetX) * strength;
     this.#mouse.dy = (y - this.#mouse.targetY) * strength;
