@@ -89,6 +89,7 @@
     }
   },
   "devDependencies": {
+    "@webgpu/types": "^0.1.70",
     "@testing-library/jest-dom": "^6.4.0",
     "@testing-library/react": "^14.2.0",
     "@testing-library/user-event": "^14.5.0",
@@ -103,8 +104,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "@webgpu/types": "^0.1.70"
   }
 }
