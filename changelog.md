@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.8
+- Add bundle size optimization tooling
+- Add log utility instead of raw console logs
+- Fix mouse position seeding on first move to avoid streak from origin
+- Fix DPR sync on alphaEnabled toggle
+
 ## v0.2.7
 - Fix: DPR defaults to retina resolution
 - Feat: improve TypeScript typing for `fluidColor`
