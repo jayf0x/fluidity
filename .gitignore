@@ -1,5 +1,6 @@
 node_modules/
 dist/
+demo/dist/
 build/
 coverage/
 *.local
@@ -7,6 +8,3 @@ coverage/
 
 .claude/settings.local.json
 .keep
-
-# used for deploy demo
-!demo/dist

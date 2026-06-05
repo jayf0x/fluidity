@@ -14,9 +14,13 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
-echo "▶ Building library…"
 cd "$REPO_ROOT"
-bun run build:nocompress
+if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
+  echo "▶ Building library…"
+  bun run build:nocompress
+else
+  echo "▶ Skipping build (SKIP_BUILD=1, reusing existing dist/)"
+fi
 
 echo "▶ Packing tarball…"
 TARBALL="$(npm pack --pack-destination "$TMP_DIR" 2>/dev/null | tail -1)"
