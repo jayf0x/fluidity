@@ -6,6 +6,7 @@
 [![license](https://img.shields.io/npm/l/@jayf0x/fluidity-js)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](./tsconfig.json)
 [![CI](https://github.com/jayf0x/fluidity/actions/workflows/ci.yml/badge.svg)](https://github.com/jayf0x/fluidity/actions/workflows/ci.yml)
+[![Bundlephobia](https://badgen.net/bundlephobia/min/@jayf0x/fluidity-js)](https://bundlephobia.com/package/@jayf0x/fluidity-js)
 
 <a href="https://jayf0x.github.io/fluidity">
   <p align="center">
@@ -74,7 +75,7 @@ export const Interactive = () => {
 | -------------------------------- | --------------------------------------------------------- |
 | `reset()`                        | Restart the simulation                                    |
 | `updateConfig(patch)`            | Change any config value live                              |
-| `move(x, y, strength?)`           | Simulate a pointer move                                   |
+| `move(x, y, strength?)`          | Simulate a pointer move                                   |
 | `splat(x, y, vx, vy, strength?)` | Inject fluid directly — safe to call many times per frame |
 
 ---
@@ -101,33 +102,33 @@ export const Interactive = () => {
 
 ### Shared props
 
-| Prop                  | Type               | Default      |
-| --------------------- | ------------------ | ------------ |
-| `algorithm`           | `FluidAlgorithm`   | `'aurora'`   |
-| `preset`              | `PresetKey`        | —            |
-| `pixelRatio`          | `number`           | `1`          |
-| `simResolution`       | `number`           | `0.5`        |
-| `densityDissipation`  | `number`           | `0.83`       |
-| `velocityDissipation` | `number`           | `0.91`       |
-| `pressureIterations`  | `number`           | `1`          |
-| `curl`                | `number`           | `0`          |
-| `splatRadius`         | `number`           | `0.1`        |
-| `splatForce`          | `number`           | `0.08`       |
-| `refraction`          | `number`           | `1.0`        |
-| `specularExp`         | `number`           | `0`          |
-| `shine`               | `number`           | `0`          |
-| `waterColor`          | `FluidColor`       | `'#000000'`  |
-| `glowColor`           | `FluidColor`       | `'#b3d9ff'`  |
-| `warpStrength`        | `number`           | `0.04`       |
-| `backgroundColor`     | `string`           | `'#0a0a0a'`  |
-| `backgroundSrc`       | `string`           | —            |
-| `backgroundSize`      | `string \| number` | `'cover'`    |
-| `mouseEnabled`        | `boolean`          | `true`       |
-| `workerEnabled`       | `boolean`          | `true`       |
-| `webGPUEnabled`       | `boolean`          | `true`       |
-| `alphaEnabled`        | `boolean`          | `true`       |
-| `className`           | `string`           | —            |
-| `style`               | `CSSProperties`    | —            |
+| Prop                  | Type               | Default     |
+| --------------------- | ------------------ | ----------- |
+| `algorithm`           | `FluidAlgorithm`   | `'aurora'`  |
+| `preset`              | `PresetKey`        | —           |
+| `pixelRatio`          | `number`           | `1`         |
+| `simResolution`       | `number`           | `0.5`       |
+| `densityDissipation`  | `number`           | `0.83`      |
+| `velocityDissipation` | `number`           | `0.91`      |
+| `pressureIterations`  | `number`           | `1`         |
+| `curl`                | `number`           | `0`         |
+| `splatRadius`         | `number`           | `0.1`       |
+| `splatForce`          | `number`           | `0.08`      |
+| `refraction`          | `number`           | `1.0`       |
+| `specularExp`         | `number`           | `0`         |
+| `shine`               | `number`           | `0`         |
+| `waterColor`          | `FluidColor`       | `'#000000'` |
+| `glowColor`           | `FluidColor`       | `'#b3d9ff'` |
+| `warpStrength`        | `number`           | `0.04`      |
+| `backgroundColor`     | `string`           | `'#0a0a0a'` |
+| `backgroundSrc`       | `string`           | —           |
+| `backgroundSize`      | `string \| number` | `'cover'`   |
+| `mouseEnabled`        | `boolean`          | `true`      |
+| `workerEnabled`       | `boolean`          | `true`      |
+| `webGPUEnabled`       | `boolean`          | `true`      |
+| `alphaEnabled`        | `boolean`          | `true`      |
+| `className`           | `string`           | —           |
+| `style`               | `CSSProperties`    | —           |
 
 ---
 
@@ -152,10 +153,10 @@ export const Interactive = () => {
 
 Control rendering resolution on two independent axes — both reactive at runtime.
 
-| Prop            | Range | Default | What it does                                                                              |
-| --------------- | ----- | ------- | ----------------------------------------------------------------------------------------- |
-| `pixelRatio`    | 0.1–1 | `1`     | Canvas resolution as fraction of devicePixelRatio. `0.5` on Retina saves ~75% GPU fill.  |
-| `simResolution` | 0.1–1 | `0.5`   | Simulation FBO size. Lower = cheaper, less detail.                                        |
+| Prop            | Range | Default | What it does                                                                            |
+| --------------- | ----- | ------- | --------------------------------------------------------------------------------------- |
+| `pixelRatio`    | 0.1–1 | `1`     | Canvas resolution as fraction of devicePixelRatio. `0.5` on Retina saves ~75% GPU fill. |
+| `simResolution` | 0.1–1 | `0.5`   | Simulation FBO size. Lower = cheaper, less detail.                                      |
 
 ```tsx
 // Sharp canvas, cheap simulation
@@ -171,20 +172,20 @@ Control rendering resolution on two independent axes — both reactive at runtim
 
 Simulation props that have a physics range accept a **normalized `0–1` value** — no need to know the raw shader units. Values outside `[0, 1]` are passed through as raw physics values for advanced overrides.
 
-| Prop                  | Default | Range   | Physics range   | Description                                     |
-| --------------------- | ------- | ------- | --------------- | ----------------------------------------------- |
-| `densityDissipation`  | `0.83`  | `0–1`   | `0.94–1.0`      | How long ink lingers                            |
-| `velocityDissipation` | `0.91`  | `0–1`   | `0.9–0.999`     | How fast fluid slows down                       |
-| `pressureIterations`  | `1`     | `1–50`  | —               | Pressure solve quality vs. cost                 |
-| `curl`                | `0`     | `0–1`   | —               | Swirl intensity                                 |
-| `splatRadius`         | `0.1`   | `0–1`   | `0.001–0.04`    | Brush radius                                    |
-| `splatForce`          | `0.08`  | `0–1`   | `0.1–5.0`       | Force applied by brush                          |
-| `refraction`          | `1.0`   | `0–1`   | —               | Background warp strength                        |
-| `specularExp`         | `0`     | `0–1`   | `0.1–10`        | Specular highlight sharpness                    |
-| `shine`               | `0`     | `0–1`   | `0–0.15`        | Highlight intensity                             |
-| `warpStrength`        | `0.04`  | `0–1`   | `0.001–0.1`     | UV warp intensity (`aurora` algorithm)          |
-| `waterColor`          | `#000`  | —       | —               | Base fluid colour (hex or `[R, G, B]` 0–1)      |
-| `glowColor`           | `#b3d9ff`| —      | —               | Glow / specular colour (hex or `[R, G, B]` 0–1) |
+| Prop                  | Default   | Range  | Physics range | Description                                     |
+| --------------------- | --------- | ------ | ------------- | ----------------------------------------------- |
+| `densityDissipation`  | `0.83`    | `0–1`  | `0.94–1.0`    | How long ink lingers                            |
+| `velocityDissipation` | `0.91`    | `0–1`  | `0.9–0.999`   | How fast fluid slows down                       |
+| `pressureIterations`  | `1`       | `1–50` | —             | Pressure solve quality vs. cost                 |
+| `curl`                | `0`       | `0–1`  | —             | Swirl intensity                                 |
+| `splatRadius`         | `0.1`     | `0–1`  | `0.001–0.04`  | Brush radius                                    |
+| `splatForce`          | `0.08`    | `0–1`  | `0.1–5.0`     | Force applied by brush                          |
+| `refraction`          | `1.0`     | `0–1`  | —             | Background warp strength                        |
+| `specularExp`         | `0`       | `0–1`  | `0.1–10`      | Specular highlight sharpness                    |
+| `shine`               | `0`       | `0–1`  | `0–0.15`      | Highlight intensity                             |
+| `warpStrength`        | `0.04`    | `0–1`  | `0.001–0.1`   | UV warp intensity (`aurora` algorithm)          |
+| `waterColor`          | `#000`    | —      | —             | Base fluid colour (hex or `[R, G, B]` 0–1)      |
+| `glowColor`           | `#b3d9ff` | —      | —             | Glow / specular colour (hex or `[R, G, B]` 0–1) |
 
 ---
 
