@@ -142,8 +142,8 @@ export const Interactive = () => {
 | `'ripple'`   | Still water surface with Fresnel rim             |
 
 ```tsx
-<FluidImage src="/photo.jpg" algorithm="aurora" />
-<FluidText text="fluid" algorithm="ripple" warpStrength={0.03} />
+<FluidImage src="/photo.jpg" algorithm="aurora" warpStrength={0.3} />
+<FluidText text="fluid" algorithm="ripple" refraction={0.6} />
 ```
 
 ---
