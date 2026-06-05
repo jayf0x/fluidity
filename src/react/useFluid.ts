@@ -3,6 +3,7 @@ import type { RefObject } from 'react';
 
 import { DEFAULT_QUALITY } from '../core/config';
 import { FluidController } from '../fluid-controller';
+import { log } from '../utils';
 
 /**
  * Manages the FluidController lifecycle.
@@ -65,9 +66,9 @@ export function useFluid(
     }
 
     if (initH === 0) {
-      console.warn(
-        '[fluidity-js] Container has zero height — simulation will not render. ' +
-          'Avoid height:auto or percentage heights without a sized ancestor. Use explicit pixel values instead.'
+      log(
+        'Container has zero height — simulation will not render. ',
+        'Avoid height:auto or percentage heights without a sized ancestor. Use explicit pixel values instead.'
       );
     }
 

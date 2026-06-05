@@ -23,13 +23,16 @@
  *   error           { message }
  */
 import { FluidSimulation } from '../core/simulation';
+import { log } from '../utils';
 
 let sim: FluidSimulation | null = null;
 
 // Resolved once 'init' completes so that messages arriving during the async
 // WebGPU adapter request are queued (via await) rather than dropped.
 let _markReady: (() => void) | undefined;
-const simReady = new Promise<void>((r) => { _markReady = r; });
+const simReady = new Promise<void>((r) => {
+  _markReady = r;
+});
 
 self.onmessage = async (e: MessageEvent) => {
   const { type, ...data } = e.data as { type: string; [key: string]: unknown };
@@ -141,7 +144,7 @@ self.onmessage = async (e: MessageEvent) => {
       }
 
       default:
-        console.warn('[fluidity-js worker] Unknown message type:', type);
+        log('Unknown message type:', type);
     }
   } catch (err) {
     self.postMessage({ type: 'error', message: (err as Error)?.message ?? String(err) });

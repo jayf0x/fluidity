@@ -1,5 +1,6 @@
 import { DEFAULT_PROPS_IMAGE } from './core/config';
 import { FluidSimulation } from './core/simulation';
+import { log } from './utils';
 // @ts-ignore — Vite worker import syntax not understood by tsc
 import FluidWorker from './worker/index.js?worker&inline';
 
@@ -26,7 +27,13 @@ export class FluidController {
       alphaEnabled = true,
       quality = {},
       config = {},
-    }: { workerEnabled?: boolean; webGPUEnabled?: boolean; alphaEnabled?: boolean; quality?: FluidQuality; config?: Partial<FluidConfig> } = {}
+    }: {
+      workerEnabled?: boolean;
+      webGPUEnabled?: boolean;
+      alphaEnabled?: boolean;
+      quality?: FluidQuality;
+      config?: Partial<FluidConfig>;
+    } = {}
   ) {
     this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
     this.#qualitySim = Math.max(0.1, Math.min(1, quality.sim ?? 0.5));
@@ -53,7 +60,7 @@ export class FluidController {
     } else {
       // Sim not yet ready — queue (last-write-wins within a source type)
       this.#pendingTextSource = opts;
-      this.#pendingImageSrc   = null;
+      this.#pendingImageSrc = null;
     }
   }
 
@@ -69,7 +76,7 @@ export class FluidController {
     } else if (this.#sim) {
       this.#sim.setImageSource(src, effect, size);
     } else {
-      this.#pendingImageSrc   = { src, effect, size };
+      this.#pendingImageSrc = { src, effect, size };
       this.#pendingTextSource = null;
     }
   }
@@ -170,19 +177,21 @@ export class FluidController {
 
     if (hasGPU) {
       // Async WebGPU-first: source calls arriving before resolve are queued.
-      FluidSimulation.create(canvas, config, quality, true, this.#enableAlpha).then((sim) => {
-        this.#sim = sim;
-        if (this.#pendingTextSource) {
-          sim.setTextSource(this.#pendingTextSource);
-          this.#pendingTextSource = null;
-        } else if (this.#pendingImageSrc) {
-          const { src, effect, size } = this.#pendingImageSrc;
-          sim.setImageSource(src, effect, size);
-          this.#pendingImageSrc = null;
-        }
-      }).catch((err) => {
-        console.error('[fluidity-js] Renderer init failed:', err);
-      });
+      FluidSimulation.create(canvas, config, quality, true, this.#enableAlpha)
+        .then((sim) => {
+          this.#sim = sim;
+          if (this.#pendingTextSource) {
+            sim.setTextSource(this.#pendingTextSource);
+            this.#pendingTextSource = null;
+          } else if (this.#pendingImageSrc) {
+            const { src, effect, size } = this.#pendingImageSrc;
+            sim.setImageSource(src, effect, size);
+            this.#pendingImageSrc = null;
+          }
+        })
+        .catch((err) => {
+          log('Renderer init failed:', err);
+        });
     } else {
       // Sync WebGL fallback — no queuing needed.
       this.#sim = new FluidSimulation(canvas, config, quality, undefined, this.#enableAlpha);
@@ -200,8 +209,8 @@ export class FluidController {
     try {
       offscreen = canvas.transferControlToOffscreen();
     } catch {
-      console.warn(
-        '[fluidity-js] OffscreenCanvas transfer failed — falling back to main-thread mode. ' +
+      log(
+        'OffscreenCanvas transfer failed — falling back to main-thread mode. ' +
           'This is expected in React StrictMode development.'
       );
       this.#useWorker = false;
@@ -210,17 +219,26 @@ export class FluidController {
     }
 
     const worker = (this.#worker = new FluidWorker());
-    worker.onerror = (e: ErrorEvent) => {
-      console.error('[fluidity-js] Worker error:', e.message);
-    };
+    worker.onerror = (e: ErrorEvent) => log('Worker error:', e.message);
+
     worker.onmessage = (e: MessageEvent) => {
       if (e.data.type === 'error') {
-        console.error('[fluidity-js] Simulation error:', e.data.message);
+        log('Simulation error:', e.data.message);
       }
     };
 
     worker.postMessage(
-      { type: 'init', canvas: offscreen, width, height, config, dpr, quality: { dpr: this.#qualityDpr, sim: this.#qualitySim }, useWebGPU: this.#useWebGPU, enableAlpha: this.#enableAlpha },
+      {
+        type: 'init',
+        canvas: offscreen,
+        width,
+        height,
+        config,
+        dpr,
+        quality: { dpr: this.#qualityDpr, sim: this.#qualitySim },
+        useWebGPU: this.#useWebGPU,
+        enableAlpha: this.#enableAlpha,
+      },
       [offscreen]
     );
   }

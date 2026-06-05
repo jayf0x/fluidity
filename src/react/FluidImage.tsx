@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 
 import { DEFAULT_PROPS_IMAGE, DEFAULT_QUALITY, mergeConfig, normalizeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
+import { log } from '../utils';
 import { useFluid } from './useFluid';
 
 export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function FluidImage(
@@ -42,8 +43,21 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
   const containerRef = useRef<HTMLDivElement>(null);
 
   const configProps = Object.fromEntries(
-    Object.entries({ densityDissipation, velocityDissipation, pressureIterations, curl, splatRadius, splatForce, refraction, specularExp, shine, waterColor, glowColor, algorithm, warpStrength })
-      .filter(([, v]) => v !== undefined)
+    Object.entries({
+      densityDissipation,
+      velocityDissipation,
+      pressureIterations,
+      curl,
+      splatRadius,
+      splatForce,
+      refraction,
+      specularExp,
+      shine,
+      waterColor,
+      glowColor,
+      algorithm,
+      warpStrength,
+    }).filter(([, v]) => v !== undefined)
   ) as Partial<FluidConfig>;
 
   const controllerRef = useFluid(containerRef, {
@@ -83,9 +97,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
   // Sync config/preset → updateConfig for reactive changes
   const configKey = JSON.stringify(configProps);
   useEffect(() => {
-    controllerRef.current?.updateConfig(
-      normalizeConfig(mergeConfig(configProps, preset)) as FluidConfig
-    );
+    controllerRef.current?.updateConfig(normalizeConfig(mergeConfig(configProps, preset)) as FluidConfig);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preset, configKey, webGPUEnabled, alphaEnabled]);
 
@@ -104,7 +116,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
         }
         controllerRef.current?.setBackground(bitmap, backgroundSize);
       })
-      .catch((err) => console.error('[fluidity-js] backgroundSrc load failed:', err));
+      .catch((err) => log('backgroundSrc load failed:', err));
     return () => {
       cancelled = true;
     };

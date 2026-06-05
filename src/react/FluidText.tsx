@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 
 import { DEFAULT_CONFIG_TEXT, DEFAULT_PROPS_TEXT, DEFAULT_QUALITY, mergeConfig, normalizeConfig } from '../core/config';
 import { loadImageBitmap } from '../core/textures';
+import { log } from '../utils';
 import { useFluid } from './useFluid';
 
 export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidText(
@@ -44,8 +45,21 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
   const containerRef = useRef<HTMLDivElement>(null);
 
   const configProps = Object.fromEntries(
-    Object.entries({ densityDissipation, velocityDissipation, pressureIterations, curl, splatRadius, splatForce, refraction, specularExp, shine, waterColor, glowColor, algorithm, warpStrength })
-      .filter(([, v]) => v !== undefined)
+    Object.entries({
+      densityDissipation,
+      velocityDissipation,
+      pressureIterations,
+      curl,
+      splatRadius,
+      splatForce,
+      refraction,
+      specularExp,
+      shine,
+      waterColor,
+      glowColor,
+      algorithm,
+      warpStrength,
+    }).filter(([, v]) => v !== undefined)
   ) as Partial<FluidConfig>;
 
   const controllerRef = useFluid(containerRef, {
@@ -105,7 +119,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
         }
         controllerRef.current?.setBackground(bitmap, backgroundSize);
       })
-      .catch((err) => console.error('[fluidity-js] backgroundSrc load failed:', err));
+      .catch((err) => log('backgroundSrc load failed:', err));
     return () => {
       cancelled = true;
     };
