@@ -30,7 +30,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "deploy:demo": "bash scripts/deploy-demo.sh",
-    "publish:npm": "bash ./scripts/publish-npm.sh"
+    "publish:npm": "bash ./scripts/publish-npm.sh",
+    "rm:stalepr": "git branch -vv | grep '\\[gone\\]' | awk '{print $1}' | xargs git branch -D"
   },
   "keywords": [
     "webgpu",
