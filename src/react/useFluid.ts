@@ -80,6 +80,14 @@ export function useFluid(
     });
     controllerRef.current = controller;
 
+    // Immediately sync dimensions so #dpr is correct from the first frame.
+    // The ResizeObserver only fires when the container *size* changes, so it
+    // won't re-fire on an alphaEnabled/webGPUEnabled toggle where the container
+    // hasn't moved. Without this call the simulation keeps #dpr=1 and all
+    // pointer-to-UV coordinate transforms are wrong until something else
+    // triggers a resize.
+    if (initW > 0 && initH > 0) controller.resize(initW, initH);
+
     // Forward container resizes to the simulation — reads clampedDprRef so pixelRatio changes are picked up
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
