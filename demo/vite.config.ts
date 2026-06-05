@@ -4,17 +4,19 @@ import { defineConfig } from 'vite';
 import Terminal from 'vite-plugin-terminal';
 
 export default defineConfig(({ command }) => ({
-  base: command === 'serve' ? '/' : '/fluidity/',
+  base: command === 'serve' || !process.env.GH_PAGES ? '/' : '/fluidity/',
   plugins: [
     react(),
     // Terminal plugin only works in dev mode (virtual module not available in builds)
     command === 'serve' && Terminal({ console: 'terminal', output: ['terminal', 'console'] }),
   ],
   resolve: {
-    // Point 'fluidity-js' imports directly at the source tree so the app
-    // always reflects live changes without a separate build step.
+    // FLUIDITY_DIST=1 → resolve to the compiled dist (for testing the built package).
+    // Default → src for live-reload dev.
     alias: {
-      'fluidity-js': resolve(__dirname, '../src/index.js'),
+      'fluidity-js': process.env.FLUIDITY_DIST
+        ? resolve(__dirname, '../dist/index.js')
+        : resolve(__dirname, '../src/index.js'),
     },
   },
 }));

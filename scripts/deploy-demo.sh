@@ -7,7 +7,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 export PATH="$HOME/.nvm/versions/node/v20.19.6/bin:$PATH"
 
 cd "$REPO_ROOT/demo"
-bun run build
+GH_PAGES=1 bun run build
 
 
 npx gh-pages -d dist --dotfiles

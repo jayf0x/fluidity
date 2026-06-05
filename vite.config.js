@@ -15,8 +15,95 @@ function copyTypes() {
   };
 }
 
+/**
+ * Minifies GLSL and WGSL shader strings embedded as /* glsl *\/ and /* wgsl *\/ tagged
+ * template literals in TypeScript source files. Runs before esbuild so the result
+ * feeds into downstream minification.
+ *
+ * Strips // line comments, collapses leading whitespace and blank lines.
+ * Does NOT rename identifiers — uniform/varying names must stay intact.
+ */
+function shaderMinifier() {
+  const SHADER_FILE_RE = /\/(shaders|wgsl-shaders)\.ts$/;
+  const TAG_RE = /\/\*\s*(?:glsl|wgsl)\s*\*\/\s*`([\s\S]*?)`/g;
+
+  function minifyShader(src) {
+    return src
+      .split('\n')
+      .map((line) => {
+        // Strip // comments (but not URLs — those have ://)
+        const commentIdx = line.search(/(?<!:)\/\//);
+        const code = commentIdx >= 0 ? line.slice(0, commentIdx) : line;
+        return code.trimStart();
+      })
+      .filter((line) => line.length > 0)
+      .join('\n')
+      .replace(/\n{2,}/g, '\n') // collapse blank lines
+      .trim();
+  }
+
+  return {
+    name: 'shader-minifier',
+    enforce: 'pre',
+    transform(code, id) {
+      if (!SHADER_FILE_RE.test(id)) return null;
+      const result = code.replace(TAG_RE, (_, shader) => `\`${minifyShader(shader)}\``);
+      return { code: result, map: null };
+    },
+  };
+}
+
+/**
+ * Replaces Vite's base64-encoded inline worker with a raw JS string.
+ *
+ * Vite inlines `?worker&inline` as:
+ *   const VAR = "base64..."; ... new Blob([atob(VAR)], ...)
+ *
+ * atob() is only needed because base64 can't be embedded as a Blob directly.
+ * Swapping to a raw UTF-8 string removes the 33% base64 overhead and lets
+ * gzip compress the worker code at its natural density.
+ */
+function workerRawString() {
+  return {
+    name: 'worker-raw-string',
+    enforce: 'post',
+    apply: 'build',
+    generateBundle(_opts, bundle) {
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== 'chunk') continue;
+
+        // Match: const VARNAME="base64string" (anywhere in the chunk)
+        const varRe = /\b([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*"([A-Za-z0-9+/]{200,}={0,2})"/g;
+        let match;
+        while ((match = varRe.exec(chunk.code)) !== null) {
+          const [fullMatch, varName, b64] = match;
+
+          // Verify this variable is used in atob(VAR) + Blob context
+          const atobRe = new RegExp(`\\batob\\(${varName}\\)`, 'g');
+          if (!atobRe.test(chunk.code)) continue;
+
+          // Decode the base64 worker code
+          let workerCode;
+          try {
+            workerCode = Buffer.from(b64, 'base64').toString('utf-8');
+          } catch {
+            continue;
+          }
+
+          // Replace the base64 assignment with the raw string
+          const rawString = JSON.stringify(workerCode);
+          chunk.code = chunk.code.replace(fullMatch, `${varName}=${rawString}`);
+
+          // Replace atob(VAR) → VAR (no longer needs decoding)
+          chunk.code = chunk.code.replace(new RegExp(`\\batob\\(${varName}\\)`, 'g'), varName);
+        }
+      }
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), copyTypes()],
+  plugins: [shaderMinifier(), react(), copyTypes(), workerRawString()],
 
   build: {
     lib: {
@@ -41,10 +128,13 @@ export default defineConfig({
 
   esbuild: {
     legalComments: 'none',
+    drop: ['debugger'],
+    pure: ['console.debug'],
   },
 
   worker: {
     format: 'es',
+    plugins: [shaderMinifier()],
   },
 
   test: {
