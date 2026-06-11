@@ -313,19 +313,19 @@ struct U {
 
 @fragment fn fs(i: VSOut) -> @location(0) vec4f {
   let obs     = textureSample(uObs, samp, i.uv).r;
-  let density = max(textureSample(uTex, samp, i.uv).r, 0.0) * (1.0 - obs);
+  let density = clamp(textureSample(uTex, samp, i.uv).r, 0.0, 1.0) * (1.0 - obs);
   let cov     = textureSample(uCov, samp, i.uv).r;
 
   let sx  = u.texelSize.x * 6.0;
   let sy  = u.texelSize.y * 6.0;
-  let d00 = max(textureSample(uTex, samp, i.uv + vec2f(-sx, -sy)).r, 0.0);
-  let d10 = max(textureSample(uTex, samp, i.uv + vec2f(0.0, -sy)).r, 0.0);
-  let d20 = max(textureSample(uTex, samp, i.uv + vec2f( sx, -sy)).r, 0.0);
-  let d01 = max(textureSample(uTex, samp, i.uv + vec2f(-sx, 0.0)).r, 0.0);
-  let d21 = max(textureSample(uTex, samp, i.uv + vec2f( sx, 0.0)).r, 0.0);
-  let d02 = max(textureSample(uTex, samp, i.uv + vec2f(-sx,  sy)).r, 0.0);
-  let d12 = max(textureSample(uTex, samp, i.uv + vec2f(0.0,  sy)).r, 0.0);
-  let d22 = max(textureSample(uTex, samp, i.uv + vec2f( sx,  sy)).r, 0.0);
+  let d00 = clamp(textureSample(uTex, samp, i.uv + vec2f(-sx, -sy)).r, 0.0, 1.0);
+  let d10 = clamp(textureSample(uTex, samp, i.uv + vec2f(0.0, -sy)).r, 0.0, 1.0);
+  let d20 = clamp(textureSample(uTex, samp, i.uv + vec2f( sx, -sy)).r, 0.0, 1.0);
+  let d01 = clamp(textureSample(uTex, samp, i.uv + vec2f(-sx, 0.0)).r, 0.0, 1.0);
+  let d21 = clamp(textureSample(uTex, samp, i.uv + vec2f( sx, 0.0)).r, 0.0, 1.0);
+  let d02 = clamp(textureSample(uTex, samp, i.uv + vec2f(-sx,  sy)).r, 0.0, 1.0);
+  let d12 = clamp(textureSample(uTex, samp, i.uv + vec2f(0.0,  sy)).r, 0.0, 1.0);
+  let d22 = clamp(textureSample(uTex, samp, i.uv + vec2f( sx,  sy)).r, 0.0, 1.0);
   let gx  = (d20 + 2.0*d21 + d22) - (d00 + 2.0*d01 + d02);
   let gy  = (d02 + 2.0*d12 + d22) - (d00 + 2.0*d10 + d20);
 

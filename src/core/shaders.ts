@@ -172,7 +172,7 @@ export const displayShader = /* glsl */ `
     float obs      = texture2D(uObstacle,  vUv).r;
     // Smooth fade: density falls off over the blurred obstacle boundary zone
     // rather than cutting off at a hard step, eliminating the jagged fringe.
-    float density  = max(texture2D(uTexture, vUv).r, 0.0) * (1.0 - obs);
+    float density  = clamp(texture2D(uTexture, vUv).r, 0.0, 1.0) * (1.0 - obs);
     float coverage = texture2D(uCoverage,  vUv).r;
 
     // 8-tap Sobel normal — computes gradient via 3×3 kernel (no centre sample needed).
@@ -180,14 +180,14 @@ export const displayShader = /* glsl */ `
     // ≈ 3 sim texels per axis.  The Sobel kernel properly averages the gradient in
     // every direction — no 4-tap cross bias that creates 45° circuit-board artefacts.
     float sx = texelSize.x * 6.0, sy = texelSize.y * 6.0;
-    float d00 = max(texture2D(uTexture, vUv + vec2(-sx, -sy)).r, 0.0);
-    float d10 = max(texture2D(uTexture, vUv + vec2(0.0, -sy)).r, 0.0);
-    float d20 = max(texture2D(uTexture, vUv + vec2( sx, -sy)).r, 0.0);
-    float d01 = max(texture2D(uTexture, vUv + vec2(-sx, 0.0)).r, 0.0);
-    float d21 = max(texture2D(uTexture, vUv + vec2( sx, 0.0)).r, 0.0);
-    float d02 = max(texture2D(uTexture, vUv + vec2(-sx,  sy)).r, 0.0);
-    float d12 = max(texture2D(uTexture, vUv + vec2(0.0,  sy)).r, 0.0);
-    float d22 = max(texture2D(uTexture, vUv + vec2( sx,  sy)).r, 0.0);
+    float d00 = clamp(texture2D(uTexture, vUv + vec2(-sx, -sy)).r, 0.0, 1.0);
+    float d10 = clamp(texture2D(uTexture, vUv + vec2(0.0, -sy)).r, 0.0, 1.0);
+    float d20 = clamp(texture2D(uTexture, vUv + vec2( sx, -sy)).r, 0.0, 1.0);
+    float d01 = clamp(texture2D(uTexture, vUv + vec2(-sx, 0.0)).r, 0.0, 1.0);
+    float d21 = clamp(texture2D(uTexture, vUv + vec2( sx, 0.0)).r, 0.0, 1.0);
+    float d02 = clamp(texture2D(uTexture, vUv + vec2(-sx,  sy)).r, 0.0, 1.0);
+    float d12 = clamp(texture2D(uTexture, vUv + vec2(0.0,  sy)).r, 0.0, 1.0);
+    float d22 = clamp(texture2D(uTexture, vUv + vec2( sx,  sy)).r, 0.0, 1.0);
     float gx  = (d20 + 2.0*d21 + d22) - (d00 + 2.0*d01 + d02);
     float gy  = (d02 + 2.0*d12 + d22) - (d00 + 2.0*d10 + d20);
 
