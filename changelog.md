@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.2.9
+- Internal/infrastructure changes only
+
 ## v0.2.8
 - Add bundle size optimization tooling
 - Add log utility instead of raw console logs
