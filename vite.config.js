@@ -3,6 +3,8 @@ import fs from 'fs';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
 
+import { compressShaderLiterals } from './compress-shader-literals/plugin.js';
+
 const __dir = new URL('.', import.meta.url).pathname;
 
 function copyTypes() {
@@ -23,36 +25,6 @@ function copyTypes() {
  * Strips // line comments, collapses leading whitespace and blank lines.
  * Does NOT rename identifiers — uniform/varying names must stay intact.
  */
-function shaderMinifier() {
-  const SHADER_FILE_RE = /\/(shaders|wgsl-shaders)\.ts$/;
-  const TAG_RE = /\/\*\s*(?:glsl|wgsl)\s*\*\/\s*`([\s\S]*?)`/g;
-
-  function minifyShader(src) {
-    return src
-      .split('\n')
-      .map((line) => {
-        // Strip // comments (but not URLs — those have ://)
-        const commentIdx = line.search(/(?<!:)\/\//);
-        const code = commentIdx >= 0 ? line.slice(0, commentIdx) : line;
-        return code.trimStart();
-      })
-      .filter((line) => line.length > 0)
-      .join('\n')
-      .replace(/\n{2,}/g, '\n') // collapse blank lines
-      .trim();
-  }
-
-  return {
-    name: 'shader-minifier',
-    enforce: 'pre',
-    transform(code, id) {
-      if (!SHADER_FILE_RE.test(id)) return null;
-      const result = code.replace(TAG_RE, (_, shader) => `\`${minifyShader(shader)}\``);
-      return { code: result, map: null };
-    },
-  };
-}
-
 /**
  * Replaces Vite's base64-encoded inline worker with a raw JS string.
  *
@@ -103,7 +75,7 @@ function workerRawString() {
 }
 
 export default defineConfig({
-  plugins: [shaderMinifier(), react(), copyTypes(), workerRawString()],
+  plugins: [compressShaderLiterals.vite({ outputRatio: true }), react(), copyTypes(), workerRawString()],
 
   build: {
     lib: {
@@ -134,7 +106,7 @@ export default defineConfig({
 
   worker: {
     format: 'es',
-    plugins: [shaderMinifier()],
+    plugins: [compressShaderLiterals.vite()],
   },
 
   test: {

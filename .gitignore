@@ -8,3 +8,7 @@ coverage/
 
 .claude/settings.local.json
 .keep
+
+# TEMP
+compress-shader-literals
+byte-snap
