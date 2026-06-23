@@ -21,7 +21,7 @@ const mockController = {
 };
 
 vi.mock('../../src/fluid-controller.ts', () => ({
-  FluidController: vi.fn(() => mockController),
+  FluidController: vi.fn(function () { return mockController; }),
 }));
 
 describe('FluidText', () => {

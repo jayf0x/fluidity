@@ -16,7 +16,7 @@ const mockWorkerInstance = {
 };
 
 vi.mock('../src/worker/index.ts?worker&inline', () => ({
-  default: vi.fn(() => mockWorkerInstance),
+  default: vi.fn(function () { return mockWorkerInstance; }),
 }));
 
 // Mock FluidSimulation — both the constructor and the static create() factory
@@ -36,7 +36,7 @@ vi.mock('../src/core/simulation.ts', () => {
     destroy: vi.fn(),
     isRunning: false,
   };
-  const FluidSimulation = vi.fn().mockImplementation(() => mockSim);
+  const FluidSimulation = vi.fn(function () { return mockSim; });
   // Static factory — resolves to the same mock instance
   FluidSimulation.create = vi.fn().mockResolvedValue(mockSim);
   return { FluidSimulation };
