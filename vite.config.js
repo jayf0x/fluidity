@@ -83,7 +83,7 @@ export default defineConfig({
       fileName: 'index',
       formats: ['es'],
     },
-    minify: 'esbuild',
+    minify: 'oxc',
     rollupOptions: {
       external: ['react', 'react/jsx-runtime', 'react-dom'],
       output: {
@@ -97,8 +97,8 @@ export default defineConfig({
     sourcemap: false,
   },
 
-  esbuild: {
-    legalComments: 'none',
+  // Vite 8 (Rolldown) transpiles/minifies with Oxc, not esbuild.
+  oxc: {
     drop: ['debugger'],
     pure: ['console.debug'],
   },

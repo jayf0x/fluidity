@@ -16,10 +16,9 @@
         "@types/node": "^26.0.0",
         "@vitejs/plugin-react": "^6.0.3",
         "@webgpu/types": "^0.1.70",
-        "byte-snap": "^1.0.1",
-        "compress-shader-literals": "^0.0.5",
+        "byte-snap": "^1.0.3",
+        "compress-shader-literals": "^0.0.7",
         "jsdom": "^29.1.1",
-        "magic-string": "^0.30.21",
         "prettier": "^3.8.4",
         "react": "^19.2.7",
         "react-dom": "^19.2.7",
@@ -206,7 +205,7 @@
 
     "buffer-from": ["buffer-from@1.1.2", "", {}, "sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ=="],
 
-    "byte-snap": ["byte-snap@1.0.1", "", { "dependencies": { "unplugin": "^3.0.0" } }, "sha512-1pvJ0Lm15HTW7YbW57Td211zr4GDxsVYUrRNFaosSBE5WC1sDfPlMFOfMdiHfbXWt+fJadoLXMeqOc5CIOeJUA=="],
+    "byte-snap": ["byte-snap@1.0.3", "", { "dependencies": { "unplugin": "^3.0.0" } }, "sha512-RjjRzWR70yu6e6JAcu2uqXcNCYQ4jaxqYXPPjjfBiE7N/iso4/thkip+bF6/W5fHXVkzWXn7+5goYbm+DvQgNQ=="],
 
     "call-bind": ["call-bind@1.0.9", "", { "dependencies": { "call-bind-apply-helpers": "^1.0.2", "es-define-property": "^1.0.1", "get-intrinsic": "^1.3.0", "set-function-length": "^1.2.2" } }, "sha512-a/hy+pNsFUTR+Iz8TCJvXudKVLAnz/DyeSUo10I5yvFDQJBFU2s9uqQpoSrJlroHUKoKqzg+epxyP9lqFdzfBQ=="],
 
@@ -224,7 +223,7 @@
 
     "commander": ["commander@2.20.3", "", {}, "sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ=="],
 
-    "compress-shader-literals": ["compress-shader-literals@0.0.5", "", { "dependencies": { "@babel/parser": "^8.0.0", "@babel/traverse": "^8.0.0", "@rollup/pluginutils": "^5.4.0", "byte-snap": "^1.0.0", "magic-string": "^0.30.21", "unplugin": "^3.0.0" } }, "sha512-RiFtbRXMtmm0ChLG0mq//7cbYHIbEhbgxLuvNS4cBdg1h1GKuGRLIaKG17IAl4io/lP/g/gGRQP/SYUJ4RaXsA=="],
+    "compress-shader-literals": ["compress-shader-literals@0.0.7", "", { "dependencies": { "@babel/parser": "^8.0.0", "@babel/traverse": "^8.0.0", "@rollup/pluginutils": "^5.4.0", "byte-snap": "^1.0.3", "magic-string": "^0.30.21", "unplugin": "^3.0.0" } }, "sha512-jwCYiNGHeO/WzZxCR4X5Vfpe/ZwxThG7IQOhORVfuJH6mlfgoEQy88BncqCuwhLOgRja/g8IVezPcXebEdXsgw=="],
 
     "convert-source-map": ["convert-source-map@2.0.0", "", {}, "sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg=="],
 

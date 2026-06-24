@@ -67,9 +67,9 @@ node -e "
 "
 
 # ── build + test ──────────────────────────────────────────────────────────────
-npm run build
-npm run test:run
-SKIP_BUILD=1 npm run test:install
+bun run build
+bun run test:run
+SKIP_BUILD=1 bun run test:install
 
 # ── publish (auth via temp .npmrc — never in process list) ───────────────────
 echo "Publishing to npm.js..."
