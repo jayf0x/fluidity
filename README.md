@@ -6,7 +6,6 @@
 [![license](https://img.shields.io/npm/l/@jayf0x/fluidity-js)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](./tsconfig.json)
 [![CI](https://github.com/jayf0x/fluidity/actions/workflows/ci.yml/badge.svg)](https://github.com/jayf0x/fluidity/actions/workflows/ci.yml)
-[![Bundlephobia](https://badgen.net/bundlephobia/min/@jayf0x/fluidity-js)](https://bundlephobia.com/package/@jayf0x/fluidity-js)
 
 <a href="https://jayf0x.github.io/fluidity">
   <p align="center">
@@ -17,9 +16,11 @@
 
 ## Quickstart
 
+Choose your weapon:
+
 ```bash
 bun add @jayf0x/fluidity-js
-# npm / pnpm / aube
+# OR pnpm / aube / yarn / npm ...
 ```
 
 ```tsx
