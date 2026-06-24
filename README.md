@@ -10,7 +10,7 @@
 
 <a href="https://jayf0x.github.io/fluidity">
   <p align="center">
-    <img src="assets/preview.gif" alt="Fluid text and image effects in React" height="300px"/>
+    <img src="./assets/preview.gif" alt="Fluid text and image effects in React" height="300px"/>
   </p>
   <p align="center"><strong>Demo & Examples →</strong></p>
 </a>
