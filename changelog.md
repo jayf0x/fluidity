@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.1
+- Internal/infrastructure changes only
+
 ## v0.3.0
 - Migrate to Vite 8
 - Add npm Provenance for package integrity
