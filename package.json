@@ -20,7 +20,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "vite build && node scripts/compress-dist.js",
+    "build": "vite build",
     "build:nocompress": "vite build",
     "test:install": "bash scripts/test-install.sh",
     "demo:dev": "bun run --cwd ./demo dev",
