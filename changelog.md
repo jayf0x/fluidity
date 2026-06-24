@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.0
+- Migrate to Vite 8
+- Add npm Provenance for package integrity
+- Replace local compress-shader-literals with released npm package
+
 ## v0.2.9
 - Internal/infrastructure changes only
 
