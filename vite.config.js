@@ -1,9 +1,8 @@
 import react from '@vitejs/plugin-react';
+import { compressShaderLiterals } from 'compress-shader-literals';
 import fs from 'fs';
 import { resolve } from 'path';
 import { defineConfig } from 'vite';
-
-import { compressShaderLiterals } from './compress-shader-literals/plugin.js';
 
 const __dir = new URL('.', import.meta.url).pathname;
 
