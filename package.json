@@ -1,6 +1,6 @@
 {
   "name": "@jayf0x/fluidity-js",
-  "version": "0.3.-1",
+  "version": "0.3.0",
   "description": "WebGPU-first real-time Navier-Stokes fluid simulation for React — interactive water, ink, glass, aurora, and ripple effects on text and images. Falls back to WebGL2/WebGL1. Runs in a Web Worker.",
   "type": "module",
   "module": "./dist/index.js",
