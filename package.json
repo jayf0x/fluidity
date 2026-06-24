@@ -32,7 +32,7 @@
     "typecheck": "bunx tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "publish:npm": "bash ./scripts/publish-npm.sh",
+    "npm:deploy": "bash ./scripts/publish-npm.sh",
     "rm:stalepr": "git branch -vv | grep '\\[gone\\]' | awk '{print $1}' | xargs git branch -D"
   },
   "keywords": [
