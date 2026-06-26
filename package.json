@@ -1,7 +1,7 @@
 {
   "name": "@jayf0x/fluidity-js",
   "version": "0.3.1",
-  "description": "WebGPU-first real-time Navier-Stokes fluid simulation for React \u2014 interactive water, ink, glass, aurora, and ripple effects on text and images. Falls back to WebGL2/WebGL1. Runs in a Web Worker.",
+  "description": "WebGPU-first real-time Navier-Stokes fluid simulation for React — interactive water, ink, glass, aurora, and ripple effects on text and images. Falls back to WebGL2/WebGL1. Runs in a Web Worker.",
   "type": "module",
   "module": "./dist/index.js",
   "exports": {
@@ -21,7 +21,6 @@
   "sideEffects": false,
   "scripts": {
     "build": "vite build",
-    "build:nocompress": "vite build",
     "test:install": "bash scripts/test-install.sh",
     "demo:dev": "bun run --cwd ./demo dev",
     "demo:build": "bun run build:nocompress && PATH=/Users/me/.nvm/versions/node/v20.19.6/bin:$PATH FLUIDITY_DIST=1 bun run --cwd ./demo build && PATH=/Users/me/.nvm/versions/node/v20.19.6/bin:$PATH bun run --cwd ./demo preview",
@@ -112,7 +111,7 @@
     "unplugin": "^3.0.0",
     "vite": "^8.1.0",
     "vitest": "^4.1.9",
-    "byte-snap": "^1.0.3",
+    "byte-snap": "^1.0.5",
     "compress-shader-literals": "^0.0.7",
     "size-limit": "^11.0.0",
     "@size-limit/file": "^11.0.0"
