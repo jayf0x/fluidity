@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.2
+- Internal/infrastructure changes only
+
 ## v0.3.1
 - Internal/infrastructure changes only
 
