@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.3
+- Fix: backgroundSrc
+- Fix: WebGPU init queues
+
 ## v1.0.2
 - Internal/infrastructure changes only
 
