@@ -48,4 +48,29 @@ describe('createTextTextures — backdrop fringe (bug #1)', () => {
     expect(fills[0]).toBe('#ffffff');
     expect(fills[0]).not.toBe('black');
   });
+
+  it('lets a background image fill the glyphs instead of the solid colour (bug #2)', () => {
+    const { ctx } = recordingCanvas();
+    vi.stubGlobal(
+      'OffscreenCanvas',
+      class {
+        constructor(w, h) {
+          this.width = w;
+          this.height = h;
+        }
+        getContext() {
+          return ctx;
+        }
+      }
+    );
+
+    const bitmap = { width: 200, height: 100, close: vi.fn() };
+    createTextTextures(createWebGLMock(), 100, 50, { text: 'Hi', fontSize: 40, color: '#ffffff' }, bitmap);
+
+    // Background pass must paint the image…
+    expect(ctx.drawImage).toHaveBeenCalledWith(bitmap, expect.any(Number), expect.any(Number), expect.any(Number), expect.any(Number));
+    // …and NOT overlay the text colour over the glyphs (that would hide it).
+    // Only the separate white obstacle-mask pass draws text → exactly one fillText.
+    expect(ctx.fillText).toHaveBeenCalledTimes(1);
+  });
 });

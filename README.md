@@ -25,24 +25,32 @@ bun add @jayf0x/fluidity-js
 # OR pnpm / aube / yarn / npm ...
 ```
 
-Fluid text â€” reacts to cursor movement:
+**Text**:
 
 ```tsx
 import { FluidText } from '@jayf0x/fluidity-js';
 
 <div style={{ width: '100%', height: 400 }}>
-  <FluidText text="Hello World" fontSize={140} color="#ffffff" />
+  <FluidText text="Howdy World" fontSize={140} />
 </div>;
 ```
 
-Full-bleed fluid image:
+**Image**:
 
 ```tsx
 import { FluidImage } from '@jayf0x/fluidity-js';
 
 <div style={{ width: '100%', height: '100vh' }}>
-  <FluidImage src="/hero.jpg" algorithm="aurora" />
+  <FluidImage src="/hero.png" algorithm="aurora" />
 </div>;
+```
+
+**Text + Image**:
+
+```tsx
+<div style={{ width: '100%', height: 400 }}>
+  <FluidText text="Howdy World" backgroundSrc="/hero.png" />
+</div>
 ```
 
 ---
@@ -207,7 +215,7 @@ Works in all modern browsers. Automatically picks the best renderer available â€
 
 ## Contributing
 
-Issues and PRs welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup and [AGENTS.md](./AGENTS.md) for code conventions.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup and [AGENTS.md](./AGENTS.md) for code conventions.
 
 ---
 

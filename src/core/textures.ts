@@ -81,6 +81,9 @@ export function createTextTextures(
 
   const draw = (fillColor: string) => {
     if (backgroundBitmap) {
+      // The coverage mask clips the colour texture to the glyph shape, so the
+      // image only needs to cover the canvas — the glyphs become a window onto it.
+      // Painting the text colour over the glyphs here would hide the image (bug #2).
       ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, width, height);
@@ -92,13 +95,12 @@ export function createTextTextures(
         backgroundSize
       );
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
-    } else {
-      // Fill with the text colour (not black) so anti-aliased glyph edges blend
-      // colour→colour instead of colour→black, eliminating the dark fringe (bug #1).
-      ctx.fillStyle = fillColor;
-      ctx.fillRect(0, 0, width, height);
+      return;
     }
+    // Fill with the text colour (not black) so anti-aliased glyph edges blend
+    // colour→colour instead of colour→black, eliminating the dark fringe (bug #1).
     ctx.fillStyle = fillColor;
+    ctx.fillRect(0, 0, width, height);
     ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -220,6 +222,8 @@ export function createTextTexturesGPU(
 
   const draw = (fillColor: string) => {
     if (backgroundBitmap) {
+      // Coverage clips the colour texture to the glyph shape — glyphs become a
+      // window onto the image. Painting text colour over them hides it (bug #2).
       ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, width, height);
@@ -227,13 +231,12 @@ export function createTextTexturesGPU(
         backgroundBitmap.width, backgroundBitmap.height, width, height, backgroundSize
       );
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
-    } else {
-      // Fill with the text colour (not black) so anti-aliased glyph edges blend
-      // colour→colour instead of colour→black, eliminating the dark fringe (bug #1).
-      ctx.fillStyle = fillColor;
-      ctx.fillRect(0, 0, width, height);
+      return;
     }
+    // Fill with the text colour (not black) so anti-aliased glyph edges blend
+    // colour→colour instead of colour→black, eliminating the dark fringe (bug #1).
     ctx.fillStyle = fillColor;
+    ctx.fillRect(0, 0, width, height);
     ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';

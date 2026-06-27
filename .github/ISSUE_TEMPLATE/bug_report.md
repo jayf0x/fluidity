@@ -1,6 +1,6 @@
 ---
 name: Bug
-about: Something broken in fluidity-js
+about: Something broken in @jayf0x/fluidity-js
 title: 'bug: <short description>'
 labels: 'type:bug'
 assignees: ''
@@ -13,6 +13,7 @@ assignees: ''
 ## Domain
 
 <!-- tick one -->
+
 - [ ] `domain:core` — props / config / API
 - [ ] `domain:render` — shaders / display pass
 - [ ] `domain:physics` — fluid solver
@@ -26,13 +27,12 @@ assignees: ''
 
 ## Expected vs actual
 
-| | |
-|---|---|
-| Expected | |
-| Actual | |
+|          |     |
+| -------- | --- |
+| Expected |     |
+| Actual   |     |
 
 ## Context
 
-- Version: `@jayf0x/fluidity-js@`
-- Renderer: WebGPU / WebGL2 / WebGL1
+- Version:
 - Browser + OS:

@@ -18,8 +18,8 @@ assignees: ''
 
 ## Acceptance criteria
 
-- [ ] 
-- [ ] 
+- [ ]
+- [ ]
 
 ## Files likely touched
 
