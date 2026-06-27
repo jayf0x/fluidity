@@ -112,7 +112,7 @@
     "vite": "^8.1.0",
     "vitest": "^4.1.9",
     "byte-snap": "^1.0.5",
-    "compress-shader-literals": "^0.0.7",
+    "compress-shader-literals": "latest",
     "size-limit": "^11.0.0",
     "@size-limit/file": "^11.0.0"
   },

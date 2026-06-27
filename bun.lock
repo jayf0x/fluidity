@@ -18,7 +18,7 @@
         "@vitejs/plugin-react": "^6.0.3",
         "@webgpu/types": "^0.1.70",
         "byte-snap": "^1.0.5",
-        "compress-shader-literals": "^0.0.7",
+        "compress-shader-literals": "latest",
         "jsdom": "^29.1.1",
         "prettier": "^3.8.4",
         "react": "^19.2.7",
@@ -231,7 +231,7 @@
 
     "commander": ["commander@2.20.3", "", {}, "sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ=="],
 
-    "compress-shader-literals": ["compress-shader-literals@0.0.7", "", { "dependencies": { "@babel/parser": "^8.0.0", "@babel/traverse": "^8.0.0", "@rollup/pluginutils": "^5.4.0", "byte-snap": "^1.0.3", "magic-string": "^0.30.21", "unplugin": "^3.0.0" } }, "sha512-jwCYiNGHeO/WzZxCR4X5Vfpe/ZwxThG7IQOhORVfuJH6mlfgoEQy88BncqCuwhLOgRja/g8IVezPcXebEdXsgw=="],
+    "compress-shader-literals": ["compress-shader-literals@0.0.10", "", { "dependencies": { "@babel/parser": "^8.0.0", "@babel/traverse": "^8.0.0", "@rollup/pluginutils": "^5.4.0", "byte-snap": "^1.0.5", "magic-string": "^0.30.21", "unplugin": "^3.0.0" } }, "sha512-wcEUkXpGtkvYyhV9TP9sYqkukUAfq6lb90dycEpDqb9LI6xjYZtVPIirKbgt87YLKy+9Ahb1Bje8fc2Es5qNsQ=="],
 
     "convert-source-map": ["convert-source-map@2.0.0", "", {}, "sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg=="],
 
@@ -558,8 +558,6 @@
     "@types/babel__traverse/@babel/types": ["@babel/types@7.29.0", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A=="],
 
     "@vitest/mocker/estree-walker": ["estree-walker@3.0.3", "", { "dependencies": { "@types/estree": "^1.0.0" } }, "sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g=="],
-
-    "compress-shader-literals/byte-snap": ["byte-snap@1.0.3", "", { "dependencies": { "unplugin": "^3.0.0" } }, "sha512-RjjRzWR70yu6e6JAcu2uqXcNCYQ4jaxqYXPPjjfBiE7N/iso4/thkip+bF6/W5fHXVkzWXn7+5goYbm+DvQgNQ=="],
 
     "pretty-format/ansi-styles": ["ansi-styles@5.2.0", "", {}, "sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA=="],
 
