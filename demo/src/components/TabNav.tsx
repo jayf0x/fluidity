@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
-type Tab = 'text' | 'image' | 'splash' | 'split';
+type Tab = 'text' | 'image' | 'auto' | 'split' | 'background';
 
 export const TABS: { id: Tab; label: string }[] = [
   { id: 'text', label: 'text' },
   { id: 'image', label: 'image' },
-  { id: 'splash', label: 'auto-splash' },
+  { id: 'auto', label: 'ref control' },
   { id: 'split', label: 'split view' },
+  { id: 'background', label: 'as background' },
 ];
 
 interface TabNavProps {
@@ -58,7 +59,9 @@ export function TabNav({ tab, onTabChange }: TabNavProps) {
           border: '1px solid rgba(91,143,249,0.28)',
           boxShadow: '0 0 14px rgba(91,143,249,0.12), inset 0 1px 0 rgba(255,255,255,0.06)',
           borderRadius: 99,
-          transition: indicator.ready ? 'left 0.22s cubic-bezier(.4,0,.2,1), width 0.22s cubic-bezier(.4,0,.2,1)' : 'none',
+          transition: indicator.ready
+            ? 'left 0.22s cubic-bezier(.4,0,.2,1), width 0.22s cubic-bezier(.4,0,.2,1)'
+            : 'none',
           pointerEvents: 'none',
         }}
       />

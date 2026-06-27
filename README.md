@@ -14,6 +14,8 @@
   <p align="center"><strong>Demo & Examples →</strong></p>
 </a>
 
+> ⭐ **Star [this repository](https://github.com/jayf0x/fluidity) if you’d like to support its growth**
+
 ## Quickstart
 
 Choose your weapon:
@@ -23,26 +25,24 @@ bun add @jayf0x/fluidity-js
 # OR pnpm / aube / yarn / npm ...
 ```
 
+Fluid text — reacts to cursor movement:
+
 ```tsx
-import { FluidImage, FluidText } from '@jayf0x/fluidity-js';
+import { FluidText } from '@jayf0x/fluidity-js';
 
-// Fluid text — reacts to cursor movement
-export const Hero = () => {
-  return (
-    <div style={{ width: '100%', height: 400 }}>
-      <FluidText text="Hello World" fontSize={140} color="#ffffff" />
-    </div>
-  );
-};
+<div style={{ width: '100%', height: 400 }}>
+  <FluidText text="Hello World" fontSize={140} color="#ffffff" />
+</div>;
+```
 
-// Full-bleed fluid image
-export const Cover = () => {
-  return (
-    <div style={{ width: '100%', height: '100vh' }}>
-      <FluidImage src="/hero.jpg" algorithm="aurora" />
-    </div>
-  );
-};
+Full-bleed fluid image:
+
+```tsx
+import { FluidImage } from '@jayf0x/fluidity-js';
+
+<div style={{ width: '100%', height: '100vh' }}>
+  <FluidImage src="/hero.jpg" algorithm="aurora" />
+</div>;
 ```
 
 ---

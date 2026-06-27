@@ -115,7 +115,7 @@ function rotateColor() {
 
 const effectNames = Object.keys(allEffects);
 
-export function SplashExample() {
+export const AutoSplatExample = () => {
   const ref = useRef<FluidHandle>(null);
   const stateRef = useRef<State>({ x: 0.1, y: 0, z: 0, vx: 0, vy: 0 });
   const store = useCreateStore();
@@ -160,4 +160,4 @@ export function SplashExample() {
       <FluidText ref={ref} text={effect} fontSize={200} {...args} />
     </DemoWrapper>
   );
-}
+};

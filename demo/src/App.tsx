@@ -2,8 +2,9 @@ import { memo, useState } from 'react';
 
 import { FPSTracker } from './components/FPSTracker';
 import { TABS, TabNav } from './components/TabNav';
+import { AutoSplatExample } from './examples/AutoSplatExample';
+import { BackgroundExample } from './examples/BackgroundExample';
 import { ImageExample } from './examples/ImageExample';
-import { SplashExample } from './examples/SplashExample';
 import { SplitExample } from './examples/SplitExample';
 import { TextExample } from './examples/TextExample';
 
@@ -12,8 +13,9 @@ type Tab = (typeof TABS)[number]['id'];
 const EXAMPLE_MAP: Record<Tab, React.ComponentType> = {
   text: TextExample,
   image: ImageExample,
-  splash: SplashExample,
+  auto: AutoSplatExample,
   split: SplitExample,
+  background: BackgroundExample,
 };
 
 const GithubLink = memo(() => (
