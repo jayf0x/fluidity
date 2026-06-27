@@ -18,6 +18,7 @@ export class FluidController {
   // Pending source calls queued while WebGPU async init is in progress (main-thread only)
   #pendingTextSource: TextSourceOpts | null = null;
   #pendingImageSrc: { src: string; effect: number; size: string | number } | null = null;
+  #pendingBackground: { bitmap: ImageBitmap | null; size: string | number } | null = null;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -85,8 +86,11 @@ export class FluidController {
     if (this.#worker) {
       const transfer = bitmap ? [bitmap] : [];
       this.#worker.postMessage({ type: 'setBackground', bitmap: bitmap ?? null, size }, transfer as Transferable[]);
+    } else if (this.#sim) {
+      this.#sim.setBackground(bitmap ?? null, size);
     } else {
-      this.#sim?.setBackground(bitmap ?? null, size);
+      // Sim not yet ready (async WebGPU init) — queue so the background isn't dropped.
+      this.#pendingBackground = { bitmap: bitmap ?? null, size };
     }
   }
 
@@ -187,6 +191,10 @@ export class FluidController {
             const { src, effect, size } = this.#pendingImageSrc;
             sim.setImageSource(src, effect, size);
             this.#pendingImageSrc = null;
+          }
+          if (this.#pendingBackground) {
+            sim.setBackground(this.#pendingBackground.bitmap, this.#pendingBackground.size);
+            this.#pendingBackground = null;
           }
         })
         .catch((err) => {

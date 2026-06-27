@@ -93,7 +93,9 @@ export function createTextTextures(
       );
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
     } else {
-      ctx.fillStyle = 'black';
+      // Fill with the text colour (not black) so anti-aliased glyph edges blend
+      // colour→colour instead of colour→black, eliminating the dark fringe (bug #1).
+      ctx.fillStyle = fillColor;
       ctx.fillRect(0, 0, width, height);
     }
     ctx.fillStyle = fillColor;
@@ -226,7 +228,9 @@ export function createTextTexturesGPU(
       );
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
     } else {
-      ctx.fillStyle = 'black';
+      // Fill with the text colour (not black) so anti-aliased glyph edges blend
+      // colour→colour instead of colour→black, eliminating the dark fringe (bug #1).
+      ctx.fillStyle = fillColor;
       ctx.fillRect(0, 0, width, height);
     }
     ctx.fillStyle = fillColor;

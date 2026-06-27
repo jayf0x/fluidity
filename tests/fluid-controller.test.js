@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FluidSimulation } from '../src/core/simulation.ts';
 import { FluidController } from '../src/fluid-controller.ts';
@@ -202,6 +202,35 @@ describe('FluidController — main-thread mode (workerEnabled=false)', () => {
 
     ctrl.destroy();
     expect(sim.destroy).toHaveBeenCalledOnce();
+  });
+});
+
+describe('FluidController — async WebGPU init queues source/background calls', () => {
+  let canvas;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    canvas = createCanvasMock();
+    // Presence of navigator.gpu selects the async WebGPU-first main-thread path
+    vi.stubGlobal('navigator', { ...navigator, gpu: {} });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('flushes a setBackground call made before async sim init resolves', async () => {
+    const ctrl = new FluidController(canvas, { workerEnabled: false, webGPUEnabled: true });
+    const bitmap = { close: vi.fn() };
+
+    // sim is not assigned yet (create() promise pending) — must be queued, not dropped
+    ctrl.setBackground(bitmap, 'contain');
+
+    const sim = await FluidSimulation.create.mock.results[0].value;
+    // Let the .then() flush the queue
+    await Promise.resolve();
+
+    expect(sim.setBackground).toHaveBeenCalledWith(bitmap, 'contain');
   });
 });
 
