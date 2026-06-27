@@ -127,5 +127,8 @@
       "path": "dist/index.js",
       "limit": "28 kB"
     }
-  ]
+  ],
+  "dependencies": {
+    "@types/react": "^19.2.17"
+  }
 }
