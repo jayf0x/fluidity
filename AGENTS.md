@@ -33,8 +33,24 @@ src/
 tests/                      ← Vitest + jsdom
 demo/                       ← standalone Vite 5 demo site (NOT the library; uses alias to src/)
 dist/                       ← built output (do not edit)
-backlog.md                  ← prioritised bug/feature backlog
+bugs.md                     ← known defects (see Working the backlog)
+features.md                 ← features + improvements (see Working the backlog)
 ```
+
+---
+
+## Working the backlog
+
+Two flat lists drive non-urgent work:
+
+- **[bugs.md](./bugs.md)** — known defects.
+- **[features.md](./features.md)** — new capabilities (Features) and enhancements (Improvements).
+
+Rules:
+
+- Pick the top relevant row, build the fix/feature, **add a test**, then **delete that row**.
+- A new bug → add a one-line row to `bugs.md`; a new feature/improvement → `features.md`. Keep entries short: what + which files. No design essays.
+- These files are the source of truth — GitHub Issues are not used for the backlog.
 
 ---
 
@@ -227,7 +243,8 @@ Full label reference: [CONTRIBUTING.md § Labels](./CONTRIBUTING.md#labels)
 |----------|------------|
 | Simulation config defaults + presets | [src/core/config.ts](./src/core/config.ts) |
 | Ambient type declarations | [src/globals.d.ts](./src/globals.d.ts) |
-| Bug/feature backlog | [backlog.md](./backlog.md) |
+| Known bugs | [bugs.md](./bugs.md) |
+| Feature/improvement backlog | [features.md](./features.md) |
 | Version history | [changelog.md](./changelog.md) |
 | Demo examples | [demo/src/examples/](./demo/src/examples/) |
 | npm | https://www.npmjs.com/package/@jayf0x/fluidity-js |
