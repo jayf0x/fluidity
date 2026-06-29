@@ -1,17 +1,23 @@
 import type { ComponentType } from 'react';
 import { useState } from 'react';
 
-import { getShowcases } from 'frontis';
+import { defineShowcase, getShowcases } from 'frontis';
 import { Showcase } from 'frontis/react';
 
 import { FPSTracker } from './components/FPSTracker';
 import { TabNav } from './components/TabNav';
-import './examples/AutoSplatExample';
-import './examples/BackgroundExample';
-import './examples/ImageExample';
-import './examples/SplitExample';
-// Import for side effect: each file calls defineShowcase. Order here = nav order.
-import './examples/TextExample';
+import { AutoSplatExample } from './examples/AutoSplatExample';
+import { BackgroundExample } from './examples/BackgroundExample';
+import { ImageExample } from './examples/ImageExample';
+import { SplitExample } from './examples/SplitExample';
+import { TextExample } from './examples/TextExample';
+
+// Define the showcases here — order = nav order.
+defineShowcase({ id: 'text', title: 'text', category: 'Demos', component: TextExample });
+defineShowcase({ id: 'image', title: 'image', category: 'Demos', component: ImageExample });
+defineShowcase({ id: 'auto', title: 'ref control', category: 'Demos', component: AutoSplatExample });
+defineShowcase({ id: 'split', title: 'split view', category: 'Demos', component: SplitExample });
+defineShowcase({ id: 'background', title: 'as background', category: 'Demos', component: BackgroundExample });
 
 const showcases = getShowcases();
 const tabs = showcases.map((s) => ({ id: s.id, label: s.title }));

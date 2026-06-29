@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { defineShowcase } from 'frontis';
 import { DEFAULT_CONFIG, FluidText } from 'fluidity-js';
 
 import { useFluidControls } from '../hooks/useFluidControls';
@@ -84,5 +83,3 @@ export const BackgroundExample = () => {
     </>
   );
 };
-
-defineShowcase({ id: 'background', title: 'as background', category: 'Demos', component: BackgroundExample });

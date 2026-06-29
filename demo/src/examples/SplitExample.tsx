@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react';
 
-import { defineShowcase } from 'frontis';
 import { FluidImage, FluidText } from 'fluidity-js';
+import { useShowcaseStore } from 'frontis/react';
 import { useControls } from 'leva';
 
 import { useImages } from '../hooks/useImages';
@@ -161,15 +161,18 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
 export function SplitExample() {
   const refs = useRef<Array<FluidHandle | null>>(Array(TILES.length).fill(null));
 
-  const { count } = useControls({
-    count: {
-      label: 'tiles',
-      value: 4,
-      min: 2,
-      max: TILES.length,
-      step: 1,
+  const { count } = useControls(
+    {
+      count: {
+        label: 'tiles',
+        value: 4,
+        min: 2,
+        max: TILES.length,
+        step: 1,
+      },
     },
-  });
+    { store: useShowcaseStore() }
+  );
 
   const { urls, updateImages } = useImages(count);
 
@@ -210,4 +213,3 @@ export function SplitExample() {
   );
 }
 
-defineShowcase({ id: 'split', title: 'split view', category: 'Demos', component: SplitExample });

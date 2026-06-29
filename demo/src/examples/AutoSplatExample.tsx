@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { defineShowcase } from 'frontis';
 import { FluidText } from 'fluidity-js';
+import { useShowcaseStore } from 'frontis/react';
 import { useControls } from 'leva';
 
 import { useFluidControls } from '../hooks/useFluidControls';
@@ -121,9 +121,12 @@ export const AutoSplatExample = () => {
 
   const args = useFluidControls(ref, defaultConfig);
 
-  const { effect } = useControls({
-    effect: { value: effectNames[0], options: effectNames },
-  });
+  const { effect } = useControls(
+    {
+      effect: { value: effectNames[0], options: effectNames },
+    },
+    { store: useShowcaseStore() }
+  );
 
   useEffect(() => {
     // Reset state on effect change to prevent coordinate explosions
@@ -153,5 +156,3 @@ export const AutoSplatExample = () => {
 
   return <FluidText ref={ref} text={effect} fontSize={200} {...args} />;
 };
-
-defineShowcase({ id: 'auto', title: 'ref control', category: 'Demos', component: AutoSplatExample });
