@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 
-import { defineShowcase } from 'frontis';
 import { FluidImage } from 'fluidity-js';
+import { defineShowcase } from 'frontis';
 import { button, useControls } from 'leva';
 
 import { useFluidControls } from '../hooks/useFluidControls';

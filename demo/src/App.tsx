@@ -1,44 +1,20 @@
 import type { ComponentType } from 'react';
-import { memo, useState } from 'react';
+import { useState } from 'react';
 
 import { getShowcases } from 'frontis';
 import { Showcase } from 'frontis/react';
 
 import { FPSTracker } from './components/FPSTracker';
 import { TabNav } from './components/TabNav';
+import './examples/AutoSplatExample';
+import './examples/BackgroundExample';
+import './examples/ImageExample';
+import './examples/SplitExample';
 // Import for side effect: each file calls defineShowcase. Order here = nav order.
 import './examples/TextExample';
-import './examples/ImageExample';
-import './examples/AutoSplatExample';
-import './examples/SplitExample';
-import './examples/BackgroundExample';
 
 const showcases = getShowcases();
 const tabs = showcases.map((s) => ({ id: s.id, label: s.title }));
-
-const GithubLink = memo(() => (
-  <a
-    href="https://github.com/jayf0x/fluidity"
-    target="_blank"
-    rel="noreferrer"
-    style={{
-      position: 'absolute',
-      bottom: '1vh',
-      left: '1vw',
-      fontSize: 12,
-      fontFamily: 'ui-monospace, monospace',
-      color: 'rgba(255,255,255,0.18)',
-      textDecoration: 'none',
-      zIndex: 9999,
-      letterSpacing: '0.04em',
-      transition: 'color 0.15s',
-    }}
-    onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}
-    onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.18)')}
-  >
-    github ↗
-  </a>
-));
 
 export function App() {
   const [activeId, setActiveId] = useState(showcases[0].id);
@@ -55,7 +31,27 @@ export function App() {
           <Example />
         </Showcase>
       </div>
-      <GithubLink />
+      <a
+        href="https://github.com/jayf0x/fluidity"
+        target="_blank"
+        rel="noreferrer"
+        style={{
+          position: 'absolute',
+          bottom: '1vh',
+          left: '1vw',
+          fontSize: 12,
+          fontFamily: 'ui-monospace, monospace',
+          color: 'rgba(255,255,255,0.18)',
+          textDecoration: 'none',
+          zIndex: 9999,
+          letterSpacing: '0.04em',
+          transition: 'color 0.15s',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.5)')}
+        onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.18)')}
+      >
+        github ↗
+      </a>
     </div>
   );
 }
