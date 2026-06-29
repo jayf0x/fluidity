@@ -175,11 +175,9 @@ export const displayShader = /* glsl */ `
     float density  = max(texture2D(uTexture, vUv).r, 0.0) * (1.0 - obs);
     float coverage = texture2D(uCoverage,  vUv).r;
 
-    // 8-tap Sobel normal — computes gradient via 3×3 kernel (no centre sample needed).
-    // texelSize = 1/displayRes; density FBO is at simScale (0.5×), so s=6 display px
-    // ≈ 3 sim texels per axis.  The Sobel kernel properly averages the gradient in
-    // every direction — no 4-tap cross bias that creates 45° circuit-board artefacts.
-    float sx = texelSize.x * 6.0, sy = texelSize.y * 6.0;
+    // 8-tap Sobel normal — texelSize is now sim texel size (1/simRes), so * 3.0
+    // gives a 3-sim-texel spread regardless of DPR or simResolution scale.
+    float sx = texelSize.x * 3.0, sy = texelSize.y * 3.0;
     float d00 = max(texture2D(uTexture, vUv + vec2(-sx, -sy)).r, 0.0);
     float d10 = max(texture2D(uTexture, vUv + vec2(0.0, -sy)).r, 0.0);
     float d20 = max(texture2D(uTexture, vUv + vec2( sx, -sy)).r, 0.0);

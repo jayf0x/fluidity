@@ -536,7 +536,7 @@ export class FluidSimulation {
     writeTexelUniforms(dev, this.#gpuUniCurl!, tsx, tsy);
     writeVortUniforms(dev,  this.#gpuUniVort!, tsx, tsy, cfg.curl, DT);
     writeDisplayUniforms(dev, this.#gpuUniDisp!,
-      1 / FW, 1 / FH,
+      tsx, tsy,
       cfg.refraction, cfg.specularExp,
       parseColor(cfg.waterColor),
       parseColor(cfg.glowColor),
@@ -914,7 +914,7 @@ export class FluidSimulation {
     gl.clear(gl.COLOR_BUFFER_BIT); // clear to transparent (clearColor = 0,0,0,0)
 
     display.bind();
-    gl.uniform2f(display.uniforms.texelSize, 1 / this.#width, 1 / this.#height);
+    gl.uniform2f(display.uniforms.texelSize, 1 / this.#simWidth, 1 / this.#simHeight);
     gl.uniform3fv(display.uniforms.uWaterColor, parseColor(cfg.waterColor));
     gl.uniform3fv(display.uniforms.uGlowColor, parseColor(cfg.glowColor));
     gl.uniform1f(display.uniforms.uRefraction, cfg.refraction);
