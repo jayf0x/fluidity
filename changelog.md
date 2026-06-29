@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.0.4
+- Fix: smooth highlights on low resolution
+- Add Frontis library
+- Apply Frontis integration
+- Upgrade compress-shader-literals
+
 ## v1.0.3
 - Fix: backgroundSrc
 - Fix: WebGPU init queues
