@@ -11,6 +11,10 @@ export default defineConfig(({ command }) => ({
     command === 'serve' && Terminal({ console: 'terminal', output: ['terminal', 'console'] }),
   ],
   resolve: {
+    // `frontis` is linked via file:, which would otherwise let it resolve its
+    // own React/Leva copy → duplicate React ("Invalid hook call"). Force a
+    // single copy from the demo.
+    dedupe: ['react', 'react-dom', 'leva'],
     // FLUIDITY_DIST=1 → resolve to the compiled dist (for testing the built package).
     // Default → src for live-reload dev.
     alias: {

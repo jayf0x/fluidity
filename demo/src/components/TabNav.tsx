@@ -1,34 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
 
-type Tab = 'text' | 'image' | 'auto' | 'split' | 'background';
-
-export const TABS: { id: Tab; label: string }[] = [
-  { id: 'text', label: 'text' },
-  { id: 'image', label: 'image' },
-  { id: 'auto', label: 'ref control' },
-  { id: 'split', label: 'split view' },
-  { id: 'background', label: 'as background' },
-];
-
-interface TabNavProps {
-  tab: Tab;
-  onTabChange: (tab: Tab) => void;
+export interface TabNavItem {
+  id: string;
+  label: string;
 }
 
-export function TabNav({ tab, onTabChange }: TabNavProps) {
+interface TabNavProps {
+  tabs: TabNavItem[];
+  activeId: string;
+  onSelect: (id: string) => void;
+}
+
+export function TabNav({ tabs, activeId, onSelect }: TabNavProps) {
   const navRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [indicator, setIndicator] = useState({ left: 0, width: 0, ready: false });
 
   useEffect(() => {
-    const idx = TABS.findIndex((t) => t.id === tab);
+    const idx = tabs.findIndex((t) => t.id === activeId);
     const btn = btnRefs.current[idx];
     const nav = navRef.current;
     if (!btn || !nav) return;
     const btnRect = btn.getBoundingClientRect();
     const navRect = nav.getBoundingClientRect();
     setIndicator({ left: btnRect.left - navRect.left, width: btnRect.width, ready: true });
-  }, [tab]);
+  }, [tabs, activeId]);
 
   return (
     <nav
@@ -65,13 +61,13 @@ export function TabNav({ tab, onTabChange }: TabNavProps) {
           pointerEvents: 'none',
         }}
       />
-      {TABS.map(({ id, label }, i) => {
-        const active = tab === id;
+      {tabs.map(({ id, label }, i) => {
+        const active = activeId === id;
         return (
           <button
             key={id}
             ref={(el) => (btnRefs.current[i] = el)}
-            onClick={() => onTabChange(id)}
+            onClick={() => onSelect(id)}
             style={{
               position: 'relative',
               zIndex: 1,

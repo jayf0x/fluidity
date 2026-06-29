@@ -1,22 +1,20 @@
+import type { ComponentType } from 'react';
 import { memo, useState } from 'react';
 
+import { getShowcases } from 'frontis';
+import { Showcase } from 'frontis/react';
+
 import { FPSTracker } from './components/FPSTracker';
-import { TABS, TabNav } from './components/TabNav';
-import { AutoSplatExample } from './examples/AutoSplatExample';
-import { BackgroundExample } from './examples/BackgroundExample';
-import { ImageExample } from './examples/ImageExample';
-import { SplitExample } from './examples/SplitExample';
-import { TextExample } from './examples/TextExample';
+import { TabNav } from './components/TabNav';
+// Import for side effect: each file calls defineShowcase. Order here = nav order.
+import './examples/TextExample';
+import './examples/ImageExample';
+import './examples/AutoSplatExample';
+import './examples/SplitExample';
+import './examples/BackgroundExample';
 
-type Tab = (typeof TABS)[number]['id'];
-
-const EXAMPLE_MAP: Record<Tab, React.ComponentType> = {
-  text: TextExample,
-  image: ImageExample,
-  auto: AutoSplatExample,
-  split: SplitExample,
-  background: BackgroundExample,
-};
+const showcases = getShowcases();
+const tabs = showcases.map((s) => ({ id: s.id, label: s.title }));
 
 const GithubLink = memo(() => (
   <a
@@ -43,15 +41,19 @@ const GithubLink = memo(() => (
 ));
 
 export function App() {
-  const [tab, setTab] = useState<Tab>('text');
-  const Example = EXAMPLE_MAP[tab];
+  const [activeId, setActiveId] = useState(showcases[0].id);
+  const current = showcases.find((s) => s.id === activeId) ?? showcases[0];
+  const Example = current.component as ComponentType;
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', background: '#0a0a0a' }}>
-      <TabNav tab={tab} onTabChange={setTab} />
+      <TabNav tabs={tabs} activeId={activeId} onSelect={setActiveId} />
       <FPSTracker />
       <div style={{ width: '100%', height: '100%' }}>
-        <Example />
+        {/* key remounts the Showcase per tab → fresh isolated store, like the old per-example useCreateStore */}
+        <Showcase key={activeId}>
+          <Example />
+        </Showcase>
       </div>
       <GithubLink />
     </div>

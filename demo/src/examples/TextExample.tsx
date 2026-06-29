@@ -1,9 +1,9 @@
 import { useRef } from 'react';
 
+import { defineShowcase } from 'frontis';
 import { DEFAULT_CONFIG_TEXT, FluidText } from 'fluidity-js';
-import { button, useControls, useCreateStore } from 'leva';
+import { button, useControls } from 'leva';
 
-import { DemoWrapper } from '../components/DemoWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaults: FluidConfig = {
@@ -14,24 +14,19 @@ const defaults: FluidConfig = {
   splatRadius: 0.1,
   specularExp: 0.5,
 };
+
+// Rendered inside <Showcase> (App), so the Leva store comes from context.
 export function TextExample() {
   const ref = useRef<FluidHandle>(null);
-  const store = useCreateStore();
-  const args = useFluidControls(ref, store, defaults);
+  const args = useFluidControls(ref, defaults);
 
-  const props = useControls(
-    'settings',
-    {
-      text: { value: 'Fluidity' },
-      fontSize: { value: 100 * window.devicePixelRatio, min: 100, max: 1200, step: 10 },
-      reset: button(() => ref.current?.reset()),
-    },
-    { store }
-  );
+  const props = useControls('settings', {
+    text: { value: 'Fluidity' },
+    fontSize: { value: 100 * window.devicePixelRatio, min: 100, max: 1200, step: 10 },
+    reset: button(() => ref.current?.reset()),
+  });
 
-  return (
-    <DemoWrapper store={store}>
-      <FluidText ref={ref} fontFamily="Ubuntu" {...args} {...props} />
-    </DemoWrapper>
-  );
+  return <FluidText ref={ref} fontFamily="Ubuntu" {...args} {...props} />;
 }
+
+defineShowcase({ id: 'text', title: 'text', category: 'Demos', component: TextExample });

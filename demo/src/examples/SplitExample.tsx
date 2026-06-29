@@ -1,9 +1,9 @@
 import { useMemo, useRef } from 'react';
 
+import { defineShowcase } from 'frontis';
 import { FluidImage, FluidText } from 'fluidity-js';
-import { useControls, useCreateStore } from 'leva';
+import { useControls } from 'leva';
 
-import { DemoWrapper } from '../components/DemoWrapper';
 import { useImages } from '../hooks/useImages';
 
 type TextTileDef = FluidTextProps & {
@@ -160,7 +160,6 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
 
 export function SplitExample() {
   const refs = useRef<Array<FluidHandle | null>>(Array(TILES.length).fill(null));
-  const store = useCreateStore();
 
   const { count } = useControls({
     count: {
@@ -178,37 +177,37 @@ export function SplitExample() {
   const cols = useMemo(() => Math.max(2, Math.ceil(Math.sqrt(count))), [count]);
 
   return (
-    <DemoWrapper store={store}>
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'grid',
-          gridTemplateColumns: `repeat(${cols}, 1fr)`,
-          gridAutoRows: '1fr',
-        }}
-      >
-        {TILES.slice(0, count).map((tile, i) =>
-          tile.type === 'text' ? (
-            <FluidText
-              key={i}
-              ref={(el) => {
-                refs.current[i] = el;
-              }}
-              {...tile}
-            />
-          ) : (
-            <FluidImage
-              key={i}
-              ref={(el) => {
-                refs.current[i] = el;
-              }}
-              {...tile}
-              src={urls[i]}
-            />
-          )
-        )}
-      </div>
-    </DemoWrapper>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'grid',
+        gridTemplateColumns: `repeat(${cols}, 1fr)`,
+        gridAutoRows: '1fr',
+      }}
+    >
+      {TILES.slice(0, count).map((tile, i) =>
+        tile.type === 'text' ? (
+          <FluidText
+            key={i}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
+            {...tile}
+          />
+        ) : (
+          <FluidImage
+            key={i}
+            ref={(el) => {
+              refs.current[i] = el;
+            }}
+            {...tile}
+            src={urls[i]}
+          />
+        )
+      )}
+    </div>
   );
 }
+
+defineShowcase({ id: 'split', title: 'split view', category: 'Demos', component: SplitExample });

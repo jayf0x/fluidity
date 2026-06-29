@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react';
 
+import { defineShowcase } from 'frontis';
 import { DEFAULT_CONFIG, FluidText } from 'fluidity-js';
-import { useCreateStore } from 'leva';
 
-import { DemoWrapper } from '../components/DemoWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaults: Partial<FluidConfig> = {
@@ -19,8 +18,7 @@ const defaults: Partial<FluidConfig> = {
 
 export const BackgroundExample = () => {
   const ref = useRef<FluidHandle>(null);
-  const store = useCreateStore();
-  const args = useFluidControls(ref, store, defaults);
+  const args = useFluidControls(ref, defaults);
 
   const lastPos = useRef<{ x: number; y: number } | null>(null);
 
@@ -37,7 +35,7 @@ export const BackgroundExample = () => {
   }, [onPointerMove]);
 
   return (
-    <DemoWrapper store={store}>
+    <>
       {/* fluid as full-screen background, driven by ref — no internal mouse handling */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
         <FluidText ref={ref} mouseEnabled={false} text="🐔 or 🥚" {...args} />
@@ -83,6 +81,8 @@ export const BackgroundExample = () => {
           </a>
         </div>
       </div>
-    </DemoWrapper>
+    </>
   );
 };
+
+defineShowcase({ id: 'background', title: 'as background', category: 'Demos', component: BackgroundExample });

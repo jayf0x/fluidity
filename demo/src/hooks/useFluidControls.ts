@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { RefObject } from 'react';
 
 import { DEFAULT_CONFIG } from 'fluidity-js';
-import { useControls } from 'leva';
+import { useSharedControls } from 'frontis/react';
 
 type Defaults = Partial<FluidConfig> & {
   pixelRatio?: number;
@@ -15,13 +15,18 @@ type Defaults = Partial<FluidConfig> & {
 
 /**
  * Registers the shared "fluid config" Leva panel and syncs values → simulation.
- * Pass the page's isolated `store` (from `useCreateStore()`) for tab isolation.
+ * Reads the isolated store from the enclosing <Showcase> (frontis) via context,
+ * so there's no `store` to thread anymore.
  * Returns flat props — spread directly onto FluidText / FluidImage.
  *
  * customDefaults — pass DEFAULT_CONFIG for image or DEFAULT_CONFIG_TEXT for text
  * to initialize the Leva panel with the right starting values.
+ *
+ * The shared-schema composition + isolated store now live in Frontis
+ * (`useSharedControls`); the fluid schema, DEFAULT_CONFIG, and the
+ * `updateConfig` sync below stay here — Frontis never learns what a fluid is.
  */
-export function useFluidControls(ref: RefObject<FluidHandle | null>, store: LevaStore, customDefaults: Defaults = {}) {
+export function useFluidControls(ref: RefObject<FluidHandle | null>, customDefaults: Defaults = {}) {
   const values = useMemo(() => {
     const merged = {
       // sim defaults from library base config
@@ -44,7 +49,7 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fluidSchema = useCallback(
+  const fluidSchema = useMemo(
     () => ({
       // ── Simulation ──────────────────────────────────────────────────────────
       densityDissipation: { value: values.densityDissipation, min: 0, max: 1, step: 0.01 },
@@ -78,20 +83,17 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
     []
   );
 
-  const [
-    {
-      waterColor,
-      glowColor,
-      preset: presetRaw,
-      backgroundColor,
-      webGPUEnabled,
-      alphaEnabled,
-      pixelRatio,
-      simResolution,
-      ...simConfig
-    },
-    set,
-  ] = useControls('fluid config', fluidSchema, { store });
+  const {
+    waterColor,
+    glowColor,
+    preset: presetRaw,
+    backgroundColor,
+    webGPUEnabled,
+    alphaEnabled,
+    pixelRatio,
+    simResolution,
+    ...simConfig
+  } = useSharedControls(fluidSchema, { folder: 'fluid config' });
 
   // Resolve 'none' sentinel back to undefined so callers can pass it straight to preset prop
   const preset = presetRaw === 'none' ? undefined : (presetRaw as PresetKey);
@@ -106,5 +108,5 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, store: Leva
     } satisfies Partial<FluidConfig>);
   }, [ref, simConfig, waterColor, glowColor]);
 
-  return { set, preset, backgroundColor, pixelRatio, simResolution, webGPUEnabled, alphaEnabled };
+  return { preset, backgroundColor, pixelRatio, simResolution, webGPUEnabled, alphaEnabled };
 }

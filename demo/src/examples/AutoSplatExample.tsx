@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 
+import { defineShowcase } from 'frontis';
 import { FluidText } from 'fluidity-js';
-import { useControls, useCreateStore } from 'leva';
+import { useControls } from 'leva';
 
-import { DemoWrapper } from '../components/DemoWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 
 const defaultConfig: Partial<FluidConfig> = {
@@ -118,16 +118,12 @@ const effectNames = Object.keys(allEffects);
 export const AutoSplatExample = () => {
   const ref = useRef<FluidHandle>(null);
   const stateRef = useRef<State>({ x: 0.1, y: 0, z: 0, vx: 0, vy: 0 });
-  const store = useCreateStore();
 
-  const args = useFluidControls(ref, store, defaultConfig);
+  const args = useFluidControls(ref, defaultConfig);
 
-  const { effect } = useControls(
-    {
-      effect: { value: effectNames[0], options: effectNames },
-    },
-    { store }
-  );
+  const { effect } = useControls({
+    effect: { value: effectNames[0], options: effectNames },
+  });
 
   useEffect(() => {
     // Reset state on effect change to prevent coordinate explosions
@@ -155,9 +151,7 @@ export const AutoSplatExample = () => {
     return () => cancelAnimationFrame(frameId);
   }, [animate]);
 
-  return (
-    <DemoWrapper store={store}>
-      <FluidText ref={ref} text={effect} fontSize={200} {...args} />
-    </DemoWrapper>
-  );
+  return <FluidText ref={ref} text={effect} fontSize={200} {...args} />;
 };
+
+defineShowcase({ id: 'auto', title: 'ref control', category: 'Demos', component: AutoSplatExample });

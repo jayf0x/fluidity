@@ -1,9 +1,9 @@
 import { useRef } from 'react';
 
+import { defineShowcase } from 'frontis';
 import { FluidImage } from 'fluidity-js';
-import { button, useControls, useCreateStore } from 'leva';
+import { button, useControls } from 'leva';
 
-import { DemoWrapper } from '../components/DemoWrapper';
 import { useFluidControls } from '../hooks/useFluidControls';
 import { useImages } from '../hooks/useImages';
 
@@ -14,32 +14,21 @@ const defaults: Partial<FluidConfig> = {
 
 export function ImageExample() {
   const ref = useRef<FluidHandle>(null);
-  const store = useCreateStore();
-  const args = useFluidControls(ref, store, defaults);
+  const args = useFluidControls(ref, defaults);
 
-  const { imageQuality } = useControls(
-    'settings',
-    {
-      imageQuality: { value: 1, min: 0.1, max: 3, step: 0.1 },
-    },
-    { store }
-  );
+  const { imageQuality } = useControls('settings', {
+    imageQuality: { value: 1, min: 0.1, max: 3, step: 0.1 },
+  });
 
   const { urls, updateImages } = useImages(1, imageQuality);
-  const { imageSize } = useControls(
-    'settings',
-    {
-      imageSize: { label: 'size', options: ['cover', 'contain', '80%', '50%'], value: 'cover' },
-      nextImage: button(updateImages),
-      reload: button(() => ref.current?.reset()),
-      splash: button(() => ref.current?.move(400, 300, 12)),
-    },
-    { store }
-  );
+  const { imageSize } = useControls('settings', {
+    imageSize: { label: 'size', options: ['cover', 'contain', '80%', '50%'], value: 'cover' },
+    nextImage: button(updateImages),
+    reload: button(() => ref.current?.reset()),
+    splash: button(() => ref.current?.move(400, 300, 12)),
+  });
 
-  return (
-    <DemoWrapper store={store}>
-      <FluidImage ref={ref} src={urls[0]} effect={0} imageSize={imageSize} {...args} />
-    </DemoWrapper>
-  );
+  return <FluidImage ref={ref} src={urls[0]} effect={0} imageSize={imageSize} {...args} />;
 }
+
+defineShowcase({ id: 'image', title: 'image', category: 'Demos', component: ImageExample });
