@@ -6,7 +6,8 @@ export interface TextSourceOpts {
   color: string;
   fontFamily?: string;
   fontWeight?: string | number;
-  /** Oversample factor for the text canvas before upload. Higher = sharper edges. Default: 2 */
+  textAlign?: 'left' | 'center' | 'right';
+  /** Oversample factor for the text canvas before upload. Higher = sharper edges. Default: 1 */
   textQuality?: number;
 }
 
@@ -57,6 +58,55 @@ export function computeImageTransform(
   return { x: (canvasW - drawW) / 2, y: (canvasH - drawH) / 2, drawW, drawH };
 }
 
+// ─── Shared text drawing helper ──────────────────────────────────────────────
+
+/**
+ * Draws `text` into `ctx` (a `width × height` canvas) with optional oversampling.
+ * When `quality > 1`, renders to a larger OffscreenCanvas then scales down for
+ * sub-pixel anti-aliasing without blurring the upload texture dimensions.
+ */
+function drawTextToCanvas(
+  ctx: OffscreenCanvasRenderingContext2D,
+  width: number,
+  height: number,
+  bgColor: string,
+  textColor: string,
+  text: string,
+  fontSize: number,
+  fontFamily: string,
+  fontWeight: string | number,
+  align: 'left' | 'center' | 'right',
+  quality: number
+): void {
+  const tq = Math.max(1, quality);
+  const ow = Math.round(width * tq);
+  const oh = Math.round(height * tq);
+  const x = align === 'left' ? 0 : align === 'right' ? ow : ow / 2;
+
+  if (tq > 1) {
+    const oCanvas = new OffscreenCanvas(ow, oh);
+    const oCtx = oCanvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
+    oCtx.fillStyle = bgColor;
+    oCtx.fillRect(0, 0, ow, oh);
+    oCtx.fillStyle = textColor;
+    oCtx.font = `${fontWeight} ${fontSize * tq}px ${fontFamily}`;
+    oCtx.textAlign = align;
+    oCtx.textBaseline = 'middle';
+    oCtx.fillText(text, x, oh / 2);
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(oCanvas, 0, 0, width, height);
+    return;
+  }
+
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = textColor;
+  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, height / 2);
+}
+
 // ─── WebGL texture creation ───────────────────────────────────────────────────
 
 /**
@@ -73,7 +123,7 @@ export function createTextTextures(
   backgroundBitmap: ImageBitmap | null = null,
   backgroundSize: string | number = 'cover'
 ): TextureSet {
-  const { text, fontSize, color, fontFamily = 'sans-serif', fontWeight = 900 } = opts;
+  const { text, fontSize, color, fontFamily = 'sans-serif', fontWeight = 900, textAlign = 'center', textQuality = 1 } = opts;
 
   // width/height are DPR-adjusted — draw at 1:1 device pixels for crisp text
   const tCanvas = new OffscreenCanvas(width, height);
@@ -97,14 +147,7 @@ export function createTextTextures(
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
       return;
     }
-    // Fill with the text colour (not black) so anti-aliased glyph edges blend
-    // colour→colour instead of colour→black, eliminating the dark fringe (bug #1).
-    ctx.fillStyle = fillColor;
-    ctx.fillRect(0, 0, width, height);
-    ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, width / 2, height / 2);
+    drawTextToCanvas(ctx, width, height, fillColor, fillColor, text, fontSize, fontFamily, fontWeight, textAlign, textQuality);
   };
 
   draw(color);
@@ -112,13 +155,7 @@ export function createTextTextures(
 
   // Obstacle / coverage: sharp white text on black.
   // coverageTex and obstacleTex share the same WebGLTexture — caller must NOT double-delete.
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = 'white';
-  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text, width / 2, height / 2);
+  drawTextToCanvas(ctx, width, height, 'black', 'white', text, fontSize, fontFamily, fontWeight, textAlign, textQuality);
   const obstacleTex = uploadTextureGL(gl, tCanvas);
 
   return { backgroundTex, obstacleTex, coverageTex: obstacleTex };
@@ -215,7 +252,7 @@ export function createTextTexturesGPU(
   backgroundBitmap: ImageBitmap | null = null,
   backgroundSize: string | number = 'cover'
 ): GPUTextureSet {
-  const { text, fontSize, color, fontFamily = 'sans-serif', fontWeight = 900 } = opts;
+  const { text, fontSize, color, fontFamily = 'sans-serif', fontWeight = 900, textAlign = 'center', textQuality = 1 } = opts;
 
   const tCanvas = new OffscreenCanvas(width, height);
   const ctx = tCanvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
@@ -233,27 +270,14 @@ export function createTextTexturesGPU(
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
       return;
     }
-    // Fill with the text colour (not black) so anti-aliased glyph edges blend
-    // colour→colour instead of colour→black, eliminating the dark fringe (bug #1).
-    ctx.fillStyle = fillColor;
-    ctx.fillRect(0, 0, width, height);
-    ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, width / 2, height / 2);
+    drawTextToCanvas(ctx, width, height, fillColor, fillColor, text, fontSize, fontFamily, fontWeight, textAlign, textQuality);
   };
 
   draw(color);
   const backgroundTex = uploadTextureGPU(device, tCanvas, width, height);
 
   // Obstacle / coverage: sharp text — shared texture, sharedCoverage=true.
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = 'white';
-  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text, width / 2, height / 2);
+  drawTextToCanvas(ctx, width, height, 'black', 'white', text, fontSize, fontFamily, fontWeight, textAlign, textQuality);
   const obstacleTex = uploadTextureGPU(device, tCanvas, width, height);
 
   return {

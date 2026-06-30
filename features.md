@@ -6,8 +6,6 @@ New capabilities and enhancements. Pick one, build it, add a test, remove the en
 
 | # | Feature | Files |
 |---|---------|-------|
-| 1 | `textAlign` prop on `<FluidText>` (`left`/`right`/`center`, default `center`). | `src/globals.d.ts`, `src/core/textures.ts`, `src/core/config.ts` |
-| 2 | Implement `textQuality` prop — declared but unused. Oversample text canvas then downsample before upload to anti-alias. | `src/core/textures.ts` |
 | 3 | `obstacleStrength` prop (0–1) — image luminance drives the physics obstacle. Default `0` = current behaviour. | `src/globals.d.ts`, `src/core/textures.ts`, `src/core/config.ts` |
 | 4 | Transparency in fluid colors — let the page behind the canvas show through. Clarify which props accept alpha first. | `src/globals.d.ts`, `src/core/config.ts`, `src/core/shaders.ts`, `src/core/simulation.ts` |
 | 5 | Per-axis `simResolutionX`/`simResolutionY` (or `simMaxPixels` cap) — stay responsive at extreme aspect ratios. | `src/core/config.ts`, `src/core/simulation.ts` |

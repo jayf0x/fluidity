@@ -74,3 +74,69 @@ describe('createTextTextures — backdrop fringe (bug #1)', () => {
     expect(ctx.fillText).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('createTextTextures — textAlign (feature 1)', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it.each([
+    ['left',   0],
+    ['center', 50],
+    ['right',  100],
+  ])('textAlign=%s positions fillText at x=%i', (align, expectedX) => {
+    const fillTexts = [];
+    const ctx = {
+      fillStyle: '', font: '', textAlign: '', textBaseline: '',
+      fillRect: vi.fn(),
+      fillText: vi.fn((_t, x) => fillTexts.push(x)),
+      clearRect: vi.fn(),
+      drawImage: vi.fn(),
+    };
+    vi.stubGlobal('OffscreenCanvas', class {
+      constructor(w, h) { this.width = w; this.height = h; }
+      getContext() { return ctx; }
+    });
+
+    // width=100 → left=0, center=50, right=100
+    createTextTextures(createWebGLMock(), 100, 50, { text: 'X', fontSize: 40, color: '#fff', textAlign: align });
+    expect(fillTexts[0]).toBe(expectedX);
+  });
+});
+
+describe('createTextTextures — textQuality (feature 2)', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('tq=1 draws directly into the target canvas (no extra OffscreenCanvas)', () => {
+    let instances = 0;
+    const ctx = {
+      fillStyle: '', font: '', textAlign: '', textBaseline: '',
+      fillRect: vi.fn(), fillText: vi.fn(), clearRect: vi.fn(), drawImage: vi.fn(),
+    };
+    vi.stubGlobal('OffscreenCanvas', class {
+      constructor(w, h) { this.width = w; this.height = h; instances++; }
+      getContext() { return ctx; }
+    });
+
+    createTextTextures(createWebGLMock(), 100, 50, { text: 'X', fontSize: 40, color: '#fff', textQuality: 1 });
+    // Only the 1 target canvas; no oversampled intermediary
+    expect(instances).toBe(1);
+  });
+
+  it('tq=2 creates an oversampled canvas and scales it down', () => {
+    const canvases = [];
+    const ctx = {
+      fillStyle: '', font: '', textAlign: '', textBaseline: '',
+      fillRect: vi.fn(), fillText: vi.fn(), clearRect: vi.fn(), drawImage: vi.fn(),
+    };
+    vi.stubGlobal('OffscreenCanvas', class {
+      constructor(w, h) { this.width = w; this.height = h; canvases.push(this); }
+      getContext() { return ctx; }
+    });
+
+    createTextTextures(createWebGLMock(), 100, 50, { text: 'X', fontSize: 40, color: '#fff', textQuality: 2 });
+    // Oversampled canvas (200×100) is created in addition to the main canvas (100×50)
+    const oversized = canvases.filter(c => c.width === 200 && c.height === 100);
+    expect(oversized.length).toBeGreaterThan(0);
+    // Main canvas receives a drawImage call to scale it down
+    expect(ctx.drawImage).toHaveBeenCalled();
+  });
+});
