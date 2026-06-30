@@ -93,6 +93,8 @@ function drawTextToCanvas(
     oCtx.textAlign = align;
     oCtx.textBaseline = 'middle';
     oCtx.fillText(text, x, oh / 2);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.clearRect(0, 0, width, height);
     ctx.drawImage(oCanvas, 0, 0, width, height);
     return;

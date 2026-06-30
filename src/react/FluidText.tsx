@@ -89,7 +89,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
         controllerRef.current?.updateConfig(normalizeConfig(cfg));
       },
     }),
-    [text, fontSize, color, fontFamily, fontWeight]
+    [text, fontSize, color, fontFamily, fontWeight, textAlign, textQuality]
   );
 
   // Sync text source whenever relevant props change (webGPUEnabled/alphaEnabled trigger reinit → re-set source)
