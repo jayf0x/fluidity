@@ -17,14 +17,6 @@ function copyTypes() {
 }
 
 /**
- * Minifies GLSL and WGSL shader strings embedded as /* glsl *\/ and /* wgsl *\/ tagged
- * template literals in TypeScript source files. Runs before esbuild so the result
- * feeds into downstream minification.
- *
- * Strips // line comments, collapses leading whitespace and blank lines.
- * Does NOT rename identifiers — uniform/varying names must stay intact.
- */
-/**
  * Replaces Vite's base64-encoded inline worker with a raw JS string.
  *
  * Vite inlines `?worker&inline` as:
