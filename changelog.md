@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.5
+- Add more text controls
+- Update fluidText parameters
+
 ## v1.0.4
 - Fix: smooth highlights on low resolution
 - Add Frontis library
