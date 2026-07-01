@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.6
+- Improve Sobel spread: density-aware kernel + close warm-start
+
 ## v1.0.5
 - Add more text controls
 - Update fluidText parameters
