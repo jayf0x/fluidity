@@ -91,6 +91,7 @@
     }
   },
   "devDependencies": {
+    "@types/react": "^19.2.17",
     "@babel/parser": "^8.0.0",
     "@babel/traverse": "^8.0.0",
     "@rollup/pluginutils": "^5.4.0",
@@ -128,7 +129,4 @@
       "limit": "28 kB"
     }
   ],
-  "dependencies": {
-    "@types/react": "^19.2.17"
-  }
 }
