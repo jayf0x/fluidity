@@ -316,9 +316,10 @@ struct U {
   let density = max(textureSample(uTex, samp, i.uv).r, 0.0) * (1.0 - obs);
   let cov     = textureSample(uCov, samp, i.uv).r;
 
-  // texelSize is sim texel size (1/simRes); * 3.0 = 3-sim-texel spread at any DPR/scale.
-  let sx  = u.texelSize.x * 3.0;
-  let sy  = u.texelSize.y * 3.0;
+  // Density-aware spread: wider at low density (smooth noisy gradient), tight at high (sharp specular).
+  let sobelSpread = clamp(3.0 / max(density, 0.3), 1.5, 6.0);
+  let sx  = u.texelSize.x * sobelSpread;
+  let sy  = u.texelSize.y * sobelSpread;
   let d00 = max(textureSample(uTex, samp, i.uv + vec2f(-sx, -sy)).r, 0.0);
   let d10 = max(textureSample(uTex, samp, i.uv + vec2f(0.0, -sy)).r, 0.0);
   let d20 = max(textureSample(uTex, samp, i.uv + vec2f( sx, -sy)).r, 0.0);

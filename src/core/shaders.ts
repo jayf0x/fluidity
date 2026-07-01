@@ -175,9 +175,11 @@ export const displayShader = /* glsl */ `
     float density  = max(texture2D(uTexture, vUv).r, 0.0) * (1.0 - obs);
     float coverage = texture2D(uCoverage,  vUv).r;
 
-    // 8-tap Sobel normal — texelSize is now sim texel size (1/simRes), so * 3.0
-    // gives a 3-sim-texel spread regardless of DPR or simResolution scale.
-    float sx = texelSize.x * 3.0, sy = texelSize.y * 3.0;
+    // 8-tap Sobel normal — spread is density-aware: wider at low density (noisy gradient
+    // needs smoothing), tighter at high density (well-defined gradient = sharp specular).
+    // texelSize is sim texel size; range clamps to [1.5, 6] sim texels.
+    float sobelSpread = clamp(3.0 / max(density, 0.3), 1.5, 6.0);
+    float sx = texelSize.x * sobelSpread, sy = texelSize.y * sobelSpread;
     float d00 = max(texture2D(uTexture, vUv + vec2(-sx, -sy)).r, 0.0);
     float d10 = max(texture2D(uTexture, vUv + vec2(0.0, -sy)).r, 0.0);
     float d20 = max(texture2D(uTexture, vUv + vec2( sx, -sy)).r, 0.0);
