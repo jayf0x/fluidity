@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.7
+- Internal/infrastructure changes only
+
 ## v1.0.6
 - Improve Sobel spread: density-aware kernel + close warm-start
 
