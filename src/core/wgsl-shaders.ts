@@ -153,7 +153,21 @@ struct U { texelSize: vec2f, _pad: vec2f }
   let R   = mix(textureSample(uPres, samp, i.vR).x, C, textureSample(uObs, samp, i.vR).r);
   let T   = mix(textureSample(uPres, samp, i.vT).x, C, textureSample(uObs, samp, i.vT).r);
   let B   = mix(textureSample(uPres, samp, i.vB).x, C, textureSample(uObs, samp, i.vB).r);
-  let vel = (textureSample(uVel, samp, i.uv).xy - vec2f(R - L, T - B)) * (1.0 - obs);
+  var vel = textureSample(uVel, samp, i.uv).xy - vec2f(R - L, T - B);
+
+  // Slip boundary condition: decompose into normal/tangential via the obstacle
+  // gradient (surface normal) and only damp the normal component at the boundary,
+  // preserving tangential flow so fluid slides along obstacle edges (no-slip off).
+  let obsGrad = vec2f(
+    textureSample(uObs, samp, i.vR).r - textureSample(uObs, samp, i.vL).r,
+    textureSample(uObs, samp, i.vT).r - textureSample(uObs, samp, i.vB).r
+  );
+  let gradLen = length(obsGrad);
+  let normal  = select(vec2f(0.0), obsGrad / gradLen, gradLen > 0.0001);
+  let velN    = dot(vel, normal);
+  let velTang = vel - velN * normal;
+  vel = mix(vel, velTang, obs);
+
   return vec4f(vel, 0.0, 1.0);
 }
 `;

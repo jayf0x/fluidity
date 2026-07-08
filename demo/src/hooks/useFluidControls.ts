@@ -36,8 +36,8 @@ export function useFluidControls(ref: RefObject<FluidHandle | null>, customDefau
       webGPUEnabled: true,
       alphaEnabled: true,
       backgroundColor: '#0a0a0a',
-      pixelRatio: 1 / (window.devicePixelRatio || 1),
-      simResolution: 0.5,
+      pixelRatio: Math.min(0.9, 1 / (window.devicePixelRatio || 1) + 0.2),
+      simResolution: 0.8,
       // caller overrides (e.g. DEFAULT_CONFIG_TEXT for text examples)
       ...customDefaults,
     };

@@ -77,7 +77,22 @@ export const gradientSubtractShader = /* glsl */ `
     float R   = mix(texture2D(uPressure, vR).x, C, texture2D(uObstacle, vR).r);
     float T   = mix(texture2D(uPressure, vT).x, C, texture2D(uObstacle, vT).r);
     float B   = mix(texture2D(uPressure, vB).x, C, texture2D(uObstacle, vB).r);
-    vec2 vel  = (texture2D(uVelocity, vUv).xy - vec2(R - L, T - B)) * (1.0 - obs);
+    vec2 vel  = texture2D(uVelocity, vUv).xy - vec2(R - L, T - B);
+
+    // Slip boundary condition: decompose velocity into normal/tangential components
+    // using the obstacle mask gradient (its surface normal), then only damp the
+    // normal component at the boundary — tangential flow is preserved so fluid
+    // slides along obstacle edges instead of fully stopping (no-slip).
+    vec2  obsGrad  = vec2(
+      texture2D(uObstacle, vR).r - texture2D(uObstacle, vL).r,
+      texture2D(uObstacle, vT).r - texture2D(uObstacle, vB).r
+    );
+    float gradLen  = length(obsGrad);
+    vec2  normal   = gradLen > 0.0001 ? obsGrad / gradLen : vec2(0.0);
+    float velN     = dot(vel, normal);
+    vec2  velTang  = vel - velN * normal;
+    vel = mix(vel, velTang, obs);
+
     gl_FragColor = vec4(vel, 0.0, 1.0);
   }
 `;

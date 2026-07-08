@@ -15,5 +15,4 @@ New capabilities and enhancements. Pick one, build it, add a test, remove the en
 
 | # | Improvement | Files |
 |---|-------------|-------|
-| 8 | Tangential (slip) velocity boundary condition at obstacle edges — project velocity tangential using obstacle gradient. | `src/core/shaders.ts`, `src/core/wgsl-shaders.ts`, `src/core/simulation.ts` |
 | 10 | Pre-blur density FBO (separable Gaussian) for smooth normals; raw density still drives color/alpha. | `src/core/shaders.ts`, `src/core/wgsl-shaders.ts`, `src/core/simulation.ts` |
