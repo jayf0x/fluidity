@@ -4,9 +4,6 @@
   "workspaces": {
     "": {
       "name": "@jayf0x/fluidity-js",
-      "dependencies": {
-        "@types/react": "^19.2.17",
-      },
       "devDependencies": {
         "@babel/parser": "^8.0.0",
         "@babel/traverse": "^8.0.0",
@@ -18,9 +15,10 @@
         "@trivago/prettier-plugin-sort-imports": "^6.0.2",
         "@types/babel__traverse": "^7.28.0",
         "@types/node": "^26.0.0",
+        "@types/react": "^19.2.17",
         "@vitejs/plugin-react": "^6.0.3",
         "@webgpu/types": "^0.1.70",
-        "byte-snap": "^1.0.5",
+        "byte-snap": "latest",
         "compress-shader-literals": "latest",
         "jsdom": "^29.1.1",
         "prettier": "^3.8.4",
@@ -214,7 +212,7 @@
 
     "buffer-from": ["buffer-from@1.1.2", "", {}, "sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ=="],
 
-    "byte-snap": ["byte-snap@1.0.5", "", { "dependencies": { "unplugin": "^3.0.0" } }, "sha512-qo4GoCK+lTD9k2DJD7TfGC1wtidBOzNig7tmRJ8Oamf51j7m5U3mQR+2AmUXoVyelDqoVhMCD+LG/JV7aBRYhQ=="],
+    "byte-snap": ["byte-snap@1.1.2", "", { "dependencies": { "unplugin": "^3.0.0" } }, "sha512-XhEolKEDlGo8JnxWFcohmUWqy4YwFnIF/aKCynUP4fZTNar5G5Gp8ydsP2W1knqJJ9WfWRIarP/ryE0zDGgVpg=="],
 
     "bytes-iec": ["bytes-iec@3.1.1", "", {}, "sha512-fey6+4jDK7TFtFg/klGSvNKJctyU7n2aQdnM+CO0ruLPbqqMOM8Tio0Pc+deqUeVKX1tL5DQep1zQ7+37aTAsA=="],
 
@@ -565,6 +563,8 @@
     "@types/babel__traverse/@babel/types": ["@babel/types@7.29.0", "", { "dependencies": { "@babel/helper-string-parser": "^7.27.1", "@babel/helper-validator-identifier": "^7.28.5" } }, "sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A=="],
 
     "@vitest/mocker/estree-walker": ["estree-walker@3.0.3", "", { "dependencies": { "@types/estree": "^1.0.0" } }, "sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g=="],
+
+    "compress-shader-literals/byte-snap": ["byte-snap@1.0.5", "", { "dependencies": { "unplugin": "^3.0.0" } }, "sha512-qo4GoCK+lTD9k2DJD7TfGC1wtidBOzNig7tmRJ8Oamf51j7m5U3mQR+2AmUXoVyelDqoVhMCD+LG/JV7aBRYhQ=="],
 
     "pretty-format/ansi-styles": ["ansi-styles@5.2.0", "", {}, "sha512-Cxwpt2SfTzTtXcfOlzGEee8O+c+MmUgGrNiBcXnuWxuFJHe6a5Hz7qwhwe5OgaSYI0IJvkLqWX1ASG+cJOkEiA=="],
 
