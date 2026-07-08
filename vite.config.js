@@ -8,11 +8,15 @@ import { defineConfig } from 'vite';
 const __dir = new URL('.', import.meta.url).pathname;
 
 function copyTypes() {
+  let outDir = 'dist';
   return {
     name: 'copy-types',
+    configResolved(c) {
+      outDir = c.build.outDir;
+    },
     closeBundle() {
-      fs.copyFileSync(resolve(__dir, 'src/index.d.ts'), resolve(__dir, 'dist/index.d.ts'));
-      fs.copyFileSync(resolve(__dir, 'src/globals.d.ts'), resolve(__dir, 'dist/globals.d.ts'));
+      fs.copyFileSync(resolve(__dir, 'src/index.d.ts'), resolve(__dir, outDir, 'index.d.ts'));
+      fs.copyFileSync(resolve(__dir, 'src/globals.d.ts'), resolve(__dir, outDir, 'globals.d.ts'));
     },
   };
 }
@@ -68,10 +72,10 @@ function workerRawString() {
 
 export default defineConfig({
   plugins: [
-    snapPlugins([() => compressShaderLiterals.vite({ outputRatio: true })]),
-    react(),
     copyTypes(),
-    workerRawString(),
+    snapPlugins([workerRawString], { buildCmd: 'bun run build' }),
+    snapPlugins([() => compressShaderLiterals.vite({ outputRatio: true })], { buildCmd: 'bun run build' }),
+    react(),
   ],
 
   build: {
