@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.8
+- Add byte-snap optimization and compress-shader-literals
+- Fix tangential velocity boundary conditions
+
 ## v1.0.7
 - Internal/infrastructure changes only
 
