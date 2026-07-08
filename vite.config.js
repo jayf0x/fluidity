@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react';
+import { snapPlugins } from 'byte-snap';
 import { compressShaderLiterals } from 'compress-shader-literals';
 import fs from 'fs';
 import { resolve } from 'path';
@@ -66,7 +67,12 @@ function workerRawString() {
 }
 
 export default defineConfig({
-  plugins: [compressShaderLiterals.vite({ outputRatio: true }), react(), copyTypes(), workerRawString()],
+  plugins: [
+    snapPlugins([() => compressShaderLiterals.vite({ outputRatio: true })]),
+    react(),
+    copyTypes(),
+    workerRawString(),
+  ],
 
   build: {
     lib: {
