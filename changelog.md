@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.10
+- Add textblur and refraction; warpStrength image-only
+
 ## v1.0.9
 - Fix: pre-blur density FBO (separable Gaussian) for smooth normals
 
