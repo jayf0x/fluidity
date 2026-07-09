@@ -1,6 +1,7 @@
 import {
   advectionShader,
   baseVertexShader,
+  blurShader,
   curlShader,
   displayShader,
   divergenceShader,
@@ -40,6 +41,7 @@ export interface Programs {
   splat: Program;
   curl: Program;
   vorticity: Program;
+  blur: Program;
   display: Program;
 }
 
@@ -187,6 +189,7 @@ export function createPrograms(gl: GL): Programs {
     splat: new Program(gl, baseVertexShader, splatShader),
     curl: new Program(gl, baseVertexShader, curlShader),
     vorticity: new Program(gl, baseVertexShader, vorticityShader),
+    blur: new Program(gl, baseVertexShader, blurShader),
     display: new Program(gl, baseVertexShader, displayShader),
   };
 }

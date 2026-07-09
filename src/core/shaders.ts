@@ -126,6 +126,26 @@ export const curlShader = /* glsl */ `
   }
 `;
 
+// Separable Gaussian blur, one axis per pass (direction = (1,0) then (0,1)).
+// Used to pre-blur the density FBO for smoother display-pass normals; raw
+// density (uTexture in displayShader) still drives colour/alpha directly.
+export const blurShader = /* glsl */ `
+  precision highp float;
+  varying vec2 vUv;
+  uniform sampler2D uSource;
+  uniform vec2 texelSize;
+  uniform vec2 direction;
+  void main () {
+    vec2 off = direction * texelSize;
+    float sum = texture2D(uSource, vUv).r * 0.38774
+      + texture2D(uSource, vUv + off).r * 0.24477
+      + texture2D(uSource, vUv - off).r * 0.24477
+      + texture2D(uSource, vUv + off * 2.0).r * 0.06136
+      + texture2D(uSource, vUv - off * 2.0).r * 0.06136;
+    gl_FragColor = vec4(sum, 0.0, 0.0, 1.0);
+  }
+`;
+
 export const vorticityShader = /* glsl */ `
   precision highp float;
   varying vec2 vUv; varying vec2 vL; varying vec2 vR; varying vec2 vT; varying vec2 vB;
@@ -172,6 +192,7 @@ export const displayShader = /* glsl */ `
   uniform sampler2D uBackground;
   uniform sampler2D uCoverage;
   uniform sampler2D uVelocity;
+  uniform sampler2D uDensityBlurred;
 
   uniform vec2  texelSize;
   uniform vec3  uWaterColor;
@@ -190,19 +211,20 @@ export const displayShader = /* glsl */ `
     float density  = max(texture2D(uTexture, vUv).r, 0.0) * (1.0 - obs);
     float coverage = texture2D(uCoverage,  vUv).r;
 
-    // 8-tap Sobel normal — spread is density-aware: wider at low density (noisy gradient
-    // needs smoothing), tighter at high density (well-defined gradient = sharp specular).
-    // texelSize is sim texel size; range clamps to [1.5, 6] sim texels.
+    // 8-tap Sobel normal — sampled from the pre-blurred density FBO (separable Gaussian,
+    // see blurShader) so the gradient is smooth without needing a huge tap spread; raw
+    // density (uTexture, above) still drives colour/alpha. Spread stays density-aware:
+    // wider at low density, tighter at high density for sharp specular on solid strokes.
     float sobelSpread = clamp(3.0 / max(density, 0.3), 1.5, 6.0);
     float sx = texelSize.x * sobelSpread, sy = texelSize.y * sobelSpread;
-    float d00 = max(texture2D(uTexture, vUv + vec2(-sx, -sy)).r, 0.0);
-    float d10 = max(texture2D(uTexture, vUv + vec2(0.0, -sy)).r, 0.0);
-    float d20 = max(texture2D(uTexture, vUv + vec2( sx, -sy)).r, 0.0);
-    float d01 = max(texture2D(uTexture, vUv + vec2(-sx, 0.0)).r, 0.0);
-    float d21 = max(texture2D(uTexture, vUv + vec2( sx, 0.0)).r, 0.0);
-    float d02 = max(texture2D(uTexture, vUv + vec2(-sx,  sy)).r, 0.0);
-    float d12 = max(texture2D(uTexture, vUv + vec2(0.0,  sy)).r, 0.0);
-    float d22 = max(texture2D(uTexture, vUv + vec2( sx,  sy)).r, 0.0);
+    float d00 = max(texture2D(uDensityBlurred, vUv + vec2(-sx, -sy)).r, 0.0);
+    float d10 = max(texture2D(uDensityBlurred, vUv + vec2(0.0, -sy)).r, 0.0);
+    float d20 = max(texture2D(uDensityBlurred, vUv + vec2( sx, -sy)).r, 0.0);
+    float d01 = max(texture2D(uDensityBlurred, vUv + vec2(-sx, 0.0)).r, 0.0);
+    float d21 = max(texture2D(uDensityBlurred, vUv + vec2( sx, 0.0)).r, 0.0);
+    float d02 = max(texture2D(uDensityBlurred, vUv + vec2(-sx,  sy)).r, 0.0);
+    float d12 = max(texture2D(uDensityBlurred, vUv + vec2(0.0,  sy)).r, 0.0);
+    float d22 = max(texture2D(uDensityBlurred, vUv + vec2( sx,  sy)).r, 0.0);
     float gx  = (d20 + 2.0*d21 + d22) - (d00 + 2.0*d01 + d02);
     float gy  = (d02 + 2.0*d12 + d22) - (d00 + 2.0*d10 + d20);
 

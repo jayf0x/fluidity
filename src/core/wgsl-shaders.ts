@@ -239,6 +239,37 @@ struct U { texelSize: vec2f, _pad: vec2f }
 }
 `;
 
+// ─── Blur ────────────────────────────────────────────────────────────────────
+// Separable Gaussian, one axis per pass (direction = (1,0) then (0,1)).
+// Pre-blurs the density FBO for smoother display-pass normals; raw density
+// (uTex in displayWGSL) still drives colour/alpha directly.
+
+export const blurWGSL = /* wgsl */`
+${SHARED_VS_STRUCT}
+
+struct U { texelSize: vec2f, direction: vec2f }
+@group(0) @binding(0) var<uniform> u    : U;
+@group(0) @binding(1) var          samp : sampler;
+@group(0) @binding(2) var          uSrc : texture_2d<f32>;
+
+@vertex fn vs(@location(0) a: vec2f) -> VSOut {
+  var o: VSOut;
+  o.uv = vec2f(a.x * 0.5 + 0.5, 0.5 - a.y * 0.5);
+  o.pos = vec4f(a, 0.0, 1.0);
+  return o;
+}
+
+@fragment fn fs(i: VSOut) -> @location(0) vec4f {
+  let off = u.direction * u.texelSize;
+  let sum = textureSample(uSrc, samp, i.uv).r * 0.38774
+    + textureSample(uSrc, samp, i.uv + off).r * 0.24477
+    + textureSample(uSrc, samp, i.uv - off).r * 0.24477
+    + textureSample(uSrc, samp, i.uv + off * 2.0).r * 0.06136
+    + textureSample(uSrc, samp, i.uv - off * 2.0).r * 0.06136;
+  return vec4f(sum, 0.0, 0.0, 1.0);
+}
+`;
+
 // ─── Vorticity ───────────────────────────────────────────────────────────────
 
 export const vorticityWGSL = /* wgsl */`
@@ -313,6 +344,7 @@ struct U {
 @group(0) @binding(4) var          uBg  : texture_2d<f32>;
 @group(0) @binding(5) var          uCov : texture_2d<f32>;
 @group(0) @binding(6) var          uVel : texture_2d<f32>;
+@group(0) @binding(7) var          uDensBlur : texture_2d<f32>;
 
 @vertex fn vs(@location(0) a: vec2f) -> VSOut {
   var o: VSOut;
@@ -330,18 +362,20 @@ struct U {
   let density = max(textureSample(uTex, samp, i.uv).r, 0.0) * (1.0 - obs);
   let cov     = textureSample(uCov, samp, i.uv).r;
 
-  // Density-aware spread: wider at low density (smooth noisy gradient), tight at high (sharp specular).
+  // Sobel taps sample the pre-blurred density (uDensBlur, see blurWGSL) for a smooth
+  // gradient; raw density above still drives colour/alpha. Spread stays density-aware:
+  // wider at low density (smooth noisy gradient), tight at high (sharp specular).
   let sobelSpread = clamp(3.0 / max(density, 0.3), 1.5, 6.0);
   let sx  = u.texelSize.x * sobelSpread;
   let sy  = u.texelSize.y * sobelSpread;
-  let d00 = max(textureSample(uTex, samp, i.uv + vec2f(-sx, -sy)).r, 0.0);
-  let d10 = max(textureSample(uTex, samp, i.uv + vec2f(0.0, -sy)).r, 0.0);
-  let d20 = max(textureSample(uTex, samp, i.uv + vec2f( sx, -sy)).r, 0.0);
-  let d01 = max(textureSample(uTex, samp, i.uv + vec2f(-sx, 0.0)).r, 0.0);
-  let d21 = max(textureSample(uTex, samp, i.uv + vec2f( sx, 0.0)).r, 0.0);
-  let d02 = max(textureSample(uTex, samp, i.uv + vec2f(-sx,  sy)).r, 0.0);
-  let d12 = max(textureSample(uTex, samp, i.uv + vec2f(0.0,  sy)).r, 0.0);
-  let d22 = max(textureSample(uTex, samp, i.uv + vec2f( sx,  sy)).r, 0.0);
+  let d00 = max(textureSample(uDensBlur, samp, i.uv + vec2f(-sx, -sy)).r, 0.0);
+  let d10 = max(textureSample(uDensBlur, samp, i.uv + vec2f(0.0, -sy)).r, 0.0);
+  let d20 = max(textureSample(uDensBlur, samp, i.uv + vec2f( sx, -sy)).r, 0.0);
+  let d01 = max(textureSample(uDensBlur, samp, i.uv + vec2f(-sx, 0.0)).r, 0.0);
+  let d21 = max(textureSample(uDensBlur, samp, i.uv + vec2f( sx, 0.0)).r, 0.0);
+  let d02 = max(textureSample(uDensBlur, samp, i.uv + vec2f(-sx,  sy)).r, 0.0);
+  let d12 = max(textureSample(uDensBlur, samp, i.uv + vec2f(0.0,  sy)).r, 0.0);
+  let d22 = max(textureSample(uDensBlur, samp, i.uv + vec2f( sx,  sy)).r, 0.0);
   let gx  = (d20 + 2.0*d21 + d22) - (d00 + 2.0*d01 + d02);
   let gy  = (d02 + 2.0*d12 + d22) - (d00 + 2.0*d10 + d20);
 

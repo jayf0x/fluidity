@@ -76,6 +76,14 @@ describe('FluidSimulation — image source loading', () => {
     // isReady is false so step shouldn't run — just verify no crash
     expect(() => sim.resize(800, 600)).not.toThrow();
   });
+
+  it('runs a real GL frame (with the density pre-blur pass) without throwing (improvement #10)', () => {
+    vi.useFakeTimers();
+    sim.setTextSource({ text: 'Hi', fontSize: 40, color: '#fff' });
+    sim.resize(200, 100);
+    expect(() => vi.advanceTimersByTime(20)).not.toThrow();
+    vi.useRealTimers();
+  });
 });
 
 describe('FluidSimulation — URL handling', () => {

@@ -21,6 +21,7 @@ import {
   gpuRenderDisplay,
   gpuRenderToTexture,
   writeAdvUniforms,
+  writeBlurUniforms,
   writeDisplayUniforms,
   writeSplatUniforms,
   writeTexelUniforms,
@@ -88,6 +89,10 @@ export class FluidSimulation {
   #glDivergence: FBO | null = null;
   #glPressure: DoubleFBO | null = null;
   #glCurl: FBO | null = null;
+  // Pre-blurred density (separable Gaussian) — feeds the display-pass Sobel normal;
+  // raw #glDensity still drives colour/alpha (improvement #10).
+  #glDensityBlurTemp: FBO | null = null;
+  #glDensityBlurred: FBO | null = null;
   #glBgTex: WebGLTexture | null = null;
   #glObsTex: WebGLTexture | null = null;
   #glCovTex: WebGLTexture | null = null;
@@ -102,6 +107,10 @@ export class FluidSimulation {
   #gpuDivergence: GPUTextureFBO | null = null;
   #gpuPressure: GPUDoubleFBO | null = null;
   #gpuCurl: GPUTextureFBO | null = null;
+  // Pre-blurred density (separable Gaussian) — feeds the display-pass Sobel normal;
+  // raw #gpuDensity still drives colour/alpha (improvement #10).
+  #gpuDensityBlurTemp: GPUTextureFBO | null = null;
+  #gpuDensityBlurred: GPUTextureFBO | null = null;
   #gpuTexSet: GPUTextureSet | null = null;
   // Pre-allocated uniform buffers (sizes: see gpu-utils writeXxx docs)
   // Velocity/density advection use separate buffers — writeBuffer is a queue op;
@@ -115,6 +124,8 @@ export class FluidSimulation {
   #gpuUniSplatDen:GPUBuffer | null = null; // 48 bytes — density splat
   #gpuUniCurl:    GPUBuffer | null = null; // 16 bytes
   #gpuUniVort:    GPUBuffer | null = null; // 16 bytes
+  #gpuUniBlurH:   GPUBuffer | null = null; // 16 bytes — separate from V: same aliasing
+  #gpuUniBlurV:   GPUBuffer | null = null; // 16 bytes   hazard as adv/advDen above
   #gpuUniDisp:    GPUBuffer | null = null; // 64 bytes
 
   // ── Shared state ────────────────────────────────────────────────────────────
@@ -352,6 +363,8 @@ export class FluidSimulation {
     this.#gpuUniSplatDen = createUniformBuffer(device, 48);
     this.#gpuUniCurl     = createUniformBuffer(device, 16);
     this.#gpuUniVort     = createUniformBuffer(device, 16);
+    this.#gpuUniBlurH    = createUniformBuffer(device, 16);
+    this.#gpuUniBlurV    = createUniformBuffer(device, 16);
     this.#gpuUniDisp     = createUniformBuffer(device, 64);
   }
 
@@ -389,6 +402,8 @@ export class FluidSimulation {
       this.#gpuPressure   = createGPUDoubleFBO(device, fmt, W, H);
       this.#gpuDivergence = createGPUTextureFBO(device, fmt, W, H);
       this.#gpuCurl       = createGPUTextureFBO(device, fmt, W, H);
+      this.#gpuDensityBlurTemp = createGPUTextureFBO(device, fmt, W, H);
+      this.#gpuDensityBlurred  = createGPUTextureFBO(device, fmt, W, H);
     } else {
       const gl  = this.#gl!;
       const ext = this.#glExt!;
@@ -398,6 +413,8 @@ export class FluidSimulation {
       this.#glPressure   = createDoubleFBO(gl, ext, W, H);
       this.#glDivergence = createFBO(gl, ext, W, H);
       this.#glCurl       = createFBO(gl, ext, W, H);
+      this.#glDensityBlurTemp = createFBO(gl, ext, W, H);
+      this.#glDensityBlurred  = createFBO(gl, ext, W, H);
     }
   }
 
@@ -456,8 +473,11 @@ export class FluidSimulation {
       this.#gpuPressure?.dispose();
       this.#gpuDivergence?.tex.destroy();
       this.#gpuCurl?.tex.destroy();
+      this.#gpuDensityBlurTemp?.tex.destroy();
+      this.#gpuDensityBlurred?.tex.destroy();
       this.#gpuDensity = this.#gpuVelocity = this.#gpuPressure = null;
       this.#gpuDivergence = this.#gpuCurl = null;
+      this.#gpuDensityBlurTemp = this.#gpuDensityBlurred = null;
     } else {
       const gl = this.#gl!;
       this.#glDensity?.dispose();
@@ -471,7 +491,16 @@ export class FluidSimulation {
         gl.deleteTexture(this.#glCurl.tex);
         gl.deleteFramebuffer(this.#glCurl.fbo);
       }
+      if (this.#glDensityBlurTemp) {
+        gl.deleteTexture(this.#glDensityBlurTemp.tex);
+        gl.deleteFramebuffer(this.#glDensityBlurTemp.fbo);
+      }
+      if (this.#glDensityBlurred) {
+        gl.deleteTexture(this.#glDensityBlurred.tex);
+        gl.deleteFramebuffer(this.#glDensityBlurred.fbo);
+      }
       this.#glDensity = this.#glVelocity = this.#glPressure = this.#glDivergence = this.#glCurl = null;
+      this.#glDensityBlurTemp = this.#glDensityBlurred = null;
     }
   }
 
@@ -676,7 +705,27 @@ export class FluidSimulation {
     }
     this.#gpuVelocity.swap();
 
-    // ── 10. Display ──────────────────────────────────────────────────────────
+    // ── 10. Pre-blur density (separable Gaussian) — feeds the display Sobel normal
+    // only; raw density (binding 2 below) still drives colour/alpha directly.
+    {
+      writeBlurUniforms(dev, this.#gpuUniBlurH!, tsx, tsy, 1, 0);
+      const groupH = bg(progs.blur, [
+        { binding: 0, resource: { buffer: this.#gpuUniBlurH! } },
+        sampEntry,
+        { binding: 2, resource: this.#gpuDensity!.read.view },
+      ]);
+      gpuRenderToTexture(enc, progs.blur, groupH, quad, this.#gpuDensityBlurTemp!.view);
+
+      writeBlurUniforms(dev, this.#gpuUniBlurV!, tsx, tsy, 0, 1);
+      const groupV = bg(progs.blur, [
+        { binding: 0, resource: { buffer: this.#gpuUniBlurV! } },
+        sampEntry,
+        { binding: 2, resource: this.#gpuDensityBlurTemp!.view },
+      ]);
+      gpuRenderToTexture(enc, progs.blur, groupV, quad, this.#gpuDensityBlurred!.view);
+    }
+
+    // ── 11. Display ──────────────────────────────────────────────────────────
     {
       const swapView = gpu.context.getCurrentTexture().createView();
       const group = bg(progs.display, [
@@ -687,6 +736,7 @@ export class FluidSimulation {
         { binding: 4, resource: tex.backgroundView },
         { binding: 5, resource: tex.coverageView },
         { binding: 6, resource: this.#gpuVelocity.read.view },
+        { binding: 7, resource: this.#gpuDensityBlurred!.view },
       ]);
       gpuRenderDisplay(enc, progs.display, group, quad, swapView);
     }
@@ -789,7 +839,7 @@ export class FluidSimulation {
 
     const gl   = this.#gl!;
     const cfg  = this.#config;
-    const { advection, divergence, pressure, gradientSubtract, splat, curl, vorticity, display } = this.#glPrograms!;
+    const { advection, divergence, pressure, gradientSubtract, splat, curl, vorticity, blur, display } = this.#glPrograms!;
 
     this.#mouse.x += (this.#mouse.targetX - this.#mouse.x) * 0.15;
     this.#mouse.y += (this.#mouse.targetY - this.#mouse.y) * 0.15;
@@ -908,7 +958,22 @@ export class FluidSimulation {
     blit(this.#glVelocity.write.fbo);
     this.#glVelocity.swap();
 
-    // 6. Display
+    // 6. Pre-blur density (separable Gaussian) — feeds the display Sobel normal only;
+    // raw density (bound below as uTexture) still drives colour/alpha directly.
+    blur.bind();
+    gl.uniform2f(blur.uniforms.texelSize, 1 / W, 1 / H);
+    gl.uniform1i(blur.uniforms.uSource, 0);
+    gl.uniform2f(blur.uniforms.direction, 1, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#glDensity.read.tex);
+    blit(this.#glDensityBlurTemp!.fbo);
+
+    gl.uniform2f(blur.uniforms.direction, 0, 1);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.#glDensityBlurTemp!.tex);
+    blit(this.#glDensityBlurred!.fbo);
+
+    // 7. Display
     gl.viewport(0, 0, this.#width, this.#height);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     gl.clear(gl.COLOR_BUFFER_BIT); // clear to transparent (clearColor = 0,0,0,0)
@@ -934,12 +999,15 @@ export class FluidSimulation {
     gl.bindTexture(gl.TEXTURE_2D, this.#glCovTex);
     gl.activeTexture(gl.TEXTURE4);
     gl.bindTexture(gl.TEXTURE_2D, this.#glVelocity.read.tex);
+    gl.activeTexture(gl.TEXTURE5);
+    gl.bindTexture(gl.TEXTURE_2D, this.#glDensityBlurred!.tex);
 
     gl.uniform1i(display.uniforms.uTexture, 0);
     gl.uniform1i(display.uniforms.uObstacle, 1);
     gl.uniform1i(display.uniforms.uBackground, 2);
     gl.uniform1i(display.uniforms.uCoverage, 3);
     gl.uniform1i(display.uniforms.uVelocity, 4);
+    gl.uniform1i(display.uniforms.uDensityBlurred, 5);
 
     blit(null);
   }

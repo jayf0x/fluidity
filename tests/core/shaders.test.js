@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { displayShader, gradientSubtractShader } from '../../src/core/shaders.ts';
-import { displayWGSL, gradientSubtractWGSL } from '../../src/core/wgsl-shaders.ts';
+import { blurShader, displayShader, gradientSubtractShader } from '../../src/core/shaders.ts';
+import { blurWGSL, displayWGSL, gradientSubtractWGSL } from '../../src/core/wgsl-shaders.ts';
 
 // Shaders can't run under jsdom — these guard the source text against regressions.
 
@@ -31,5 +31,29 @@ describe('gradient-subtract shader — slip boundary condition (improvement #8)'
     expect(gradientSubtractWGSL).toMatch(/obsGrad/);
     expect(gradientSubtractWGSL).toMatch(/velTang/);
     expect(gradientSubtractWGSL).not.toMatch(/\* \(1\.0 - obs\)/);
+  });
+});
+
+// Improvement #10: density is pre-blurred (separable Gaussian, 2 passes) into its own
+// FBO for smooth Sobel normals; the display pass's raw density (uTexture/uTex) must
+// still drive colour/alpha directly, not the blurred copy.
+describe('density pre-blur (improvement #10)', () => {
+  it('blurShader/blurWGSL exist as a separable Gaussian (direction-based, 5-tap)', () => {
+    expect(blurShader).toMatch(/uniform vec2 direction/);
+    expect(blurShader).toMatch(/0\.38774/);
+    expect(blurWGSL).toMatch(/direction/);
+    expect(blurWGSL).toMatch(/0\.38774/);
+  });
+
+  it('display shaders sample the blurred density for Sobel taps, not raw density', () => {
+    expect(displayShader).toMatch(/uniform sampler2D uDensityBlurred/);
+    expect(displayShader).toMatch(/texture2D\(uDensityBlurred, vUv \+ vec2\(-sx, -sy\)\)/);
+    expect(displayWGSL).toMatch(/uDensBlur\s*:\s*texture_2d<f32>/);
+    expect(displayWGSL).toMatch(/textureSample\(uDensBlur, samp, i\.uv \+ vec2f\(-sx, -sy\)\)/);
+  });
+
+  it('raw density (used for colour/alpha) still comes from uTexture/uTex, not the blurred copy', () => {
+    expect(displayShader).toMatch(/float density\s*=\s*max\(texture2D\(uTexture, vUv\)/);
+    expect(displayWGSL).toMatch(/let density = max\(textureSample\(uTex, samp, i\.uv\)/);
   });
 });

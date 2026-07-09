@@ -43,6 +43,7 @@ export function createWebGLMock() {
     TEXTURE2: 0x84c2,
     TEXTURE3: 0x84c3,
     TEXTURE4: 0x84c4,
+    TEXTURE5: 0x84c5,
     COLOR_BUFFER_BIT: 0x4000,
 
     // Program / shader

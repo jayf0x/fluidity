@@ -1,5 +1,6 @@
 import {
   advectionWGSL,
+  blurWGSL,
   curlWGSL,
   displayWGSL,
   divergenceWGSL,
@@ -33,6 +34,7 @@ export interface GPUPrograms {
   splat: GPURenderPipeline;
   curl: GPURenderPipeline;
   vorticity: GPURenderPipeline;
+  blur: GPURenderPipeline;
   display: GPURenderPipeline;
 }
 
@@ -104,6 +106,7 @@ export function createGPUPrograms(device: GPUDevice, swapFormat: GPUTextureForma
     splat:           makePipeline(device, splatWGSL,           sim),
     curl:            makePipeline(device, curlWGSL,            sim),
     vorticity:       makePipeline(device, vorticityWGSL,       sim),
+    blur:            makePipeline(device, blurWGSL,            sim),
     display:         makePipeline(device, displayWGSL,         swapFormat, enableAlpha ? undefined : BLEND_OPAQUE),
   };
 }
@@ -143,6 +146,15 @@ export function writeVortUniforms(
   tsx: number, tsy: number, curl: number, dt: number
 ): void {
   const d = new Float32Array([tsx, tsy, curl, dt]);
+  device.queue.writeBuffer(buf, 0, d);
+}
+
+// Writes blur uniforms (16 bytes): texelSize(vec2f), direction(vec2f)
+export function writeBlurUniforms(
+  device: GPUDevice, buf: GPUBuffer,
+  tsx: number, tsy: number, dirX: number, dirY: number
+): void {
+  const d = new Float32Array([tsx, tsy, dirX, dirY]);
   device.queue.writeBuffer(buf, 0, d);
 }
 
