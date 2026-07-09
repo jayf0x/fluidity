@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.9
+- Fix: pre-blur density FBO (separable Gaussian) for smooth normals
+
 ## v1.0.8
 - Add byte-snap optimization and compress-shader-literals
 - Fix tangential velocity boundary conditions
