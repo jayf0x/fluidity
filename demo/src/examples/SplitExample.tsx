@@ -23,7 +23,6 @@ const TILES: Array<TextTileDef | ImageTileDef> = [
     backgroundColor: '#08000f',
     algorithm: 'aurora',
     curl: 0.4,
-    warpStrength: 0.24,
     glowColor: '#ff1a73',
   },
   {

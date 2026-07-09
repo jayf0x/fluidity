@@ -148,6 +148,12 @@ if (typeof OffscreenCanvas === 'undefined') {
         fillText: vi.fn(),
         clearRect: vi.fn(),
         drawImage: vi.fn(),
+        measureText: vi.fn(() => ({
+          actualBoundingBoxLeft: 0,
+          actualBoundingBoxRight: 40,
+          actualBoundingBoxAscent: 10,
+          actualBoundingBoxDescent: 10,
+        })),
         font: '',
         textAlign: 'center',
         textBaseline: 'middle',

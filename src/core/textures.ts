@@ -9,7 +9,16 @@ export interface TextSourceOpts {
   textAlign?: 'left' | 'center' | 'right';
   /** Oversample factor for the text canvas before upload. Higher = sharper edges. Default: 1 */
   textQuality?: number;
+  /**
+   * Edge softness (device px) applied to the glyph draw. Softens the AA edge so
+   * colour doesn't blend into a dark fringe against the black backdrop. Clamped to
+   * [0, 2] — beyond that the glyph itself starts reading as blurry. Default: 1.
+   */
+  textBlur?: number;
 }
+
+export const DEFAULT_TEXT_BLUR = 1;
+const MAX_TEXT_BLUR = 2;
 
 export interface TextureSet {
   backgroundTex: WebGLTexture;
@@ -76,7 +85,8 @@ function drawTextToCanvas(
   fontFamily: string,
   fontWeight: string | number,
   align: 'left' | 'center' | 'right',
-  quality: number
+  quality: number,
+  blurPx = 0
 ): void {
   const tq = Math.max(1, quality);
   const ow = Math.round(width * tq);
@@ -88,11 +98,15 @@ function drawTextToCanvas(
     const oCtx = oCanvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
     oCtx.fillStyle = bgColor;
     oCtx.fillRect(0, 0, ow, oh);
+    // Blurring the glyph draw (not the backdrop fill above) softens the AA edge into
+    // a gradient instead of a hard dark fringe against the black backdrop.
+    oCtx.filter = blurPx > 0 ? `blur(${blurPx * tq}px)` : 'none';
     oCtx.fillStyle = textColor;
     oCtx.font = `${fontWeight} ${fontSize * tq}px ${fontFamily}`;
     oCtx.textAlign = align;
     oCtx.textBaseline = 'middle';
     oCtx.fillText(text, x, oh / 2);
+    oCtx.filter = 'none';
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     ctx.clearRect(0, 0, width, height);
@@ -102,11 +116,35 @@ function drawTextToCanvas(
 
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, width, height);
+  ctx.filter = blurPx > 0 ? `blur(${blurPx}px)` : 'none';
   ctx.fillStyle = textColor;
   ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
   ctx.textAlign = align;
   ctx.textBaseline = 'middle';
   ctx.fillText(text, x, height / 2);
+  ctx.filter = 'none';
+}
+
+/**
+ * Paints a black canvas with a white rect over `[x, y, w, h]` — the binary
+ * content-bounds mask used for CSS `backgroundColor` passthrough in image mode.
+ */
+function fillRectCoverage(
+  ctx: OffscreenCanvasRenderingContext2D,
+  width: number,
+  height: number,
+  x: number,
+  y: number,
+  w: number,
+  h: number
+): void {
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = 'white';
+  const cx = Math.max(0, x);
+  const cy = Math.max(0, y);
+  ctx.fillRect(cx, cy, Math.min(w, width - cx), Math.min(h, height - cy));
 }
 
 // ─── WebGL texture creation ───────────────────────────────────────────────────
@@ -125,7 +163,12 @@ export function createTextTextures(
   backgroundBitmap: ImageBitmap | null = null,
   backgroundSize: string | number = 'cover'
 ): TextureSet {
-  const { text, fontSize, color, fontFamily = 'sans-serif', fontWeight = 900, textAlign = 'center', textQuality = 1 } = opts;
+  const {
+    text, fontSize, color,
+    fontFamily = 'sans-serif', fontWeight = 900, textAlign = 'center', textQuality = 1,
+    textBlur: rawTextBlur = DEFAULT_TEXT_BLUR,
+  } = opts;
+  const textBlur = Math.min(Math.max(rawTextBlur, 0), MAX_TEXT_BLUR);
 
   // width/height are DPR-adjusted — draw at 1:1 device pixels for crisp text
   const tCanvas = new OffscreenCanvas(width, height);
@@ -149,7 +192,9 @@ export function createTextTextures(
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
       return;
     }
-    drawTextToCanvas(ctx, width, height, fillColor, fillColor, text, fontSize, fontFamily, fontWeight, textAlign, textQuality);
+    // bgColor='black' + a soft blur on the glyph draw softens the AA edge into a
+    // gradient instead of a hard dark fringe against the black backdrop.
+    drawTextToCanvas(ctx, width, height, 'black', fillColor, text, fontSize, fontFamily, fontWeight, textAlign, textQuality, textBlur);
   };
 
   draw(color);
@@ -157,7 +202,7 @@ export function createTextTextures(
 
   // Obstacle / coverage: sharp white text on black.
   // coverageTex and obstacleTex share the same WebGLTexture — caller must NOT double-delete.
-  drawTextToCanvas(ctx, width, height, 'black', 'white', text, fontSize, fontFamily, fontWeight, textAlign, textQuality);
+  drawTextToCanvas(ctx, width, height, 'black', 'white', text, fontSize, fontFamily, fontWeight, textAlign, textQuality, textBlur);
   const obstacleTex = uploadTextureGL(gl, tCanvas);
 
   return { backgroundTex, obstacleTex, coverageTex: obstacleTex };
@@ -212,16 +257,7 @@ export function createImageTextures(
   const obstacleTex = uploadTextureGL(gl, tCanvas);
 
   // ── Coverage texture (binary rect mask for transparency) ─────────────────
-  ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = 'white';
-  ctx.fillRect(
-    Math.max(0, x),
-    Math.max(0, y),
-    Math.min(drawW, width - Math.max(0, x)),
-    Math.min(drawH, height - Math.max(0, y))
-  );
+  fillRectCoverage(ctx, width, height, x, y, drawW, drawH);
   const coverageTex = uploadTextureGL(gl, tCanvas);
 
   return { backgroundTex, obstacleTex, coverageTex };
@@ -254,7 +290,12 @@ export function createTextTexturesGPU(
   backgroundBitmap: ImageBitmap | null = null,
   backgroundSize: string | number = 'cover'
 ): GPUTextureSet {
-  const { text, fontSize, color, fontFamily = 'sans-serif', fontWeight = 900, textAlign = 'center', textQuality = 1 } = opts;
+  const {
+    text, fontSize, color,
+    fontFamily = 'sans-serif', fontWeight = 900, textAlign = 'center', textQuality = 1,
+    textBlur: rawTextBlur = DEFAULT_TEXT_BLUR,
+  } = opts;
+  const textBlur = Math.min(Math.max(rawTextBlur, 0), MAX_TEXT_BLUR);
 
   const tCanvas = new OffscreenCanvas(width, height);
   const ctx = tCanvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
@@ -272,14 +313,16 @@ export function createTextTexturesGPU(
       ctx.drawImage(backgroundBitmap, x, y, drawW, drawH);
       return;
     }
-    drawTextToCanvas(ctx, width, height, fillColor, fillColor, text, fontSize, fontFamily, fontWeight, textAlign, textQuality);
+    // bgColor='black' + a soft blur on the glyph draw softens the AA edge into a
+    // gradient instead of a hard dark fringe against the black backdrop.
+    drawTextToCanvas(ctx, width, height, 'black', fillColor, text, fontSize, fontFamily, fontWeight, textAlign, textQuality, textBlur);
   };
 
   draw(color);
   const backgroundTex = uploadTextureGPU(device, tCanvas, width, height);
 
   // Obstacle / coverage: sharp text — shared texture, sharedCoverage=true.
-  drawTextToCanvas(ctx, width, height, 'black', 'white', text, fontSize, fontFamily, fontWeight, textAlign, textQuality);
+  drawTextToCanvas(ctx, width, height, 'black', 'white', text, fontSize, fontFamily, fontWeight, textAlign, textQuality, textBlur);
   const obstacleTex = uploadTextureGPU(device, tCanvas, width, height);
 
   return {
@@ -333,11 +376,7 @@ export function createImageTexturesGPU(
   ctx.filter = 'none';
   const obstacleTex = uploadTextureGPU(device, tCanvas, width, height);
 
-  ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = 'white';
-  ctx.fillRect(Math.max(0, x), Math.max(0, y), Math.min(drawW, width - Math.max(0, x)), Math.min(drawH, height - Math.max(0, y)));
+  fillRectCoverage(ctx, width, height, x, y, drawW, drawH);
   const coverageTex = uploadTextureGPU(device, tCanvas, width, height);
 
   return {

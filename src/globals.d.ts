@@ -63,7 +63,13 @@ interface FluidBaseProps extends Partial<FluidConfig> {
   alphaEnabled?: boolean;
 }
 
-interface FluidTextProps extends FluidBaseProps {
+/**
+ * `refraction`/`warpStrength` have no visible effect on text (the obstacle/coverage
+ * mask is glyph-shaped, so the background reveal they'd bend collapses back to
+ * `uWaterColor` right outside the glyph edge) — omitted here to keep the prop
+ * surface honest. They still work fully on `FluidImage`.
+ */
+interface FluidTextProps extends Omit<FluidBaseProps, 'refraction' | 'warpStrength'> {
   text: string;
   fontSize?: number;
   color?: string;
@@ -71,6 +77,11 @@ interface FluidTextProps extends FluidBaseProps {
   fontWeight?: string | number;
   textAlign?: 'left' | 'center' | 'right';
   textQuality?: number;
+  /**
+   * Edge softness (device px) for the glyph draw. Softens the dark AA fringe on
+   * solid-colour text against the black backdrop. Clamped to [0, 2]. Default: 1.
+   */
+  textBlur?: number;
 }
 
 interface FluidImageProps extends FluidBaseProps {
@@ -87,4 +98,5 @@ interface TextSourceOpts {
   fontWeight?: string | number;
   textAlign?: 'left' | 'center' | 'right';
   textQuality?: number;
+  textBlur?: number;
 }

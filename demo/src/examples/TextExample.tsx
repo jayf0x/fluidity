@@ -30,6 +30,7 @@ export function TextExample() {
       fontSize: { value: 100 * window.devicePixelRatio, min: 100, max: 1200, step: 10 },
       textAlign: { value: 'center' as 'left' | 'center' | 'right', options: ['left', 'center', 'right'] },
       textQuality: { value: 1, min: 1, max: 4, step: 1 },
+      textBlur: { value: 1, min: 0, max: 2, step: 0.5 },
       reset: button(() => ref.current?.reset()),
     },
     { store: useShowcaseStore() }

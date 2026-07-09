@@ -100,14 +100,17 @@ export const Interactive = () => {
 | `color`      | `string`           | `'#ffffff'`    |
 | `fontFamily` | `string`           | `'sans-serif'` |
 | `fontWeight` | `string \| number` | `900`          |
+| `textBlur`   | `number`           | `1`            |
 
 ### FluidImage
 
-| Prop        | Type               | Default   |
-| ----------- | ------------------ | --------- |
-| `src`       | `string`           | —         |
-| `imageSize` | `string \| number` | `'cover'` |
-| `effect`    | `number`           | `0`       |
+| Prop           | Type               | Default   |
+| -------------- | ------------------ | --------- |
+| `src`          | `string`           | —         |
+| `imageSize`    | `string \| number` | `'cover'` |
+| `effect`       | `number`           | `0`       |
+| `refraction`   | `number`           | `1.0`     |
+| `warpStrength` | `number`           | `0.04`    |
 
 ### Shared props
 
@@ -123,12 +126,10 @@ export const Interactive = () => {
 | `curl`                | `number`           | `0`         |
 | `splatRadius`         | `number`           | `0.1`       |
 | `splatForce`          | `number`           | `0.08`      |
-| `refraction`          | `number`           | `1.0`       |
 | `specularExp`         | `number`           | `0`         |
 | `shine`               | `number`           | `0`         |
 | `waterColor`          | `FluidColor`       | `'#000000'` |
 | `glowColor`           | `FluidColor`       | `'#b3d9ff'` |
-| `warpStrength`        | `number`           | `0.04`      |
 | `backgroundColor`     | `string`           | `'#0a0a0a'` |
 | `backgroundSrc`       | `string`           | —           |
 | `backgroundSize`      | `string \| number` | `'cover'`   |
@@ -153,7 +154,7 @@ export const Interactive = () => {
 
 ```tsx
 <FluidImage src="/photo.jpg" algorithm="aurora" warpStrength={0.3} />
-<FluidText text="fluid" algorithm="ripple" refraction={0.6} />
+<FluidText text="fluid" algorithm="ripple" />
 ```
 
 ---

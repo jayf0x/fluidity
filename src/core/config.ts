@@ -86,6 +86,7 @@ export const DEFAULT_PROPS_TEXT = {
   fontWeight: 900 as string | number,
   textAlign: 'center' as 'left' | 'center' | 'right',
   textQuality: 1,
+  textBlur: 1,
 } as const;
 
 export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {

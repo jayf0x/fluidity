@@ -3,10 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTextTextures } from '../../src/core/textures.ts';
 import { createWebGLMock } from '../setup.js';
 
-// Records the fillStyle in effect at each fillRect call so we can assert what
-// colour the backdrop is painted with.
+// Records the fillStyle at each fillRect call and the ctx.filter in effect at each
+// fillText call, so we can assert both the backdrop colour and the blur softening.
 function recordingCanvas() {
   const fills = [];
+  const textFilters = [];
   const ctx = {
     fillStyle: '',
     font: '',
@@ -16,18 +17,20 @@ function recordingCanvas() {
     fillRect: vi.fn(function () {
       fills.push(ctx.fillStyle);
     }),
-    fillText: vi.fn(),
+    fillText: vi.fn(function () {
+      textFilters.push(ctx.filter);
+    }),
     clearRect: vi.fn(),
     drawImage: vi.fn(),
   };
-  return { ctx, fills };
+  return { ctx, fills, textFilters };
 }
 
 describe('createTextTextures — backdrop fringe (bug #1)', () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it('fills the colour backdrop with the text colour, not black', () => {
-    const { ctx, fills } = recordingCanvas();
+  it('keeps a black backdrop and blurs the glyph draw instead of flattening colour', () => {
+    const { ctx, fills, textFilters } = recordingCanvas();
     vi.stubGlobal(
       'OffscreenCanvas',
       class {
@@ -43,10 +46,56 @@ describe('createTextTextures — backdrop fringe (bug #1)', () => {
 
     createTextTextures(createWebGLMock(), 100, 50, { text: 'Hi', fontSize: 40, color: '#ffffff' });
 
-    // The first full-canvas fill is the background/colour pass — must be the text
-    // colour so anti-aliased glyph edges don't blend into a black fringe.
-    expect(fills[0]).toBe('#ffffff');
-    expect(fills[0]).not.toBe('black');
+    // Backdrop for the background/colour pass is still black. The AA fringe is fixed
+    // by blurring the glyph edge instead (asserted below), not by flattening colour.
+    expect(fills[0]).toBe('black');
+    // The glyph draw (first fillText — background/colour pass) uses a blur filter so
+    // the edge fades smoothly into black rather than a hard, dark AA ring.
+    expect(textFilters[0]).toMatch(/^blur\(/);
+  });
+
+  it('blurs the obstacle/coverage glyph draw too, matching the colour pass', () => {
+    const { ctx, textFilters } = recordingCanvas();
+    vi.stubGlobal(
+      'OffscreenCanvas',
+      class {
+        constructor(w, h) {
+          this.width = w;
+          this.height = h;
+        }
+        getContext() {
+          return ctx;
+        }
+      }
+    );
+
+    createTextTextures(createWebGLMock(), 100, 50, { text: 'Hi', fontSize: 40, color: '#ffffff' });
+
+    // fillText is called twice: [0] background/colour, [1] obstacle/coverage.
+    // Both passes must share the same blur so the fringe fix is consistent.
+    expect(textFilters[1]).toBe(textFilters[0]);
+    expect(textFilters[1]).toMatch(/^blur\(/);
+  });
+
+  it('clamps textBlur to [0, 2] on both passes', () => {
+    const { ctx, textFilters } = recordingCanvas();
+    vi.stubGlobal(
+      'OffscreenCanvas',
+      class {
+        constructor(w, h) {
+          this.width = w;
+          this.height = h;
+        }
+        getContext() {
+          return ctx;
+        }
+      }
+    );
+
+    createTextTextures(createWebGLMock(), 100, 50, { text: 'Hi', fontSize: 40, color: '#ffffff', textBlur: 8 });
+
+    expect(textFilters[0]).toBe('blur(2px)');
+    expect(textFilters[1]).toBe('blur(2px)');
   });
 
   it('lets a background image fill the glyphs instead of the solid colour (bug #2)', () => {
@@ -72,6 +121,61 @@ describe('createTextTextures — backdrop fringe (bug #1)', () => {
     // …and NOT overlay the text colour over the glyphs (that would hide it).
     // Only the separate white obstacle-mask pass draws text → exactly one fillText.
     expect(ctx.fillText).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('createTextTextures — coverage shares the obstacle mask (text mode)', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('keeps coverageTex === obstacleTex for solid-colour text', () => {
+    const { ctx } = recordingCanvas();
+    vi.stubGlobal(
+      'OffscreenCanvas',
+      class {
+        constructor(w, h) {
+          this.width = w;
+          this.height = h;
+        }
+        getContext() {
+          return ctx;
+        }
+      }
+    );
+
+    const { obstacleTex, coverageTex } = createTextTextures(createWebGLMock(), 100, 50, {
+      text: 'Hi',
+      fontSize: 40,
+      color: '#ffffff',
+    });
+
+    expect(coverageTex).toBe(obstacleTex);
+  });
+
+  it('keeps coverageTex === obstacleTex when a backgroundSrc image is set', () => {
+    const { ctx } = recordingCanvas();
+    vi.stubGlobal(
+      'OffscreenCanvas',
+      class {
+        constructor(w, h) {
+          this.width = w;
+          this.height = h;
+        }
+        getContext() {
+          return ctx;
+        }
+      }
+    );
+
+    const bitmap = { width: 200, height: 100, close: vi.fn() };
+    const { obstacleTex, coverageTex } = createTextTextures(
+      createWebGLMock(),
+      100,
+      50,
+      { text: 'Hi', fontSize: 40, color: '#ffffff' },
+      bitmap
+    );
+
+    expect(coverageTex).toBe(obstacleTex);
   });
 });
 

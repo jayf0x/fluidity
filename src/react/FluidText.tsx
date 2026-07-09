@@ -15,6 +15,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     fontWeight = DEFAULT_PROPS_TEXT.fontWeight,
     textAlign = DEFAULT_PROPS_TEXT.textAlign,
     textQuality = DEFAULT_PROPS_TEXT.textQuality,
+    textBlur = DEFAULT_PROPS_TEXT.textBlur,
     className,
     style,
     preset,
@@ -35,12 +36,10 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     curl,
     splatRadius,
     splatForce,
-    refraction,
     specularExp,
     shine,
     waterColor,
     glowColor,
-    warpStrength,
   },
   ref
 ) {
@@ -54,13 +53,11 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
       curl,
       splatRadius,
       splatForce,
-      refraction,
       specularExp,
       shine,
       waterColor,
       glowColor,
       algorithm,
-      warpStrength,
     }).filter(([, v]) => v !== undefined)
   ) as Partial<FluidConfig>;
 
@@ -77,7 +74,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     ref,
     () => ({
       reset() {
-        controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight, textAlign, textQuality });
+        controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight, textAlign, textQuality, textBlur });
       },
       move(x: number, y: number, strength = 1) {
         controllerRef.current?.handleMove(x, y, strength);
@@ -89,13 +86,13 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
         controllerRef.current?.updateConfig(normalizeConfig(cfg));
       },
     }),
-    [text, fontSize, color, fontFamily, fontWeight, textAlign, textQuality]
+    [text, fontSize, color, fontFamily, fontWeight, textAlign, textQuality, textBlur]
   );
 
   // Sync text source whenever relevant props change (webGPUEnabled/alphaEnabled trigger reinit → re-set source)
   useEffect(() => {
-    controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight, textAlign, textQuality });
-  }, [text, fontSize, color, fontFamily, fontWeight, textAlign, textQuality, webGPUEnabled, alphaEnabled]);
+    controllerRef.current?.setTextSource({ text, fontSize, color, fontFamily, fontWeight, textAlign, textQuality, textBlur });
+  }, [text, fontSize, color, fontFamily, fontWeight, textAlign, textQuality, textBlur, webGPUEnabled, alphaEnabled]);
 
   // Sync config/preset → updateConfig for reactive changes
   const configKey = JSON.stringify(configProps);
