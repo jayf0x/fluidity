@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.0.11
+- Add obstacleStrength parameter
+
 ## v1.0.10
 - Add textblur and refraction; warpStrength image-only
 
