@@ -11,6 +11,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     src,
     effect = DEFAULT_PROPS_IMAGE.effect,
     imageSize = DEFAULT_PROPS_IMAGE.imageSize,
+    obstacleStrength = DEFAULT_PROPS_IMAGE.obstacleStrength,
     className,
     style,
     preset,
@@ -73,7 +74,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     ref,
     () => ({
       reset() {
-        if (src) controllerRef.current?.setImageSource(src, effect, imageSize);
+        if (src) controllerRef.current?.setImageSource(src, effect, imageSize, obstacleStrength);
       },
       move(x, y, strength = 1) {
         controllerRef.current?.handleMove(x, y, strength);
@@ -85,14 +86,14 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
         controllerRef.current?.updateConfig(normalizeConfig(cfg));
       },
     }),
-    [src, effect, imageSize]
+    [src, effect, imageSize, obstacleStrength]
   );
 
-  // Reload whenever src, effect, or imageSize changes (webGPUEnabled triggers reinit → re-set source)
+  // Reload whenever src, effect, imageSize, or obstacleStrength changes (webGPUEnabled triggers reinit → re-set source)
   useEffect(() => {
     if (!src) return;
-    controllerRef.current?.setImageSource(src, effect, imageSize);
-  }, [src, effect, imageSize, webGPUEnabled, alphaEnabled]);
+    controllerRef.current?.setImageSource(src, effect, imageSize, obstacleStrength);
+  }, [src, effect, imageSize, obstacleStrength, webGPUEnabled, alphaEnabled]);
 
   // Sync config/preset → updateConfig for reactive changes
   const configKey = JSON.stringify(configProps);

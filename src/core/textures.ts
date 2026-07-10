@@ -222,7 +222,8 @@ export function createImageTextures(
   effect = 0.0,
   size: string | number = 'cover',
   backgroundBitmap: ImageBitmap | null = null,
-  backgroundSize: string | number = 'cover'
+  backgroundSize: string | number = 'cover',
+  obstacleStrength = 0.0
 ): TextureSet {
   const tCanvas = new OffscreenCanvas(width, height);
   const ctx = tCanvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
@@ -247,11 +248,14 @@ export function createImageTextures(
   ctx.drawImage(bitmap, x, y, drawW, drawH);
   const backgroundTex = uploadTextureGL(gl, tCanvas);
 
-  // ── Obstacle texture (darkened + blurred for soft physics boundary) ──────
+  // ── Obstacle texture (blurred for soft physics boundary) ─────────────────
+  // brightness(obstacleStrength) scales the drawn image by its own per-pixel luminance:
+  // 0 (default) = black = no obstacle (current/prior behaviour, image is decorative only);
+  // 1 = obstacle strength follows the image's luminance directly (bright = solid, dark = weak).
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, width, height);
-  ctx.filter = `brightness(${effect}) blur(8px)`;
+  ctx.filter = `brightness(${obstacleStrength}) blur(8px)`;
   ctx.drawImage(bitmap, x, y, drawW, drawH);
   ctx.filter = 'none';
   const obstacleTex = uploadTextureGL(gl, tCanvas);
@@ -347,7 +351,8 @@ export function createImageTexturesGPU(
   effect = 0.0,
   size: string | number = 'cover',
   backgroundBitmap: ImageBitmap | null = null,
-  backgroundSize: string | number = 'cover'
+  backgroundSize: string | number = 'cover',
+  obstacleStrength = 0.0
 ): GPUTextureSet {
   const tCanvas = new OffscreenCanvas(width, height);
   const ctx = tCanvas.getContext('2d') as OffscreenCanvasRenderingContext2D;
@@ -368,10 +373,12 @@ export function createImageTexturesGPU(
   ctx.drawImage(bitmap, x, y, drawW, drawH);
   const backgroundTex = uploadTextureGPU(device, tCanvas, width, height);
 
+  // brightness(obstacleStrength) — see createImageTextures for the semantics (0 = no
+  // obstacle/current behaviour, 1 = obstacle follows the image's own luminance).
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, width, height);
-  ctx.filter = `brightness(${effect}) blur(8px)`;
+  ctx.filter = `brightness(${obstacleStrength}) blur(8px)`;
   ctx.drawImage(bitmap, x, y, drawW, drawH);
   ctx.filter = 'none';
   const obstacleTex = uploadTextureGPU(device, tCanvas, width, height);

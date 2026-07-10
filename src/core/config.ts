@@ -76,6 +76,7 @@ export const DEFAULT_PROPS_IMAGE = {
   ...DEFAULT_PROPS_SHARED,
   effect: 0 as number,
   imageSize: 'cover' as string | number,
+  obstacleStrength: 0 as number,
 } as const;
 
 export const DEFAULT_PROPS_TEXT = {

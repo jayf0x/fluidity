@@ -109,6 +109,7 @@ export const Interactive = () => {
 | `src`          | `string`           | —         |
 | `imageSize`    | `string \| number` | `'cover'` |
 | `effect`       | `number`           | `0`       |
+| `obstacleStrength` | `number`       | `0`       |
 | `refraction`   | `number`           | `1.0`     |
 | `warpStrength` | `number`           | `0.04`    |
 

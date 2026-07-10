@@ -26,10 +26,11 @@ export function ImageExample() {
   );
 
   const { urls, updateImages } = useImages(1, imageQuality);
-  const { imageSize } = useControls(
+  const { imageSize, obstacleStrength } = useControls(
     'settings',
     {
       imageSize: { label: 'size', options: ['cover', 'contain', '80%', '50%'], value: 'cover' },
+      obstacleStrength: { value: 0, min: 0, max: 1, step: 0.05 },
       nextImage: button(updateImages),
       reload: button(() => ref.current?.reset()),
       splash: button(() => ref.current?.move(400, 300, 12)),
@@ -37,5 +38,7 @@ export function ImageExample() {
     { store }
   );
 
-  return <FluidImage ref={ref} src={urls[0]} effect={0} imageSize={imageSize} {...args} />;
+  return (
+    <FluidImage ref={ref} src={urls[0]} effect={0} imageSize={imageSize} obstacleStrength={obstacleStrength} {...args} />
+  );
 }

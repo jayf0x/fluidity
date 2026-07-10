@@ -22,7 +22,7 @@
   "scripts": {
     "build": "vite build",
     "test:install": "bash scripts/test-install.sh",
-    "demo:dev": "bun run --cwd ./demo dev",
+    "dev": "bun run --cwd ./demo dev",
     "demo:build": "bun run build:nocompress && PATH=/Users/me/.nvm/versions/node/v20.19.6/bin:$PATH FLUIDITY_DIST=1 bun run --cwd ./demo build && PATH=/Users/me/.nvm/versions/node/v20.19.6/bin:$PATH bun run --cwd ./demo preview",
     "test": "vitest",
     "test:run": "vitest run",

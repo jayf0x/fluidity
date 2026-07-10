@@ -8,8 +8,8 @@
  * Message types (main → worker):
  *   init            { canvas: OffscreenCanvas, width, height, config, dpr, quality: { dpr, sim } }
  *   setTextSource   { opts: TextSourceOpts }
- *   setImageSource  { src: string, effect?: number, size?: string | number }
- *   setImageBitmap  { bitmap: ImageBitmap, effect?: number, size?: string | number }  (transferable)
+ *   setImageSource  { src: string, effect?: number, size?: string | number, obstacleStrength?: number }
+ *   setImageBitmap  { bitmap: ImageBitmap, effect?: number, size?: string | number, obstacleStrength?: number }  (transferable)
  *   setBackground   { bitmap: ImageBitmap | null, size?: string | number }  (transferable if bitmap)
  *   move            { x, y, strength? }
  *   resize          { width, height, dpr }
@@ -72,7 +72,8 @@ self.onmessage = async (e: MessageEvent) => {
         await sim.setImageSource(
           data.src as string,
           data.effect as number | undefined,
-          data.size as string | number | undefined
+          data.size as string | number | undefined,
+          data.obstacleStrength as number | undefined
         );
         break;
       }
@@ -83,7 +84,8 @@ self.onmessage = async (e: MessageEvent) => {
         sim.setImageBitmap(
           data.bitmap as ImageBitmap,
           data.effect as number | undefined,
-          data.size as string | number | undefined
+          data.size as string | number | undefined,
+          data.obstacleStrength as number | undefined
         );
         break;
       }

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { createTextTextures } from '../../src/core/textures.ts';
+import { createImageTextures, createTextTextures } from '../../src/core/textures.ts';
 import { createWebGLMock } from '../setup.js';
 
 // Records the fillStyle at each fillRect call and the ctx.filter in effect at each
@@ -242,5 +242,71 @@ describe('createTextTextures — textQuality (feature 2)', () => {
     expect(oversized.length).toBeGreaterThan(0);
     // Main canvas receives a drawImage call to scale it down
     expect(ctx.drawImage).toHaveBeenCalled();
+  });
+});
+
+// Records the ctx.filter in effect at each drawImage call, so we can assert which
+// brightness value (effect vs obstacleStrength) drove which draw.
+function recordingImageCanvas() {
+  const drawFilters = [];
+  const ctx = {
+    fillStyle: '', font: '', textAlign: '', textBaseline: '', filter: 'none',
+    fillRect: vi.fn(),
+    fillText: vi.fn(),
+    clearRect: vi.fn(),
+    drawImage: vi.fn(function () {
+      drawFilters.push(ctx.filter);
+    }),
+  };
+  return { ctx, drawFilters };
+}
+
+describe('createImageTextures — obstacleStrength (feature #3)', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('defaults to brightness(0) on the obstacle draw — image is decorative only (current/prior behaviour)', () => {
+    const { ctx, drawFilters } = recordingImageCanvas();
+    vi.stubGlobal('OffscreenCanvas', class {
+      constructor(w, h) { this.width = w; this.height = h; }
+      getContext() { return ctx; }
+    });
+
+    const bitmap = { width: 200, height: 100 };
+    createImageTextures(createWebGLMock(), bitmap, 100, 50);
+
+    // drawImage is called twice for the primary bitmap with no backgroundBitmap:
+    // [0] background pass (no filter set — always full brightness), [1] obstacle pass.
+    expect(drawFilters[1]).toBe('brightness(0) blur(8px)');
+  });
+
+  it('drives the obstacle draw brightness independently from `effect`', () => {
+    const { ctx, drawFilters } = recordingImageCanvas();
+    vi.stubGlobal('OffscreenCanvas', class {
+      constructor(w, h) { this.width = w; this.height = h; }
+      getContext() { return ctx; }
+    });
+
+    const bitmap = { width: 200, height: 100 };
+    // effect=0.9 must not leak into the obstacle draw; obstacleStrength=1 drives it instead.
+    createImageTextures(createWebGLMock(), bitmap, 100, 50, 0.9, 'cover', null, 'cover', 1);
+
+    expect(drawFilters[1]).toBe('brightness(1) blur(8px)');
+  });
+
+  it('applies `effect` only to the optional backgroundBitmap layer, not the obstacle mask', () => {
+    const { ctx, drawFilters } = recordingImageCanvas();
+    vi.stubGlobal('OffscreenCanvas', class {
+      constructor(w, h) { this.width = w; this.height = h; }
+      getContext() { return ctx; }
+    });
+
+    const bitmap = { width: 200, height: 100 };
+    const backgroundBitmap = { width: 50, height: 50 };
+    createImageTextures(createWebGLMock(), bitmap, 100, 50, 0.7, 'cover', backgroundBitmap, 'cover', 0);
+
+    // drawImage order: [0] backgroundBitmap (effect=0.7), [1] primary bitmap (no filter),
+    // [2] obstacle pass (obstacleStrength=0, defaulted).
+    expect(drawFilters[0]).toBe('brightness(0.7) blur(8px)');
+    expect(drawFilters[2]).toBe('brightness(0) blur(8px)');
   });
 });

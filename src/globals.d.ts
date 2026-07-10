@@ -88,6 +88,12 @@ interface FluidImageProps extends FluidBaseProps {
   src: string;
   effect?: number;
   imageSize?: string | number;
+  /**
+   * 0–1 — how much the image's own luminance drives the physics obstacle. `0` (default)
+   * matches prior behaviour: the image is purely decorative, fluid flows unobstructed.
+   * `1`: bright pixels fully block flow, dark pixels barely block it at all.
+   */
+  obstacleStrength?: number;
 }
 
 interface TextSourceOpts {

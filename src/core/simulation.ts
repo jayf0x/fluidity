@@ -56,7 +56,7 @@ const ALGORITHM_INT: Record<FluidAlgorithm, number> = { standard: 0, glass: 1, i
 
 type Source =
   | { type: 'text'; opts: TextSourceOpts }
-  | { type: 'image'; bitmap: ImageBitmap; effect: number; size: string | number };
+  | { type: 'image'; bitmap: ImageBitmap; effect: number; size: string | number; obstacleStrength: number };
 
 interface MouseState {
   x: number;
@@ -205,17 +205,17 @@ export class FluidSimulation {
     this.#ensureRunning();
   }
 
-  async setImageSource(src: string, effect = 0.0, size: string | number = 'cover'): Promise<void> {
+  async setImageSource(src: string, effect = 0.0, size: string | number = 'cover', obstacleStrength = 0.0): Promise<void> {
     const bitmap = await loadImageBitmap(src);
     if (this.#destroyed) { bitmap.close(); return; }
-    this.#source = { type: 'image', bitmap, effect, size };
+    this.#source = { type: 'image', bitmap, effect, size, obstacleStrength };
     this.#applyDimensions();
     this.#applySource();
     this.#ensureRunning();
   }
 
-  setImageBitmap(bitmap: ImageBitmap, effect = 0.0, size: string | number = 'cover'): void {
-    this.#source = { type: 'image', bitmap, effect, size };
+  setImageBitmap(bitmap: ImageBitmap, effect = 0.0, size: string | number = 'cover', obstacleStrength = 0.0): void {
+    this.#source = { type: 'image', bitmap, effect, size, obstacleStrength };
     this.#applyDimensions();
     this.#applySource();
     this.#ensureRunning();
@@ -434,7 +434,8 @@ export class FluidSimulation {
         this.#gpuTexSet = createImageTexturesGPU(
           device, this.#source.bitmap, this.#width, this.#height,
           this.#source.effect, this.#source.size,
-          this.#backgroundBitmap, this.#backgroundSize
+          this.#backgroundBitmap, this.#backgroundSize,
+          this.#source.obstacleStrength
         );
       }
     } else {
@@ -451,7 +452,8 @@ export class FluidSimulation {
         const { backgroundTex, obstacleTex, coverageTex } = createImageTextures(
           gl, this.#source.bitmap, this.#width, this.#height,
           this.#source.effect, this.#source.size,
-          this.#backgroundBitmap, this.#backgroundSize
+          this.#backgroundBitmap, this.#backgroundSize,
+          this.#source.obstacleStrength
         );
         this.#glBgTex  = backgroundTex;
         this.#glObsTex = obstacleTex;

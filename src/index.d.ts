@@ -11,7 +11,7 @@ export declare function useFluid(
 export declare class FluidController {
   constructor(canvas: HTMLCanvasElement, opts?: { isWorkerEnabled?: boolean; config?: Partial<FluidConfig> });
   setTextSource(opts: TextSourceOpts): void;
-  setImageSource(src: string, effect?: number, size?: string | number): void;
+  setImageSource(src: string, effect?: number, size?: string | number, obstacleStrength?: number): void;
   setBackground(bitmap: ImageBitmap | null, size?: string | number): void;
   handleMove(x: number, y: number, strength?: number): void;
   splat(x: number, y: number, vx: number, vy: number, strength?: number): void;
@@ -23,8 +23,8 @@ export declare class FluidController {
 export declare class FluidSimulation {
   constructor(canvas: HTMLCanvasElement | OffscreenCanvas, config?: Partial<FluidConfig>);
   setTextSource(opts: TextSourceOpts): void;
-  setImageSource(src: string, effect?: number, size?: string | number): Promise<void>;
-  setImageBitmap(bitmap: ImageBitmap, effect?: number, size?: string | number): void;
+  setImageSource(src: string, effect?: number, size?: string | number, obstacleStrength?: number): Promise<void>;
+  setImageBitmap(bitmap: ImageBitmap, effect?: number, size?: string | number, obstacleStrength?: number): void;
   setBackground(bitmap: ImageBitmap | null, size?: string | number): void;
   handleMove(x: number, y: number, strength?: number): void;
   splat(x: number, y: number, vx: number, vy: number, strength?: number): void;

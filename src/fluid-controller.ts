@@ -17,7 +17,7 @@ export class FluidController {
 
   // Pending source calls queued while WebGPU async init is in progress (main-thread only)
   #pendingTextSource: TextSourceOpts | null = null;
-  #pendingImageSrc: { src: string; effect: number; size: string | number } | null = null;
+  #pendingImageSrc: { src: string; effect: number; size: string | number; obstacleStrength: number } | null = null;
   #pendingBackground: { bitmap: ImageBitmap | null; size: string | number } | null = null;
 
   constructor(
@@ -68,16 +68,17 @@ export class FluidController {
   setImageSource(
     src: string,
     effect = DEFAULT_PROPS_IMAGE.effect,
-    size: string | number = DEFAULT_PROPS_IMAGE.imageSize
+    size: string | number = DEFAULT_PROPS_IMAGE.imageSize,
+    obstacleStrength = DEFAULT_PROPS_IMAGE.obstacleStrength
   ): void {
     if (this.#worker) {
       // Resolve relative URLs before passing to the worker — blob workers have no valid base URL
       const absoluteSrc = new URL(src, location.href).href;
-      this.#worker.postMessage({ type: 'setImageSource', src: absoluteSrc, effect, size });
+      this.#worker.postMessage({ type: 'setImageSource', src: absoluteSrc, effect, size, obstacleStrength });
     } else if (this.#sim) {
-      this.#sim.setImageSource(src, effect, size);
+      this.#sim.setImageSource(src, effect, size, obstacleStrength);
     } else {
-      this.#pendingImageSrc = { src, effect, size };
+      this.#pendingImageSrc = { src, effect, size, obstacleStrength };
       this.#pendingTextSource = null;
     }
   }
@@ -188,8 +189,8 @@ export class FluidController {
             sim.setTextSource(this.#pendingTextSource);
             this.#pendingTextSource = null;
           } else if (this.#pendingImageSrc) {
-            const { src, effect, size } = this.#pendingImageSrc;
-            sim.setImageSource(src, effect, size);
+            const { src, effect, size, obstacleStrength } = this.#pendingImageSrc;
+            sim.setImageSource(src, effect, size, obstacleStrength);
             this.#pendingImageSrc = null;
           }
           if (this.#pendingBackground) {
