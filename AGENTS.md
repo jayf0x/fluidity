@@ -33,7 +33,7 @@ src/
 tests/                      ← Vitest + jsdom
 demo/                       ← standalone Vite 5 demo site (NOT the library; uses alias to src/)
 dist/                       ← built output (do not edit)
-bugs.md                     ← known defects (see Working the backlog)
+bugs.md                     ← known defects (see Working the backlog) — absent when empty, recreated on the next filed bug
 features.md                 ← features + improvements (see Working the backlog)
 ```
 
@@ -43,13 +43,13 @@ features.md                 ← features + improvements (see Working the backlog
 
 Two flat lists drive non-urgent work:
 
-- **[bugs.md](./bugs.md)** — known defects.
+- **bugs.md** — known defects. Deleted once the last row is removed — don't assume it exists; create it fresh when filing the first new bug.
 - **[features.md](./features.md)** — new capabilities (Features) and enhancements (Improvements).
 
 Rules:
 
-- Pick the top relevant row, build the fix/feature, **add a test**, then **delete that row**.
-- A new bug → add a one-line row to `bugs.md`; a new feature/improvement → `features.md`. Keep entries short: what + which files. No design essays.
+- Pick the top relevant row, build the fix/feature, **add a test**, then **delete that row**. If that empties the file's table, delete the file too.
+- A new bug → create/append a one-line row in `bugs.md`; a new feature/improvement → `features.md`. Keep entries short: what + which files. No design essays.
 - These files are the source of truth — GitHub Issues are not used for the backlog.
 
 ---
@@ -100,7 +100,13 @@ interface FluidHandle {
 
 ### Quality props
 
-`pixelRatio` and `simResolution` are flat top-level props (both `number`, range `0.1–1`). They map to internal `FluidQuality = { dpr, sim }` at the controller boundary — `FluidQuality` is an internal type, not a component prop.
+`pixelRatio` and `simResolution` are flat top-level props (both `number`, range `0.1–1`). `simMaxPixels` (optional `number`, uncapped by default) caps `simWidth × simHeight` after `simResolution` is applied — both sim axes scale down together (aspect ratio preserved) so extreme aspect ratios stay responsive. All three map to internal `FluidQuality = { dpr, sim, maxPixels }` at the controller boundary — `FluidQuality` is an internal type, not a component prop.
+
+### FluidImage-only / FluidText-only props
+
+- `obstacleStrength` (`FluidImage` only, `0–1`, default `0`): image luminance drives the physics obstacle. `0` = image is decorative only (no blocking); `1` = obstacle strength follows the image's own per-pixel brightness.
+- `textBlur` (`FluidText` only, `number`, default `1`, clamped `[0, 2]`): edge softness on the glyph draw (colour + obstacle/coverage passes). Fixes the dark AA fringe on solid-colour text; also the only lever that gives `FluidText`'s obstacle mask a real gradient.
+- `refraction`/`warpStrength` are **omitted from `FluidTextProps`** (`Omit<FluidBaseProps, 'refraction' | 'warpStrength'>` in `globals.d.ts`) — with a glyph-shaped obstacle/coverage mask, the background reveal these bend collapses back to `uWaterColor` right outside the glyph edge, so they read as broken rather than subtle. Fully supported on `FluidImage`.
 
 ### Algorithms
 `'standard'` · `'glass'` · `'ink'` · `'aurora'` · `'ripple'`
@@ -126,8 +132,9 @@ Normalized fields: `densityDissipation`, `velocityDissipation`, `splatRadius`, `
 2. Advect density
 3. Curl → vorticity confinement
 4. Splat — mouse move OR direct `splat()` calls → velocity + density FBOs
-5. Divergence → pressure solve (N iterations) → gradient subtract
-6. Display pass: 5 texture units bound (`uTexture`, `uObstacle`, `uBackground`, `uCoverage`, `uVelocity`); uniforms: `uAlgorithm`, `uWarpStrength`, `uWaterColor`, `uGlowColor`, `uRefraction`, `uSpecularExp`, `uShine`
+5. Divergence → pressure solve (N iterations) → gradient subtract — **slip boundary condition**: velocity is decomposed into normal/tangential components via the obstacle mask's local gradient; only the normal component is damped at the boundary (`mix(vel, velTangential, obs)`), so fluid slides along obstacle edges instead of fully stopping (no more flat `* (1.0 - obs)` damp)
+6. Pre-blur density (separable Gaussian, 2 passes: horizontal then vertical) into a dedicated FBO — feeds the display pass's Sobel normal only; raw density still drives colour/alpha directly
+7. Display pass: 6 texture units bound (`uTexture`, `uObstacle`, `uBackground`, `uCoverage`, `uVelocity`, `uDensityBlurred`); uniforms: `uAlgorithm`, `uWarpStrength`, `uWaterColor`, `uGlowColor`, `uRefraction`, `uSpecularExp`, `uShine`
 
 ---
 
@@ -179,7 +186,7 @@ All canvas sizing multiplies `clientWidth/clientHeight` by `window.devicePixelRa
 
 ### Quality reactivity
 
-`useEffect([pixelRatio, simResolution])` updates `clampedDprRef`, calls `controller.updateQuality(...)`, then `controller.resize(w * newDpr, h * newDpr)`. Compares against `prevQualityRef` to skip first mount and unchanged values.
+`useEffect([pixelRatio, simResolution, simMaxPixels])` updates `clampedDprRef`, calls `controller.updateQuality(...)`, then `controller.resize(w * newDpr, h * newDpr)`. Compares against `prevQualityRef` to skip first mount and unchanged values.
 
 ### backgroundSrc bitmap lifecycle
 
@@ -243,7 +250,7 @@ Full label reference: [CONTRIBUTING.md § Labels](./CONTRIBUTING.md#labels)
 |----------|------------|
 | Simulation config defaults + presets | [src/core/config.ts](./src/core/config.ts) |
 | Ambient type declarations | [src/globals.d.ts](./src/globals.d.ts) |
-| Known bugs | [bugs.md](./bugs.md) |
+| Known bugs | bugs.md (absent when empty) |
 | Feature/improvement backlog | [features.md](./features.md) |
 | Version history | [changelog.md](./changelog.md) |
 | Demo examples | [demo/src/examples/](./demo/src/examples/) |
