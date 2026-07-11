@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.1.1
+- Improve resolution responsiveness at extreme aspect ratios
+
 ## v1.0.11
 - Add obstacleStrength parameter
 
