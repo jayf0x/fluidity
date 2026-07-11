@@ -22,6 +22,7 @@ export function useFluid(
     alphaEnabled = true,
     pixelRatio,
     simResolution,
+    simMaxPixels,
     config = {},
   }: {
     workerEnabled?: boolean;
@@ -29,16 +30,22 @@ export function useFluid(
     alphaEnabled?: boolean;
     pixelRatio?: number;
     simResolution?: number;
+    simMaxPixels?: number;
     config?: Partial<FluidConfig>;
   } = {}
 ): RefObject<FluidController | null> {
-  const quality: FluidQuality = { dpr: pixelRatio, sim: simResolution };
+  const quality: FluidQuality = { dpr: pixelRatio, sim: simResolution, maxPixels: simMaxPixels };
   const controllerRef = useRef<FluidController | null>(null);
   const initOptsRef = useRef({ workerEnabled, quality, config });
   const clampedDprRef = useRef(Math.max(0.1, Math.min(1, pixelRatio ?? DEFAULT_QUALITY.dpr ?? 1)));
-  const prevQualityRef = useRef<{ pixelRatio: number | undefined; simResolution: number | undefined }>({
+  const prevQualityRef = useRef<{
+    pixelRatio: number | undefined;
+    simResolution: number | undefined;
+    simMaxPixels: number | undefined;
+  }>({
     pixelRatio,
     simResolution,
+    simMaxPixels,
   });
 
   // Re-runs when webGPUEnabled/alphaEnabled changes (full teardown + reinit).
@@ -112,17 +119,22 @@ export function useFluid(
   useEffect(() => {
     clampedDprRef.current = Math.max(0.1, Math.min(1, pixelRatio ?? DEFAULT_QUALITY.dpr ?? 1));
     const prev = prevQualityRef.current;
-    prevQualityRef.current = { pixelRatio, simResolution };
+    prevQualityRef.current = { pixelRatio, simResolution, simMaxPixels };
     const controller = controllerRef.current;
     const container = containerRef.current;
-    if (!controller || !container || (prev.pixelRatio === pixelRatio && prev.simResolution === simResolution)) return;
-    controller.updateQuality({ dpr: pixelRatio, sim: simResolution });
+    if (
+      !controller ||
+      !container ||
+      (prev.pixelRatio === pixelRatio && prev.simResolution === simResolution && prev.simMaxPixels === simMaxPixels)
+    )
+      return;
+    controller.updateQuality({ dpr: pixelRatio, sim: simResolution, maxPixels: simMaxPixels });
     const resizeDpr = (window.devicePixelRatio || 1) * clampedDprRef.current;
     const w = container.clientWidth;
     const h = container.clientHeight;
     if (w > 0 && h > 0) controller.resize(Math.round(w * resizeDpr), Math.round(h * resizeDpr));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pixelRatio, simResolution, webGPUEnabled, alphaEnabled]);
+  }, [pixelRatio, simResolution, simMaxPixels, webGPUEnabled, alphaEnabled]);
 
   return controllerRef;
 }

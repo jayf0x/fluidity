@@ -121,6 +121,7 @@ export const Interactive = () => {
 | `preset`              | `PresetKey`        | —           |
 | `pixelRatio`          | `number`           | `1`         |
 | `simResolution`       | `number`           | `0.5`       |
+| `simMaxPixels`        | `number`           | — (uncapped) |
 | `densityDissipation`  | `number`           | `0.83`      |
 | `velocityDissipation` | `number`           | `0.91`      |
 | `pressureIterations`  | `number`           | `1`         |
@@ -162,12 +163,18 @@ export const Interactive = () => {
 
 ## Quality
 
-Control rendering resolution on two independent axes — both reactive at runtime.
+Control rendering resolution on independent axes — all reactive at runtime.
 
-| Prop            | Range | Default | What it does                                                                            |
-| --------------- | ----- | ------- | --------------------------------------------------------------------------------------- |
-| `pixelRatio`    | 0.1–1 | `1`     | Canvas resolution as fraction of devicePixelRatio. `0.5` on Retina saves ~75% GPU fill. |
-| `simResolution` | 0.1–1 | `0.5`   | Simulation FBO size. Lower = cheaper, less detail.                                      |
+| Prop             | Range | Default      | What it does                                                                            |
+| ---------------- | ----- | ------------ | ---------------------------------------------------------------------------------------- |
+| `pixelRatio`     | 0.1–1 | `1`          | Canvas resolution as fraction of devicePixelRatio. `0.5` on Retina saves ~75% GPU fill. |
+| `simResolution`  | 0.1–1 | `0.5`        | Simulation FBO size. Lower = cheaper, less detail.                                      |
+| `simMaxPixels`   | >0    | — (uncapped) | Hard cap on simWidth × simHeight, applied after `simResolution`. Both sim axes scale down together (aspect ratio preserved) so ultra-wide or ultra-tall containers stay responsive without a runaway texel count on one axis. |
+
+```tsx
+// Ultra-wide hero banner — cap the sim grid regardless of how wide the container gets
+<FluidImage src="/banner.jpg" simResolution={1} simMaxPixels={500_000} />
+```
 
 ```tsx
 // Sharp canvas, cheap simulation

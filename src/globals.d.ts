@@ -9,6 +9,10 @@ type FluidColor = [number, number, number] | `#${string}` | string;
 interface FluidQuality {
   dpr?: number;
   sim?: number;
+  /** Hard cap on simWidth × simHeight (post-`sim` scale). Keeps extreme aspect ratios
+   * (ultra-wide banners, tall hero sections) responsive without a separate per-axis knob —
+   * both axes are scaled down together, preserving aspect ratio. Default: uncapped. */
+  maxPixels?: number;
 }
 
 interface FluidConfig {
@@ -49,6 +53,9 @@ interface FluidBaseProps extends Partial<FluidConfig> {
   pixelRatio?: number;
   /** Simulation FBO size as a fraction of canvas size. Range [0.1, 1]. Default 0.5. */
   simResolution?: number;
+  /** Caps simWidth × simHeight so extreme aspect ratios (ultra-wide/tall) stay responsive —
+   * both sim axes scale down together, preserving aspect ratio. Default: uncapped. */
+  simMaxPixels?: number;
   preset?: PresetKey;
   backgroundColor?: string;
   backgroundSrc?: string;

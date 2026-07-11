@@ -25,6 +25,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     alphaEnabled = true,
     pixelRatio = DEFAULT_QUALITY.dpr,
     simResolution = DEFAULT_QUALITY.sim,
+    simMaxPixels,
     // FluidConfig flat props
     densityDissipation,
     velocityDissipation,
@@ -67,6 +68,7 @@ export const FluidImage = forwardRef<FluidHandle, FluidImageProps>(function Flui
     alphaEnabled,
     pixelRatio,
     simResolution,
+    simMaxPixels,
     config: normalizeConfig(mergeConfig(configProps, preset)) as FluidConfig,
   });
 

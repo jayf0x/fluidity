@@ -136,6 +136,7 @@ export class FluidSimulation {
   #dpr = 1;
   #qualityDpr = 1;
   #simScale = 0.5;
+  #simMaxPixels: number | undefined;
 
   #backgroundBitmap: ImageBitmap | null = null;
   #backgroundSize: string | number = 'cover';
@@ -163,6 +164,7 @@ export class FluidSimulation {
     this.#canvas = canvas;
     this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
     this.#simScale = Math.max(0.1, Math.min(1, quality.sim ?? 0.5));
+    this.#simMaxPixels = quality.maxPixels;
     this.#config = mergeConfig(config);
     this.#enableAlpha = enableAlpha;
 
@@ -264,6 +266,7 @@ export class FluidSimulation {
   updateQuality(quality: FluidQuality): void {
     if (quality.dpr !== undefined) this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr));
     if (quality.sim !== undefined) this.#simScale = Math.max(0.1, Math.min(1, quality.sim));
+    if ('maxPixels' in quality) this.#simMaxPixels = quality.maxPixels;
   }
 
   resize(width?: number, height?: number, dpr?: number): void {
@@ -273,14 +276,29 @@ export class FluidSimulation {
       if (height === undefined || height <= 0) return;
       this.#width = this.#canvas.width = width;
       this.#height = this.#canvas.height = height;
-      this.#simWidth = Math.max(1, Math.round(width * this.#simScale));
-      this.#simHeight = Math.max(1, Math.round(height * this.#simScale));
+      ({ w: this.#simWidth, h: this.#simHeight } = this.#computeSimDims(width, height));
       this.#initFBOs();
     } else {
       this.#applyDimensions();
     }
     if (this.#source) this.#applySource();
     this.#ensureRunning();
+  }
+
+  /**
+   * Applies `simScale` then, if `simMaxPixels` is set, scales both axes down together
+   * (preserving aspect ratio) so simWidth × simHeight never exceeds the cap — keeps
+   * extreme aspect ratios (ultra-wide/tall canvases) responsive.
+   */
+  #computeSimDims(width: number, height: number): { w: number; h: number } {
+    let w = Math.max(1, Math.round(width * this.#simScale));
+    let h = Math.max(1, Math.round(height * this.#simScale));
+    if (this.#simMaxPixels && w * h > this.#simMaxPixels) {
+      const scale = Math.sqrt(this.#simMaxPixels / (w * h));
+      w = Math.max(1, Math.round(w * scale));
+      h = Math.max(1, Math.round(h * scale));
+    }
+    return { w, h };
   }
 
   updateConfig(partial: Partial<FluidConfig>): void {
@@ -385,8 +403,7 @@ export class FluidSimulation {
 
     if (this.#width === 0 || this.#height === 0) return;
 
-    this.#simWidth  = Math.max(1, Math.round(this.#width  * this.#simScale));
-    this.#simHeight = Math.max(1, Math.round(this.#height * this.#simScale));
+    ({ w: this.#simWidth, h: this.#simHeight } = this.#computeSimDims(this.#width, this.#height));
     this.#initFBOs();
   }
 

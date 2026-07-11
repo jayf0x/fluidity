@@ -59,6 +59,19 @@ describe('FluidController — worker mode', () => {
     );
   });
 
+  it('forwards quality.maxPixels (simMaxPixels) in the init message (feature #5)', () => {
+    new FluidController(canvas, { workerEnabled: true, quality: { maxPixels: 500000 } });
+    const call = mockWorkerInstance.postMessage.mock.calls.find(([m]) => m?.type === 'init');
+    expect(call[0].quality).toMatchObject({ maxPixels: 500000 });
+  });
+
+  it('forwards updateQuality maxPixels to worker', () => {
+    const ctrl = new FluidController(canvas, { workerEnabled: true });
+    ctrl.updateQuality({ maxPixels: 200000 });
+    const call = mockWorkerInstance.postMessage.mock.calls.find(([m]) => m?.type === 'updateQuality');
+    expect(call[0].quality).toMatchObject({ maxPixels: 200000 });
+  });
+
   it('forwards setTextSource to worker', () => {
     const ctrl = new FluidController(canvas, { workerEnabled: true });
     ctrl.setTextSource({ text: 'Hi', fontSize: 40, color: '#fff' });

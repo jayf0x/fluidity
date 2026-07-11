@@ -86,6 +86,40 @@ describe('FluidSimulation — image source loading', () => {
   });
 });
 
+describe('FluidSimulation — simMaxPixels (feature #5)', () => {
+  it('caps simWidth × simHeight for extreme aspect ratios, preserving aspect ratio', () => {
+    const gl = createWebGLMock();
+    const canvas = createCanvasMock(gl);
+    // sim=1 (no downscale) + maxPixels=10000 on a 2000×20 canvas: naive sim dims would be
+    // 2000×20 = 40000 texels, well over the cap.
+    const sim2 = new FluidSimulation(canvas, {}, { sim: 1, maxPixels: 10000 });
+    gl.texImage2D.mockClear();
+
+    sim2.resize(2000, 20, 1);
+
+    // createFBO's texImage2D(TEXTURE_2D, 0, internalFormat, w, h, ...) — read w/h (args 3, 4).
+    const dims = gl.texImage2D.mock.calls.map(([, , , w, h]) => [w, h]);
+    expect(dims.length).toBeGreaterThan(0);
+    for (const [w, h] of dims) {
+      expect(w * h).toBeLessThanOrEqual(10000);
+      // Aspect ratio (2000:20 = 100:1) preserved within rounding.
+      expect(Math.round(w / h)).toBe(100);
+    }
+  });
+
+  it('leaves sim dims unclamped when simMaxPixels is unset (default/current behaviour)', () => {
+    const gl = createWebGLMock();
+    const canvas = createCanvasMock(gl);
+    const sim2 = new FluidSimulation(canvas, {}, { sim: 1 });
+    gl.texImage2D.mockClear();
+
+    sim2.resize(2000, 20, 1);
+
+    const dims = gl.texImage2D.mock.calls.map(([, , , w, h]) => [w, h]);
+    expect(dims.some(([w, h]) => w === 2000 && h === 20)).toBe(true);
+  });
+});
+
 describe('FluidSimulation — URL handling', () => {
   it('accepts absolute URLs for setImageSource', async () => {
     const canvas = createCanvasMock();

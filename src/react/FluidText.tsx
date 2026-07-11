@@ -29,6 +29,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     alphaEnabled = true,
     pixelRatio = DEFAULT_QUALITY.dpr,
     simResolution = DEFAULT_QUALITY.sim,
+    simMaxPixels,
     // FluidConfig flat props
     densityDissipation,
     velocityDissipation,
@@ -67,6 +68,7 @@ export const FluidText = forwardRef<FluidHandle, FluidTextProps>(function FluidT
     alphaEnabled,
     pixelRatio,
     simResolution,
+    simMaxPixels,
     config: normalizeConfig(mergeConfig(configProps, preset, DEFAULT_CONFIG_TEXT)) as FluidConfig,
   });
 

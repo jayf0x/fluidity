@@ -14,6 +14,7 @@ export class FluidController {
   #enableAlpha: boolean;
   #qualityDpr: number;
   #qualitySim: number;
+  #qualityMaxPixels: number | undefined;
 
   // Pending source calls queued while WebGPU async init is in progress (main-thread only)
   #pendingTextSource: TextSourceOpts | null = null;
@@ -38,6 +39,7 @@ export class FluidController {
   ) {
     this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? 1));
     this.#qualitySim = Math.max(0.1, Math.min(1, quality.sim ?? 0.5));
+    this.#qualityMaxPixels = quality.maxPixels;
     this.#useWebGPU = webGPUEnabled;
     this.#enableAlpha = alphaEnabled;
     this.#useWorker = workerEnabled && WORKER_SUPPORTED;
@@ -126,8 +128,12 @@ export class FluidController {
   updateQuality(quality: FluidQuality): void {
     this.#qualityDpr = Math.max(0.1, Math.min(1, quality.dpr ?? this.#qualityDpr));
     this.#qualitySim = Math.max(0.1, Math.min(1, quality.sim ?? this.#qualitySim));
+    if ('maxPixels' in quality) this.#qualityMaxPixels = quality.maxPixels;
     if (this.#worker) {
-      this.#worker.postMessage({ type: 'updateQuality', quality: { dpr: this.#qualityDpr, sim: this.#qualitySim } });
+      this.#worker.postMessage({
+        type: 'updateQuality',
+        quality: { dpr: this.#qualityDpr, sim: this.#qualitySim, maxPixels: this.#qualityMaxPixels },
+      });
     } else {
       this.#sim!.updateQuality(quality);
     }
@@ -177,7 +183,7 @@ export class FluidController {
    * constructor behaviour synchronous where possible.
    */
   #initMainThread(canvas: HTMLCanvasElement, config: Partial<FluidConfig>): void {
-    const quality = { dpr: this.#qualityDpr, sim: this.#qualitySim };
+    const quality = { dpr: this.#qualityDpr, sim: this.#qualitySim, maxPixels: this.#qualityMaxPixels };
     const hasGPU = this.#useWebGPU && typeof navigator !== 'undefined' && !!navigator.gpu;
 
     if (hasGPU) {
@@ -244,7 +250,7 @@ export class FluidController {
         height,
         config,
         dpr,
-        quality: { dpr: this.#qualityDpr, sim: this.#qualitySim },
+        quality: { dpr: this.#qualityDpr, sim: this.#qualitySim, maxPixels: this.#qualityMaxPixels },
         useWebGPU: this.#useWebGPU,
         enableAlpha: this.#enableAlpha,
       },
