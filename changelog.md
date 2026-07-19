@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.1.2
+- Add alpha support to `waterColor` (hex `#RGBA`/`#RRGGBBAA` or a 4-element array) so the fluid body itself can be partially transparent
+
 ## v1.1.1
 - Improve resolution responsiveness at extreme aspect ratios
 

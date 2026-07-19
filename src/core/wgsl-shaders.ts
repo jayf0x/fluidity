@@ -316,7 +316,7 @@ struct U {
 //   0  texelSize   vec2f
 //   8  refraction  f32
 //  12  specularExp f32
-//  16  waterColor  vec4f  (w unused)
+//  16  waterColor  vec4f  (w = alpha, scales output alpha)
 //  32  glowColor   vec4f  (w unused)
 //  48  shine       f32
 //  52  warpStrength f32
@@ -427,7 +427,7 @@ struct U {
     color   = mix(color, bg * 0.5, obs * 0.2);
   }
 
-  let alpha = clamp(max(density * 1.5, cov), 0.0, 1.0);
+  let alpha = clamp(max(density * 1.5, cov), 0.0, 1.0) * u.waterColor.w;
   if (u.enableAlpha == 1) {
     return vec4f(color * alpha, alpha);
   }

@@ -196,6 +196,7 @@ export const displayShader = /* glsl */ `
 
   uniform vec2  texelSize;
   uniform vec3  uWaterColor;
+  uniform float uWaterAlpha;
   uniform vec3  uGlowColor;
   uniform float uRefraction;
   uniform float uSpecularExp;
@@ -295,7 +296,9 @@ export const displayShader = /* glsl */ `
 
     // Output: premultiplied alpha when transparency is enabled (lets CSS backgroundColor
     // show through), or straight opaque colour when enableAlpha is off (perf mode).
-    float alpha = clamp(max(density * 1.5, coverage), 0.0, 1.0);
+    // uWaterAlpha (from waterColor's own alpha channel) scales it further, letting the
+    // fluid body itself be partially see-through regardless of density/coverage.
+    float alpha = clamp(max(density * 1.5, coverage), 0.0, 1.0) * uWaterAlpha;
     if (uEnableAlpha == 1) {
       gl_FragColor = vec4(color * alpha, alpha);
     } else {

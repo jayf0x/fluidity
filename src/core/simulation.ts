@@ -999,8 +999,10 @@ export class FluidSimulation {
 
     display.bind();
     gl.uniform2f(display.uniforms.texelSize, 1 / this.#simWidth, 1 / this.#simHeight);
-    gl.uniform3fv(display.uniforms.uWaterColor, parseColor(cfg.waterColor));
-    gl.uniform3fv(display.uniforms.uGlowColor, parseColor(cfg.glowColor));
+    const wc = parseColor(cfg.waterColor);
+    gl.uniform3fv(display.uniforms.uWaterColor, wc.slice(0, 3));
+    gl.uniform1f(display.uniforms.uWaterAlpha, wc[3]);
+    gl.uniform3fv(display.uniforms.uGlowColor, parseColor(cfg.glowColor).slice(0, 3));
     gl.uniform1f(display.uniforms.uRefraction, cfg.refraction);
     gl.uniform1f(display.uniforms.uSpecularExp, cfg.specularExp);
     gl.uniform1f(display.uniforms.uShine, cfg.shine);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_CONFIG, PROP_RANGES, mergeConfig, normalizeConfig } from '../../src/core/config.ts';
+import { DEFAULT_CONFIG, PROP_RANGES, mergeConfig, normalizeConfig, parseColor } from '../../src/core/config.ts';
 
 describe('DEFAULT_CONFIG', () => {
   it('has all required keys', () => {
@@ -31,6 +31,36 @@ describe('DEFAULT_CONFIG', () => {
     const isFluidColor = (v) => Array.isArray(v) || (typeof v === 'string' && v.startsWith('#'));
     expect(isFluidColor(DEFAULT_CONFIG.waterColor)).toBe(true);
     expect(isFluidColor(DEFAULT_CONFIG.glowColor)).toBe(true);
+  });
+});
+
+describe('parseColor', () => {
+  it('defaults alpha to 1 for opaque 6-digit hex', () => {
+    expect(parseColor('#ff0000')).toEqual([1, 0, 0, 1]);
+  });
+
+  it('defaults alpha to 1 for 3-digit hex', () => {
+    expect(parseColor('#f00')).toEqual([1, 0, 0, 1]);
+  });
+
+  it('parses alpha from 8-digit hex (#RRGGBBAA)', () => {
+    const [r, g, b, a] = parseColor('#ff000080');
+    expect([r, g, b]).toEqual([1, 0, 0]);
+    expect(a).toBeCloseTo(128 / 255, 2);
+  });
+
+  it('parses alpha from 4-digit hex (#RGBA)', () => {
+    const [r, g, b, a] = parseColor('#f008');
+    expect([r, g, b]).toEqual([1, 0, 0]);
+    expect(a).toBeCloseTo(136 / 255, 2);
+  });
+
+  it('defaults alpha to 1 for a 3-element array', () => {
+    expect(parseColor([1, 0, 0])).toEqual([1, 0, 0, 1]);
+  });
+
+  it('passes through alpha from a 4-element array', () => {
+    expect(parseColor([1, 0, 0, 0.5])).toEqual([1, 0, 0, 0.5]);
   });
 });
 

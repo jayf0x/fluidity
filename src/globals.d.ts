@@ -2,8 +2,13 @@
 
 type FluidAlgorithm = 'standard' | 'glass' | 'ink' | 'aurora' | 'ripple';
 
-/** RGB tuple (values 0–1) or a CSS hex string (#RGB, #RRGGBB, #RRGGBBAA — alpha stripped). */
-type FluidColor = [number, number, number] | `#${string}` | string;
+/**
+ * RGB(A) tuple (values 0–1) or a CSS hex string (#RGB, #RGBA, #RRGGBB, #RRGGBBAA).
+ * Alpha is honored on `waterColor` only — it lets the page/background show through
+ * the fluid body regardless of density/coverage. Ignored on `glowColor` (additive
+ * highlight, has no fill to blend). Omitted alpha defaults to fully opaque (1).
+ */
+type FluidColor = [number, number, number] | [number, number, number, number] | `#${string}` | string;
 
 /** Internal quality object used by FluidController and FluidSimulation. */
 interface FluidQuality {

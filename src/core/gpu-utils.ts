@@ -184,14 +184,14 @@ export function writeDisplayUniforms(
   device: GPUDevice, buf: GPUBuffer,
   tsx: number, tsy: number,
   refraction: number, specularExp: number,
-  wc: [number, number, number], gc: [number, number, number],
+  wc: [number, number, number, number], gc: [number, number, number, number],
   shine: number, warpStrength: number, algorithm: number,
   enableAlpha: boolean
 ): void {
   const d = new Float32Array(16);
   const di = new Int32Array(d.buffer);
   d[0] = tsx; d[1] = tsy; d[2] = refraction; d[3] = specularExp;
-  d[4] = wc[0]; d[5] = wc[1]; d[6] = wc[2]; d[7] = 0;
+  d[4] = wc[0]; d[5] = wc[1]; d[6] = wc[2]; d[7] = wc[3];
   d[8] = gc[0]; d[9] = gc[1]; d[10] = gc[2]; d[11] = 0;
   d[12] = shine; d[13] = warpStrength;
   di[14] = algorithm;   // offset 56 bytes

@@ -150,22 +150,28 @@ export const PRESETS: Record<PresetKey, Partial<FluidConfig>> = {
   },
 };
 
-/** Normalise a FluidColor to an RGB tuple with values in [0, 1]. */
-export function parseColor(color: FluidColor): [number, number, number] {
-  if (Array.isArray(color)) return color;
-  // Strip leading '#', take at most 6 hex chars (drops alpha if present)
-  const hex = (color as string).slice(1, 7);
-  if (hex.length === 3) {
+/** Normalise a FluidColor to an RGBA tuple with values in [0, 1]. Alpha defaults to 1 (opaque). */
+export function parseColor(color: FluidColor): [number, number, number, number] {
+  if (Array.isArray(color)) {
+    const [r, g, b, a = 1] = color;
+    return [r, g, b, a];
+  }
+  const hex = (color as string).slice(1);
+  if (hex.length === 3 || hex.length === 4) {
+    const a = hex.length === 4 ? parseInt(hex[3] + hex[3], 16) / 255 : 1;
     return [
       parseInt(hex[0] + hex[0], 16) / 255,
       parseInt(hex[1] + hex[1], 16) / 255,
       parseInt(hex[2] + hex[2], 16) / 255,
+      a,
     ];
   }
+  const a = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1;
   return [
     parseInt(hex.slice(0, 2), 16) / 255,
     parseInt(hex.slice(2, 4), 16) / 255,
     parseInt(hex.slice(4, 6), 16) / 255,
+    a,
   ];
 }
 
