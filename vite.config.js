@@ -74,7 +74,13 @@ export default defineConfig({
   plugins: [
     copyTypes(),
     snapPlugins([workerRawString], { buildCmd: 'bun run build' }),
-    snapPlugins([() => compressShaderLiterals.vite({ outputRatio: true })], { buildCmd: 'bun run build' }),
+    // apply: 'build' — shaders.test.js/wgsl-build.test.js assert against raw
+    // src/ text; letting this run under vitest too silently minifies what the
+    // tests import, so whitespace-sensitive assertions pass or fail based on
+    // how aggressively this plugin currently minifies rather than the source.
+    snapPlugins([() => ({ ...compressShaderLiterals.vite({ outputRatio: true, validate: true }), apply: 'build' })], {
+      buildCmd: 'bun run build',
+    }),
     react(),
   ],
 
@@ -107,7 +113,7 @@ export default defineConfig({
 
   worker: {
     format: 'es',
-    plugins: [compressShaderLiterals.vite()],
+    plugins: [compressShaderLiterals.vite({ validate: true })],
   },
 
   test: {
